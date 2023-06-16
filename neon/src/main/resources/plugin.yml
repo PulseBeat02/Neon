@@ -1,0 +1,4 @@
+name: Neon
+version: '${version}'
+main: io.github.pulsebeat02.neon.Neon
+api-version: 1.20
