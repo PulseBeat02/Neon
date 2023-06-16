@@ -42,7 +42,7 @@ public final class TranslationManager {
   }
 
   private @NotNull PropertyResourceBundle getBundle() {
-    try (final Reader reader = ResourceUtils.getResourceAsReader("/locale/neon_en.properties")) {
+    try (final Reader reader = ResourceUtils.getResourceAsReader("locale/neon_en.properties")) {
       return new PropertyResourceBundle(reader);
     } catch (final IOException e) {
       throw new RuntimeException(e);

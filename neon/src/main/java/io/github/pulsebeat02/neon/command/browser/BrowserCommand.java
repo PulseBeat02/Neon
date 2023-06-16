@@ -23,6 +23,7 @@ public final class BrowserCommand extends BaseCommand {
             .then(new BrowserDitherCommand(neon).getNode())
             .then(new BrowserResolutionCommand(neon).getNode())
             .then(new BrowserBlockCommand(neon).getNode())
+            .then(new BrowserHomeUrlCommand(neon).getNode())
             .build();
   }
 
@@ -30,11 +31,16 @@ public final class BrowserCommand extends BaseCommand {
   public @NotNull Component usage() {
     return LocaleParent.getCommandUsageComponent(
         Map.of(
-            "/browser load", "Starts the browser",
-            "/browser algorithm [algorithm]", "Sets the dithering algorithm",
-            "/browser resolution [resolution]", "Sets the resolution of the screen",
+            "/browser load",
+            "Starts the browser",
+            "/browser algorithm [algorithm]",
+            "Sets the dithering algorithm",
+            "/browser resolution [resolution]",
+            "Sets the resolution of the screen",
             "/browser block-dimension [dimension]",
-                "Sets the block dimension of itemframes of the screen"));
+            "Sets the block dimension of itemframes of the screen",
+            "/browser homepage-url [url]",
+            "Sets the homepage url of the browser"));
   }
 
   @Override

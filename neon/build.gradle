@@ -16,12 +16,14 @@ dependencies {
 
     implementation project(':neon-api')
     implementation project(':v1_20_R1')
-    implementation "net.kyori:adventure-api:4.14.0"
-    implementation "net.kyori:adventure-platform-bukkit:4.3.0"
+    implementation 'org.bstats:bstats-bukkit:3.0.2'
+    implementation 'net.kyori:adventure-api:4.14.0'
+    implementation 'net.kyori:adventure-platform-bukkit:4.3.0'
 }
 
 shadowJar {
     relocate('net.kyori', 'io.github.pulsebeat02.neon.lib.kyori')
+    relocate('org.bstats', 'io.github.pulsebeat02.neon.lib.bstats')
 }
 
 tasks {

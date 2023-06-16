@@ -9,11 +9,18 @@ import io.github.pulsebeat02.neon.nms.ReflectionHandler;
 import java.io.IOException;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 public final class Neon extends JavaPlugin {
+
+  private static final int BSTATS_PLUGIN_ID;
+
+  static {
+    BSTATS_PLUGIN_ID = 18773;
+  }
 
   private BrowserConfiguration configuration;
   private PacketSender sender;
@@ -27,6 +34,7 @@ public final class Neon extends JavaPlugin {
     this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
     this.readConfigurationFile();
     this.registerCommands();
+    this.registerStats();
   }
 
   @Override
@@ -36,6 +44,10 @@ public final class Neon extends JavaPlugin {
       this.audience.close();
       this.audience = null;
     }
+  }
+
+  private void registerStats() {
+    new Metrics(this, BSTATS_PLUGIN_ID);
   }
 
   private void registerCommands() {

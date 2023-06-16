@@ -9,4 +9,7 @@ browser {
   block-dimension {
     block-dimension brigadier:string greedy_phrase;
   }
+  homepage-url {
+    url brigadier:string greedy_phrase;
+  }
 }

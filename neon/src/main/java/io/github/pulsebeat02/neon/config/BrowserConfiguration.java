@@ -63,14 +63,22 @@ public final class BrowserConfiguration {
   }
 
   public void printFile() throws IOException {
+
+    // i know this is messed up but...
+    class NeonTable {
+      final Map<String, Object> neon = new HashMap<>();
+    }
+
+    final NeonTable configTable = new NeonTable();
+    final Map<String, Object> table = configTable.neon;
+    table.put("homepage_url", this.homePageUrl);
+    table.put("algorithm", this.algorithm.name());
+    table.put("dimension", List.of(this.dimension.getWidth(), this.dimension.getHeight()));
+    table.put("block_width", this.blockWidth);
+
     final File file = this.configurationPath.toFile();
-    final TomlWriter toml = new TomlWriter();
-    final Map<String, Object> fields = new HashMap<>();
-    fields.put("neon.homepage_url", this.homePageUrl);
-    fields.put("neon.algorithm", this.algorithm.name());
-    fields.put("neon.dimension", List.of(this.dimension.getWidth(), this.dimension.getHeight()));
-    fields.put("neon.block_width", this.blockWidth);
-    toml.write(fields, file);
+    final TomlWriter writer = TomlProvider.getTomlWriter();
+    writer.write(configTable, file);
   }
 
   private void readFile() {
@@ -83,12 +91,14 @@ public final class BrowserConfiguration {
   }
 
   private @NotNull Algorithm parseAlgorithm(@NotNull final Toml toml) {
-    return Algorithm.valueOf(toml.getString("neon.algorithm"));
+    return Algorithm.ofKey(toml.getString("neon.algorithm")).orElse(Algorithm.FILTER_LITE);
   }
 
   private @NotNull ImmutableDimension parseDimension(@NotNull final Toml toml) {
-    final List<Integer> list = toml.getList("neon.dimension");
-    return new ImmutableDimension(list.get(0), list.get(1));
+    final List<Long> list = toml.getList("neon.dimension");
+    final int width = list.get(0).intValue();
+    final int height = list.get(1).intValue();
+    return new ImmutableDimension(width, height);
   }
 
   private void checkFile() throws IOException {
@@ -98,8 +108,16 @@ public final class BrowserConfiguration {
   }
 
   private void copyFile() throws IOException {
+    this.createFolders();
     try (final InputStream stream = ResourceUtils.getResourceAsStream("neon.toml")) {
       Files.copy(stream, this.configurationPath);
+    }
+  }
+
+  private void createFolders() throws IOException {
+    final Path parent = this.configurationPath.getParent();
+    if (Files.notExists(parent) || !Files.isDirectory(parent)) {
+      Files.createDirectories(parent);
     }
   }
 
