@@ -29,7 +29,6 @@ public final class MinecraftBrowser implements CefBrowser {
 
   private final @NotNull CefBrowser internalBrowser;
   private @NotNull final Neon neon;
-  private @NotNull final CefApp app;
   private @NotNull final CefClient client;
 
   private @NotNull final CefRenderHandler renderer;
@@ -40,10 +39,11 @@ public final class MinecraftBrowser implements CefBrowser {
           IOException,
           InterruptedException {
     this.neon = neon;
-    this.app = this.createApp();
-    this.client = this.app.createClient();
+    @NotNull final CefApp app = this.createApp();
+    this.client = app.createClient();
     this.internalBrowser = this.createBrowser();
     this.renderer = new MinecraftBrowserRenderer(neon, settings);
+    this.setFocus(true);
   }
 
   private @NotNull CefApp createApp()

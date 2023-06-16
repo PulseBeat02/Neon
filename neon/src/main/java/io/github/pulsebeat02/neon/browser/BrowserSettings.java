@@ -1,5 +1,6 @@
 package io.github.pulsebeat02.neon.browser;
 
+import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.dither.DitherHandler;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import java.util.UUID;
@@ -22,6 +23,14 @@ public final class BrowserSettings {
     this.blockWidth = blockWidth;
     this.dimension = dimension;
     this.handler = handler;
+  }
+
+  public static @NotNull BrowserSettings ofSettings(
+      @NotNull final BrowserConfiguration configuration) {
+    final int blockWidth = configuration.getBlockWidth();
+    final ImmutableDimension dimension = configuration.getDimension();
+    final DitherHandler handler = configuration.getAlgorithm().getHandler();
+    return new BrowserSettings(blockWidth, dimension, handler);
   }
 
   private @NotNull UUID[] getAllPlayerUUIDs() {
