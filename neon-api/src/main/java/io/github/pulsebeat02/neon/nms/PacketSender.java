@@ -2,7 +2,6 @@ package io.github.pulsebeat02.neon.nms;
 
 import io.netty.buffer.ByteBuf;
 import java.util.UUID;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public interface PacketSender {
@@ -32,9 +31,9 @@ public interface PacketSender {
     this.displayMaps(viewers, rgb, map, mapHeight, mapWidth, videoWidth, xOff, yOff);
   }
 
-  void injectPlayer(@NotNull final Player player);
+  void injectPlayer(@NotNull final UUID player);
 
-  void uninjectPlayer(@NotNull final Player player);
+  void uninjectPlayer(@NotNull final UUID player);
 
   boolean isMapRegistered(final int id);
 

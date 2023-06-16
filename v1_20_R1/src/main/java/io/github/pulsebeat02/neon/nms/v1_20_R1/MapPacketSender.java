@@ -1,5 +1,7 @@
 package io.github.pulsebeat02.neon.nms.v1_20_R1;
 
+import static java.util.Objects.requireNonNull;
+
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.netty.buffer.ByteBuf;
@@ -19,8 +21,10 @@ import net.minecraft.network.protocol.game.PacketPlayOutMap;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public final class MapPacketSender implements PacketSender {
   private static final int PACKET_THRESHOLD_MS;
@@ -46,7 +50,7 @@ public final class MapPacketSender implements PacketSender {
   @Override
   public void displayMaps(
       final UUID[] viewers,
-      final ByteBuf rgb,
+      final @NotNull ByteBuf rgb,
       final int map,
       final int height,
       final int width,
@@ -142,12 +146,13 @@ public final class MapPacketSender implements PacketSender {
   }
 
   @Override
-  public void injectPlayer(final Player player) {
-    final PlayerConnection conn = ((CraftPlayer) player).getHandle().c;
+  public void injectPlayer(@NotNull final UUID player) {
+    final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
+    final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
     final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "h");
     final Channel channel = manager.m;
     this.addChannelPipeline(channel);
-    this.addConnection(player, conn);
+    this.addConnection(bukkitPlayer, conn);
   }
 
   private void addChannelPipeline(final Channel channel) {
@@ -161,12 +166,13 @@ public final class MapPacketSender implements PacketSender {
   }
 
   @Override
-  public void uninjectPlayer(final Player player) {
-    final PlayerConnection conn = ((CraftPlayer) player).getHandle().c;
+  public void uninjectPlayer(@NotNull final UUID player) {
+    final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
+    final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
     final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "h");
     final Channel channel = manager.m;
     this.removeChannelPipeline(channel);
-    this.removeConnection(player);
+    this.removeConnection(bukkitPlayer);
   }
 
   private void removeChannelPipeline(final Channel channel) {
