@@ -12,6 +12,7 @@ dependencies {
     compileOnly 'me.friwi:jcefmaven:110.0.25'
     compileOnly 'com.moandjiezana.toml:toml4j:0.7.2'
     compileOnly 'me.lucko:commodore:2.2'
+    compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
 
     implementation project(':neon-api')
     implementation project(':v1_20_R1')
