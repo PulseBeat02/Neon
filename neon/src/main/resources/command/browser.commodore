@@ -1,0 +1,12 @@
+browser {
+  load;
+  algorithm {
+    algorithm brigadier:string single_word;
+  }
+  resolution {
+    resolution brigadier:string greedy_phrase;
+  }
+  block-dimension {
+    block-dimension brigadier:string greedy_phrase;
+  }
+}
