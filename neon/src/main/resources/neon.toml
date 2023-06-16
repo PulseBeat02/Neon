@@ -1,2 +1,5 @@
-[browser]
-  homepage_url = "https://www.google.com"
+[neon]
+homepage_url = "https://www.google.com"
+algorithm = "FILTER_LITE"
+dimension = [640, 640]
+block_width = 5

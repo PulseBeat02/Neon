@@ -1,8 +1,7 @@
-package io.github.pulsebeat02.neon.utils;
+package io.github.pulsebeat02.neon.command;
 
-import io.github.pulsebeat02.deluxemediaplugin.DeluxeMediaPlugin;
-import io.github.pulsebeat02.deluxemediaplugin.locale.Locale;
 import io.github.pulsebeat02.neon.Neon;
+import io.github.pulsebeat02.neon.locale.Locale;
 import java.util.Optional;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;

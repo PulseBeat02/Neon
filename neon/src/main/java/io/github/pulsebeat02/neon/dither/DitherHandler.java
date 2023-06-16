@@ -6,5 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DitherHandler {
 
-  @NotNull ByteBuf dither(@NotNull final ByteBuffer raster, final int width);
+  @NotNull
+  ByteBuf dither(@NotNull final ByteBuffer raster, final int blockWidth);
 }

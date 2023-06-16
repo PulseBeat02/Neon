@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon;
+package io.github.pulsebeat02.neon.command;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class CommandMapHelper {
 
-  private static final SimpleCommandMap SIMPLE_COMMAND_MAP;
+  private static @NotNull final SimpleCommandMap SIMPLE_COMMAND_MAP;
 
   static {
     try {

@@ -1,6 +1,5 @@
-package io.github.pulsebeat02.neon.utils;
+package io.github.pulsebeat02.neon.utils.mutable;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class MutableBoolean {
@@ -11,17 +10,14 @@ public class MutableBoolean {
     this.bool = bool;
   }
 
-  @Contract(value = "_ -> new", pure = true)
   public static @NotNull MutableBoolean ofBool(final boolean bool) {
     return new MutableBoolean(bool);
   }
 
-  @Contract(value = " -> new", pure = true)
   public static @NotNull MutableBoolean ofFalse() {
     return ofBool(false);
   }
 
-  @Contract(value = " -> new", pure = true)
   public static @NotNull MutableBoolean ofTrue() {
     return ofBool(true);
   }

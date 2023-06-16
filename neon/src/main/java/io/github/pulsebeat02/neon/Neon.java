@@ -2,7 +2,10 @@ package io.github.pulsebeat02.neon;
 
 import static net.kyori.adventure.text.Component.text;
 
+import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
+import io.github.pulsebeat02.neon.nms.PacketSender;
+import io.github.pulsebeat02.neon.nms.ReflectionHandler;
 import java.io.IOException;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -13,25 +16,33 @@ import org.jetbrains.annotations.NotNull;
 public final class Neon extends JavaPlugin {
 
   private BrowserConfiguration configuration;
-  private BukkitAudiences adventure;
+  private PacketSender sender;
+  private BukkitAudiences audience;
   private Audience console;
 
   @Override
   public void onEnable() {
-    this.adventure = BukkitAudiences.create(this);
-    this.console = this.adventure.console();
+    this.audience = BukkitAudiences.create(this);
+    this.console = this.audience.console();
+    this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
     this.readConfigurationFile();
+    this.registerCommands();
   }
 
   @Override
   public void onDisable() {
-    if (this.adventure != null) {
-      this.adventure.close();
-      this.adventure = null;
+    this.configuration.shutdownConfiguration();
+    if (this.audience != null) {
+      this.audience.close();
+      this.audience = null;
     }
   }
 
-  public void readConfigurationFile() {
+  private void registerCommands() {
+    new CommandHandler(this);
+  }
+
+  private void readConfigurationFile() {
     try {
       this.configuration = new BrowserConfiguration(this);
     } catch (final IOException e) {
@@ -47,10 +58,14 @@ public final class Neon extends JavaPlugin {
     return this.configuration;
   }
 
-  public @NonNull BukkitAudiences adventure() {
-    if (this.adventure == null) {
+  public @NonNull BukkitAudiences audience() {
+    if (this.audience == null) {
       throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
     }
-    return this.adventure;
+    return this.audience;
+  }
+
+  public @NotNull PacketSender getPacketSender() {
+    return this.sender;
   }
 }

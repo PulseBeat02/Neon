@@ -1,6 +1,5 @@
-package io.github.pulsebeat02.neon.utils;
+package io.github.pulsebeat02.neon.utils.mutable;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public final class MutableInt {
@@ -11,17 +10,14 @@ public final class MutableInt {
     this.number = number;
   }
 
-  @Contract(value = "_ -> new", pure = true)
   public static @NotNull MutableInt ofNumber(@NotNull final Number number) {
     return ofInteger(number.intValue());
   }
 
-  @Contract(value = "_ -> new", pure = true)
   public static @NotNull MutableInt ofInteger(final int number) {
     return new MutableInt(number);
   }
 
-  @Contract(value = "_ -> new", pure = true)
   public static @NotNull MutableInt ofString(@NotNull final String string) {
     return ofInteger(Integer.parseInt(string));
   }

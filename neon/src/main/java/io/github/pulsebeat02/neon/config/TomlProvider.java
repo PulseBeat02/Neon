@@ -1,16 +1,17 @@
 package io.github.pulsebeat02.neon.config;
 
 import com.moandjiezana.toml.Toml;
+import org.jetbrains.annotations.NotNull;
 
 public final class TomlProvider {
 
-  private static final Toml TOML;
+  private @NotNull static final Toml TOML;
 
   static {
     TOML = new Toml();
   }
 
-  public static Toml getToml() {
+  public @NotNull static Toml getToml() {
     return TOML;
   }
 }

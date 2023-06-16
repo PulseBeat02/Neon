@@ -6,13 +6,8 @@ public final class OrderedPixelMapper {
 
   private final float[][] matrix;
 
-  private OrderedPixelMapper(final int[][] matrix, final int max, final float strength) {
+  public OrderedPixelMapper(final int[][] matrix, final int max, final float strength) {
     this.matrix = this.calculateMatrixArray(matrix, max, strength);
-  }
-
-  public static @NotNull OrderedPixelMapper ofPixelMapper(
-      final int[][] matrix, final int max, final float strength) {
-    return new OrderedPixelMapper(matrix, max, strength);
   }
 
   private float convertThresholdToAddition(final float scale, final int value, final int max) {

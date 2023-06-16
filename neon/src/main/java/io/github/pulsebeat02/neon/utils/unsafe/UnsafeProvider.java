@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon.utils;
+package io.github.pulsebeat02.neon.utils.unsafe;
 
 import java.lang.reflect.Field;
 import org.jetbrains.annotations.NotNull;
@@ -6,7 +6,7 @@ import sun.misc.Unsafe;
 
 public final class UnsafeProvider {
 
-  private static final Unsafe UNSAFE;
+  private static @NotNull final Unsafe UNSAFE;
 
   static {
     try {

@@ -20,7 +20,7 @@ public class BayerDither implements DitherHandler {
   }
 
   @Override
-  public @NotNull ByteBuf dither(final @NotNull ByteBuffer buffer, final int width) {
+  public @NotNull ByteBuf dither(@NotNull final ByteBuffer buffer, final int width) {
     final byte[] arr = buffer.array();
     final int length = arr.length;
     final int height = length / width;

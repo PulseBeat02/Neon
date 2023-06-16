@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon;
+package io.github.pulsebeat02.neon.command;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.jetbrains.annotations.NotNull;

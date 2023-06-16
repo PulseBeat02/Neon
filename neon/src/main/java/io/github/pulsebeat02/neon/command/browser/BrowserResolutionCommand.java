@@ -21,12 +21,12 @@ import net.kyori.adventure.audience.Audience;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public final class BrowserDimensionCommand implements CommandSegment.Literal<CommandSender> {
+public final class BrowserResolutionCommand implements CommandSegment.Literal<CommandSender> {
 
-  private static @NotNull final List<String> DIMENSION_SUGGESTIONS;
+  private static @NotNull final List<String> RESOLUTION_SUGGESTIONS;
 
   static {
-    DIMENSION_SUGGESTIONS =
+    RESOLUTION_SUGGESTIONS =
         List.of(
             "360:640",
             "375:667",
@@ -46,14 +46,14 @@ public final class BrowserDimensionCommand implements CommandSegment.Literal<Com
   private @NotNull final BrowserConfiguration config;
   private @NotNull final LiteralCommandNode<CommandSender> node;
 
-  public BrowserDimensionCommand(@NotNull final Neon neon) {
+  public BrowserResolutionCommand(@NotNull final Neon neon) {
     this.neon = neon;
     this.config = neon.getConfiguration();
     this.node =
-        this.literal("dimension")
-            .requires(has("neon.command.browser.dimension"))
+        this.literal("resolution")
+            .requires(has("neon.command.browser.resolution"))
             .then(
-                this.argument("dimension", StringArgumentType.greedyString())
+                this.argument("resolution", StringArgumentType.greedyString())
                     .suggests(this::suggestDimension)
                     .executes(this::setDimension))
             .build();
@@ -62,14 +62,14 @@ public final class BrowserDimensionCommand implements CommandSegment.Literal<Com
   private @NotNull CompletableFuture<Suggestions> suggestDimension(
       @NotNull final CommandContext<CommandSender> context,
       @NotNull final SuggestionsBuilder builder) {
-    DIMENSION_SUGGESTIONS.forEach(builder::suggest);
+    RESOLUTION_SUGGESTIONS.forEach(builder::suggest);
     return builder.buildFuture();
   }
 
   private int setDimension(@NotNull final CommandContext<CommandSender> context) {
     final Audience audience = this.neon.audience().sender(context.getSource());
     final Optional<int[]> optional =
-        checkDimensionBoundaries(audience, context.getArgument("dimension", String.class));
+        checkDimensionBoundaries(audience, context.getArgument("resolution", String.class));
     if (optional.isEmpty()) {
       return SINGLE_SUCCESS;
     }

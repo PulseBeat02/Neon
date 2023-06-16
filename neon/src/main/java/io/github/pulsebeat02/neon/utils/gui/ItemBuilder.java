@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon.utils;
+package io.github.pulsebeat02.neon.utils.gui;
 
 import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacyAmpersand;
 import static org.bukkit.ChatColor.translateAlternateColorCodes;
@@ -10,30 +10,27 @@ import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
 public class ItemBuilder {
 
-  private final ItemStack is;
-  private Consumer<InventoryClickEvent> action;
+  private @NotNull final ItemStack is;
+  private @Nullable Consumer<InventoryClickEvent> action;
 
   ItemBuilder(@NotNull final ItemStack is) {
     this.is = is;
   }
 
-  @Contract("_ -> new")
   public static @NotNull ItemBuilder from(@NotNull final Material material) {
     return from(material, 1);
   }
 
-  @Contract("_, _ -> new")
   public static @NotNull ItemBuilder from(@NotNull final Material material, final int count) {
     return from(new ItemStack(material, count));
   }
 
-  @Contract(value = "_ -> new", pure = true)
   public static @NotNull ItemBuilder from(@NotNull final ItemStack stack) {
     return new ItemBuilder(stack);
   }

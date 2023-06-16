@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon;
+package io.github.pulsebeat02.neon.command;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

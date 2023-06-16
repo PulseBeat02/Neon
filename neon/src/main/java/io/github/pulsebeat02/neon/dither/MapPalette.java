@@ -5,10 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.pulsebeat02.neon.json.GsonProvider;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import java.awt.Color;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +16,7 @@ public final class MapPalette {
 
   static {
     final Gson gson = GsonProvider.getGson();
-    try (final InputStream stream = ResourceUtils.getResourceAsStream("colors.json");
-        final Reader reader = new BufferedReader(new InputStreamReader(stream))) {
+    try (final Reader reader = ResourceUtils.getResourceAsReader("colors.json")) {
       final TypeToken<int[][]> token = new TypeToken<>() {};
       final int[][] colors = gson.fromJson(reader, token.getType());
       NMS_PALETTE =
