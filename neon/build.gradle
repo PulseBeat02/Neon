@@ -9,31 +9,18 @@ dependencies {
     compileOnly 'com.google.guava:guava:32.0.1-jre'
     compileOnly 'com.mojang:brigadier:1.0.18'
     compileOnly 'com.mojang:authlib:1.5.26'
+    compileOnly 'me.friwi:jcefmaven:110.0.25'
+    compileOnly 'com.moandjiezana.toml:toml4j:0.7.2'
+    compileOnly 'me.lucko:commodore:2.2'
 
     implementation project(':neon-api')
     implementation project(':v1_20_R1')
-
-    implementation 'me.lucko:commodore:2.2'
-    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
-    implementation('me.friwi:jcefmaven:110.0.25') {
-        transitive = true;
-        exclude module: 'gson'
-    }
     implementation "net.kyori:adventure-api:4.14.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.0"
-    implementation('com.moandjiezana.toml:toml4j:0.7.2') {
-        transitive = true;
-        exclude module: 'gson'
-    }
 }
 
 shadowJar {
-    relocate('me.lucko', 'io.github.pulsebeat02.neon.lib.lucko')
-    relocate('com.github.stefvanschie', 'io.github.pulsebeat02.neon.lib.stefvanschie')
     relocate('net.kyori', 'io.github.pulsebeat02.neon.lib.kyori')
-    relocate('com.moandjiezana.toml', 'io.github.pulsebeat02.neon.lib.toml')
-    relocate('com.mojang.brigadier', 'io.github.pulsebeat02.neon.lib.brigadier')
-    relocate('org.apache.commons.compress', 'io.github.pulsebeat02.neon.lib.compress')
 }
 
 tasks {
