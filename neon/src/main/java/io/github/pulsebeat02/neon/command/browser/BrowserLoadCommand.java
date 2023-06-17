@@ -33,18 +33,17 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
   }
 
   private int startBrowser(@NotNull final CommandContext<CommandSender> context) {
-
     try {
       final BrowserSettings settings = BrowserSettings.ofSettings(this.config);
       final MinecraftBrowser browser = new MinecraftBrowser(this.neon, settings);
       browser.createImmediately();
+      this.neon.setBrowser(browser);
     } catch (final UnsupportedPlatformException
         | CefInitializationException
         | IOException
         | InterruptedException e) {
       throw new RuntimeException(e);
     }
-
     return SINGLE_SUCCESS;
   }
 

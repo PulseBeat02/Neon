@@ -1,35 +1,45 @@
-package io.github.pulsebeat02.neon.browser;
-
-import static java.util.Objects.requireNonNull;
-
-import io.github.pulsebeat02.neon.Neon;
-import io.github.pulsebeat02.neon.config.BrowserConfiguration;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import io.github.pulsebeat02.neon.browser.MinecraftBrowserRenderer;
+import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.cef.CefApp;
 import org.cef.CefClient;
+import org.cef.OS;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
+import org.cef.callback.CefDragData;
 import org.cef.callback.CefPdfPrintCallback;
 import org.cef.callback.CefRunFileDialogCallback;
 import org.cef.callback.CefStringVisitor;
-import org.cef.handler.CefDialogHandler.FileDialogMode;
+import org.cef.handler.CefDialogHandler;
 import org.cef.handler.CefRenderHandler;
+import org.cef.handler.CefScreenInfo;
 import org.cef.handler.CefWindowHandler;
 import org.cef.misc.CefPdfPrintSettings;
 import org.cef.network.CefRequest;
 import org.jetbrains.annotations.NotNull;
 
-public final class MinecraftBrowser implements CefBrowser {
+public final class ExampleCustomBrowser implements CefBrowser {
+
   private static @NotNull final CefClient CEF_CLIENT;
 
   static {
@@ -45,20 +55,12 @@ public final class MinecraftBrowser implements CefBrowser {
   }
 
   private @NotNull final CefBrowser internalBrowser;
-  private @NotNull final Neon neon;
   private @NotNull final CefRenderHandler renderer;
 
-  public MinecraftBrowser(@NotNull final Neon neon, @NotNull final BrowserSettings settings)
-      throws UnsupportedPlatformException,
-          CefInitializationException,
-          IOException,
-          InterruptedException {
-    this.neon = neon;
+  public ExampleCustomBrowser() {
     this.internalBrowser = this.createBrowser();
-    this.renderer = new MinecraftBrowserRenderer(neon, this.internalBrowser, settings);
-    this.setFocus(true);
-    final String url = this.getHomepageUrl();
-    this.internalBrowser.loadURL(url);
+    this.renderer = new MinecraftBrowserRenderer(this.internalBrowser);
+    this.internalBrowser.loadURL("https://wwww.google.com");
   }
 
   private static @NotNull CefApp createApp()
@@ -67,21 +69,13 @@ public final class MinecraftBrowser implements CefBrowser {
           IOException,
           InterruptedException {
     final CefAppBuilder builder = new CefAppBuilder();
-    final Plugin plugin = requireNonNull(Bukkit.getPluginManager().getPlugin("Neon"));
-    builder.setProgressHandler(new CefProgressHandler((Neon) plugin));
     builder.addJcefArgs("--disable-gpu");
     builder.addJcefArgs("--disable-gpu-compositing");
     return builder.build();
   }
 
   private @NotNull CefBrowser createBrowser() {
-    final String url = this.getHomepageUrl();
-    return CEF_CLIENT.createBrowser(url, true, true);
-  }
-
-  private @NotNull String getHomepageUrl() {
-    final BrowserConfiguration configuration = this.neon.getConfiguration();
-    return configuration.getHomePageUrl();
+    return CEF_CLIENT.createBrowser("https://www.google.com", OS.isLinux(), true);
   }
 
   @Override
@@ -277,7 +271,7 @@ public final class MinecraftBrowser implements CefBrowser {
 
   @Override
   public void runFileDialog(
-      @NotNull final FileDialogMode mode,
+      @NotNull final CefDialogHandler.FileDialogMode mode,
       @NotNull final String title,
       @NotNull final String defaultFilePath,
       @NotNull final Vector<String> acceptFilters,
@@ -338,5 +332,86 @@ public final class MinecraftBrowser implements CefBrowser {
   public @NotNull CompletableFuture<BufferedImage> createScreenshot(
       final boolean nativeResolution) {
     return this.internalBrowser.createScreenshot(nativeResolution);
+  }
+
+  static class MinecraftBrowserRenderer implements CefRenderHandler {
+
+    private static @NotNull final Point INITIAL_POINT;
+
+    static {
+      INITIAL_POINT = new Point(0, 0);
+    }
+
+    private @NotNull final CefRenderHandler handler;
+    private @NotNull final Rectangle viewArea;
+
+    public MinecraftBrowserRenderer(@NotNull final CefBrowser browser) {
+      this.handler = browser.getRenderHandler();
+      final ImmutableDimension dimension = new ImmutableDimension(640, 640);
+      final int x = dimension.getWidth();
+      final int y = dimension.getHeight();
+      this.viewArea = new Rectangle(0, 0, x, y);
+    }
+
+    @Override
+    public void onPaint(
+        @NotNull final CefBrowser browser,
+        final boolean popup,
+        @NotNull final Rectangle[] dirtyRects,
+        @NotNull final ByteBuffer buffer,
+        final int width,
+        final int height) {
+      this.handler.onPaint(browser, popup, dirtyRects, buffer, width, height);
+      System.out.println(buffer);
+    }
+
+    @Override
+    public @NotNull Rectangle getViewRect(@NotNull final CefBrowser browser) {
+      return this.viewArea;
+    }
+
+    @Override
+    public boolean getScreenInfo(
+        @NotNull final CefBrowser browser, @NotNull final CefScreenInfo screenInfo) {
+      return this.handler.getScreenInfo(browser, screenInfo);
+    }
+
+    @Override
+    public @NotNull Point getScreenPoint(
+        @NotNull final CefBrowser browser, @NotNull final Point viewPoint) {
+      final Point point = new Point(INITIAL_POINT);
+      point.translate(viewPoint.x, viewPoint.y);
+      return point;
+    }
+
+    @Override
+    public void onPopupShow(@NotNull final CefBrowser browser, final boolean show) {
+      this.handler.onPopupShow(browser, show);
+    }
+
+    @Override
+    public void onPopupSize(@NotNull final CefBrowser browser, @NotNull final Rectangle size) {
+      this.handler.onPopupSize(browser, size);
+    }
+
+    @Override
+    public boolean onCursorChange(@NotNull final CefBrowser browser, final int cursorType) {
+      return this.handler.onCursorChange(browser, cursorType);
+    }
+
+    @Override
+    public boolean startDragging(
+        @NotNull final CefBrowser browser,
+        @NotNull final CefDragData dragData,
+        final int mask,
+        final int x,
+        final int y) {
+      return this.handler.startDragging(browser, dragData, mask, x, y);
+    }
+
+    @Override
+    public void updateDragCursor(@NotNull final CefBrowser browser, final int operation) {
+      this.handler.updateDragCursor(browser, operation);
+    }
   }
 }

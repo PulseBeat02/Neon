@@ -23,12 +23,16 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
     INITIAL_POINT = new Point(0, 0);
   }
 
+  private @NotNull final CefRenderHandler handler;
   private @NotNull final Rectangle viewArea;
   private @NotNull final BrowserSettings settings;
   private @NotNull final PacketSender sender;
 
   public MinecraftBrowserRenderer(
-      @NotNull final Neon neon, @NotNull final BrowserSettings settings) {
+      @NotNull final Neon neon,
+      @NotNull final CefBrowser browser,
+      @NotNull final BrowserSettings settings) {
+    this.handler = browser.getRenderHandler();
     final ImmutableDimension dimension = settings.getDimension();
     final int x = dimension.getWidth();
     final int y = dimension.getHeight();
@@ -60,7 +64,7 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
   @Override
   public boolean getScreenInfo(
       @NotNull final CefBrowser browser, @NotNull final CefScreenInfo screenInfo) {
-    return false;
+    return this.handler.getScreenInfo(browser, screenInfo);
   }
 
   @Override
@@ -72,14 +76,18 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
   }
 
   @Override
-  public void onPopupShow(@NotNull final CefBrowser browser, final boolean show) {}
+  public void onPopupShow(@NotNull final CefBrowser browser, final boolean show) {
+    this.handler.onPopupShow(browser, show);
+  }
 
   @Override
-  public void onPopupSize(@NotNull final CefBrowser browser, @NotNull final Rectangle size) {}
+  public void onPopupSize(@NotNull final CefBrowser browser, @NotNull final Rectangle size) {
+    this.handler.onPopupSize(browser, size);
+  }
 
   @Override
   public boolean onCursorChange(@NotNull final CefBrowser browser, final int cursorType) {
-    return false;
+    return this.handler.onCursorChange(browser, cursorType);
   }
 
   @Override
@@ -89,9 +97,11 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
       final int mask,
       final int x,
       final int y) {
-    return false;
+    return this.handler.startDragging(browser, dragData, mask, x, y);
   }
 
   @Override
-  public void updateDragCursor(@NotNull final CefBrowser browser, final int operation) {}
+  public void updateDragCursor(@NotNull final CefBrowser browser, final int operation) {
+    this.handler.updateDragCursor(browser, operation);
+  }
 }
