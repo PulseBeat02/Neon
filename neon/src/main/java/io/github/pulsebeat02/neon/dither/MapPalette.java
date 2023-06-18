@@ -16,7 +16,7 @@ public final class MapPalette {
 
   static {
     final Gson gson = GsonProvider.getGson();
-    try (final Reader reader = ResourceUtils.getResourceAsReader("colors.json")) {
+    try (final Reader reader = ResourceUtils.getResourceAsReader("colors/colors.json")) {
       final TypeToken<int[][]> token = new TypeToken<>() {};
       final int[][] colors = gson.fromJson(reader, token.getType());
       NMS_PALETTE =
