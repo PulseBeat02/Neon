@@ -3,3 +3,4 @@ homepage_url = "https://www.google.com"
 algorithm = "FILTER_LITE"
 dimension = [640, 640]
 block_width = 5
+block_height = 5

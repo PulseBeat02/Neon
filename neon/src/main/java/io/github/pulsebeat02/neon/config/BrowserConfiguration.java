@@ -33,6 +33,8 @@ public final class BrowserConfiguration {
   private @NotNull ImmutableDimension dimension;
   private int blockWidth;
 
+  private int blockHeight;
+
   public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
     this.configurationPath = neon.getDataFolder().toPath().resolve("neon.toml");
     this.checkFile();
@@ -75,6 +77,7 @@ public final class BrowserConfiguration {
     table.put("algorithm", this.algorithm.name());
     table.put("dimension", List.of(this.dimension.getWidth(), this.dimension.getHeight()));
     table.put("block_width", this.blockWidth);
+    table.put("block_height", this.blockHeight);
 
     final File file = this.configurationPath.toFile();
     final TomlWriter writer = TomlProvider.getTomlWriter();
@@ -88,6 +91,7 @@ public final class BrowserConfiguration {
     this.algorithm = this.parseAlgorithm(toml);
     this.dimension = this.parseDimension(toml);
     this.blockWidth = toml.getLong("neon.block_width").intValue();
+    this.blockHeight = toml.getLong("neon.block_height").intValue();
   }
 
   private @NotNull Algorithm parseAlgorithm(@NotNull final Toml toml) {
@@ -155,5 +159,13 @@ public final class BrowserConfiguration {
 
   public void setBlockWidth(final int blockWidth) {
     this.blockWidth = blockWidth;
+  }
+
+  public int getBlockHeight() {
+    return this.blockHeight;
+  }
+
+  public void setBlockHeight(final int blockHeight) {
+    this.blockHeight = blockHeight;
   }
 }

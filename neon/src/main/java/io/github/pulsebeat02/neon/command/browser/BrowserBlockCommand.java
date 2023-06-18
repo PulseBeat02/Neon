@@ -63,13 +63,14 @@ public final class BrowserBlockCommand implements CommandSegment.Literal<Command
     final int[] dims = optional.get();
     final int width = dims[0];
     final int height = dims[1];
-    this.setDimensions(width);
+    this.setDimensions(width, height);
     audience.sendMessage(Locale.SET_BLOCK_DIMENSION.build(width, height));
     return SINGLE_SUCCESS;
   }
 
-  private void setDimensions(final int width) {
+  private void setDimensions(final int width, final int height) {
     this.config.setBlockWidth(width);
+    this.config.setBlockHeight(height);
   }
 
   @Override
