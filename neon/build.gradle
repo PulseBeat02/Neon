@@ -9,12 +9,10 @@ dependencies {
     compileOnly 'com.google.guava:guava:32.0.1-jre'
     compileOnly 'com.mojang:brigadier:1.0.18'
     compileOnly 'com.mojang:authlib:1.5.26'
-    compileOnly 'me.friwi:jcefmaven:110.0.25'
     compileOnly 'com.moandjiezana.toml:toml4j:0.7.2'
     compileOnly 'me.lucko:commodore:2.2'
     compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
-
-    testImplementation 'me.friwi:jcefmaven:110.0.25'
+    compileOnly 'org.apache.commons:commons-compress:1.23.0'
 
     implementation project(':neon-api')
     implementation project(':v1_20_R1')

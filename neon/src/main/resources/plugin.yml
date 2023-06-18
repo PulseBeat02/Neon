@@ -12,6 +12,7 @@
     "me.friwi:jcefmaven:110.0.25",
     "com.moandjiezana.toml:toml4j:0.7.2",
     "com.github.stefvanschie.inventoryframework:IF:0.10.10",
-    "me.lucko:commodore:2.2"
+    "me.lucko:commodore:2.2",
+    "org.apache.commons:commons-compress:1.23.0"
   ]
 }

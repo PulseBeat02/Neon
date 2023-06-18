@@ -2,7 +2,7 @@ package io.github.pulsebeat02.neon;
 
 import static net.kyori.adventure.text.Component.text;
 
-import io.github.pulsebeat02.neon.browser.MinecraftBrowser;
+import org.cef.browser.MinecraftBrowser;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.nms.PacketSender;
