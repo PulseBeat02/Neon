@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,13 +36,11 @@ public final class MapPacketSender implements PacketSender {
 
   private final Map<UUID, PlayerConnection> connections;
   private final Map<UUID, Long> lastUpdated;
-  private final Set<Integer> maps;
   private final String handlerName;
 
   {
     this.connections = new ConcurrentHashMap<>();
     this.lastUpdated = new ConcurrentHashMap<>();
-    this.maps = new TreeSet<>();
     this.handlerName = "neon_handler_1171";
   }
 
@@ -187,23 +184,7 @@ public final class MapPacketSender implements PacketSender {
       pipeline.remove(this.handlerName);
     }
   }
-
   private void removeConnection(final Player player) {
     this.connections.remove(player.getUniqueId());
-  }
-
-  @Override
-  public boolean isMapRegistered(final int id) {
-    return this.maps.contains(id);
-  }
-
-  @Override
-  public void unregisterMap(final int id) {
-    this.maps.remove(id);
-  }
-
-  @Override
-  public void registerMap(final int id) {
-    this.maps.add(id);
   }
 }

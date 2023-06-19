@@ -5,6 +5,7 @@ import io.github.pulsebeat02.neon.utils.DitherUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.random.RandomGenerator;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,30 +23,27 @@ public final class RandomDither implements DitherHandler {
     HEAVY_WEIGHT = 128;
   }
 
-  private final int weight;
   private final int min;
   private final int max;
 
   public RandomDither(final int weight) {
-    this.weight = weight;
     this.min = -weight;
     this.max = weight + 1;
   }
 
   @Override
-  public @NotNull ByteBuf dither(@NotNull final ByteBuffer raster, final int width) {
-    final byte[] arr = raster.array();
-    final int length = arr.length;
+  public @NotNull ByteBuf dither(@NotNull final ByteBuffer buffer, final int width) {
+    final int length = buffer.capacity();
     final int height = length / width;
     final ByteBuf data = Unpooled.buffer(length);
     for (int y = 0; y < height; y++) {
       final int yIndex = y * width;
       for (int x = 0; x < width; x++) {
         final int index = yIndex + x;
-        final int color = raster.getInt(index);
-        int r = (color >> 16) & 0xFF;
+        final int color = buffer.get(index);
+        int b = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
-        int b = (color) & 0xFF;
+        int r = (color) & 0xFF;
         r = (r += this.random()) > 255 ? 255 : Math.max(r, 0);
         g = (g += this.random()) > 255 ? 255 : Math.max(g, 0);
         b = (b += this.random()) > 255 ? 255 : Math.max(b, 0);

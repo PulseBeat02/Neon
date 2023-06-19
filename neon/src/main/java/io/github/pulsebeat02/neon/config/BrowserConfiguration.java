@@ -36,7 +36,7 @@ public final class BrowserConfiguration {
   private int blockHeight;
 
   public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
-    this.configurationPath = neon.getDataFolder().toPath().resolve("config/neon.toml");
+    this.configurationPath = neon.getDataFolder().toPath().resolve("neon.toml");
     this.checkFile();
     this.homePageUrl = "https://www.google.com";
     this.algorithm = Algorithm.FILTER_LITE;

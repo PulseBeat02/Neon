@@ -11,7 +11,7 @@ public final class TomlProvider {
 
   static {
     TOML = new Toml();
-    TOML_WRITER = new TomlWriter.Builder().indentValuesBy(2).build();
+    TOML_WRITER = new TomlWriter.Builder().indentValuesBy(2).indentTablesBy(2).build();
   }
 
   public @NotNull static Toml getToml() {

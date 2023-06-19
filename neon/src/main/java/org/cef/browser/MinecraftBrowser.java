@@ -5,13 +5,14 @@ import static java.util.Objects.requireNonNull;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.browser.CefProgressHandler;
-
+import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -19,10 +20,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.cef.CefApp;
 import org.cef.CefClient;
+import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
+import org.cef.handler.CefScreenInfo;
 import org.jetbrains.annotations.NotNull;
 
-public class MinecraftBrowser extends CefBrowser_N {
+public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
 
   private static @NotNull final CefClient CEF_CLIENT;
 
@@ -45,6 +48,7 @@ public class MinecraftBrowser extends CefBrowser_N {
     super(CEF_CLIENT, neon.getConfiguration().getHomePageUrl(), null, null, null);
     this.neon = neon;
     this.renderer = new MinecraftBrowserRenderer(neon, settings);
+    this.setupBrowser(settings);
   }
 
   private MinecraftBrowser(
@@ -76,6 +80,16 @@ public class MinecraftBrowser extends CefBrowser_N {
     builder.addJcefArgs("--disable-gpu");
     builder.addJcefArgs("--disable-gpu-vsync");
     return builder.build();
+  }
+
+  private void setupBrowser(@NotNull final BrowserSettings settings) {
+
+    final ImmutableDimension dimension = settings.getDimension();
+    final int width = dimension.getWidth();
+    final int height = dimension.getHeight();
+
+    this.setFocus(true);
+    this.wasResized(width, height);
   }
 
   @Override
@@ -118,5 +132,51 @@ public class MinecraftBrowser extends CefBrowser_N {
   @Override
   public CefRenderHandler getRenderHandler() {
     return this.renderer;
+  }
+
+  @Override
+  public Rectangle getViewRect(final CefBrowser browser) {
+    return this.renderer.getViewRect(browser);
+  }
+
+  @Override
+  public boolean getScreenInfo(final CefBrowser browser, final CefScreenInfo screenInfo) {
+    return this.renderer.getScreenInfo(browser, screenInfo);
+  }
+
+  @Override
+  public Point getScreenPoint(final CefBrowser browser, final Point viewPoint) {
+    return this.renderer.getScreenPoint(browser, viewPoint);
+  }
+
+  @Override
+  public void onPopupShow(final CefBrowser browser, final boolean show) {
+    this.renderer.onPopupShow(browser, show);
+  }
+
+  @Override
+  public void onPopupSize(final CefBrowser browser, final Rectangle size) {
+    this.renderer.onPopupSize(browser, size);
+  }
+
+  @Override
+  public void onPaint(final CefBrowser browser, final boolean popup, final Rectangle[] dirtyRects, final ByteBuffer buffer,
+      final int width, final int height) {
+    this.renderer.onPaint(browser, popup, dirtyRects, buffer, width, height);
+  }
+
+  @Override
+  public boolean onCursorChange(final CefBrowser browser, final int cursorType) {
+    return this.renderer.onCursorChange(browser, cursorType);
+  }
+
+  @Override
+  public boolean startDragging(final CefBrowser browser, final CefDragData dragData, final int mask, final int x, final int y) {
+    return this.renderer.startDragging(browser, dragData, mask, x, y);
+  }
+
+  @Override
+  public void updateDragCursor(final CefBrowser browser, final int operation) {
+    this.renderer.updateDragCursor(browser, operation);
   }
 }

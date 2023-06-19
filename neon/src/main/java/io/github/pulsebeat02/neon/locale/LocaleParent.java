@@ -20,11 +20,7 @@ public interface LocaleParent {
 
   @NotNull
   NullComponent<Sender> PREFIX =
-      () ->
-          text()
-              .color(AQUA)
-              .append(text('['), text("Neon", GOLD), text(']'), space(), text("»", GRAY))
-              .build();
+      () -> text().color(AQUA).append(text('['), text("Neon", GOLD), text(']')).build();
 
   static @NotNull NullComponent<Sender> error(@NotNull final String key) {
     return () -> MANAGER.render(translatable(key, RED));
