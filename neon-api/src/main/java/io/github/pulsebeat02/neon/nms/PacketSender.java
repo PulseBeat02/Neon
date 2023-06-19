@@ -15,7 +15,8 @@ public interface PacketSender {
       final int map,
       final int mapWidth,
       final int mapHeight,
-      final int videoWidth);
+      final int videoWidth,
+      final int videoHeight);
 
   void displayEntities(
       @NotNull final UUID[] viewers,

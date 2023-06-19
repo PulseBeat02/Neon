@@ -61,14 +61,14 @@ public final class NeonPacketSender implements PacketSender {
       final int map,
       final int width,
       final int height,
-      final int videoWidth) {
-    final int vidHeight = rgb.capacity() / videoWidth;
+      final int videoWidth,
+      final int videoHeight) {
     final int pixW = width << 7;
     final int pixH = height << 7;
     final int xOff = (pixW - width) >> 1;
     final int yOff = (pixH - height) >> 1;
     final int negXOff = xOff + videoWidth;
-    final int negYOff = yOff + vidHeight;
+    final int negYOff = yOff + videoHeight;
     final int xLoopMin = Math.max(0, xOff >> 7);
     final int yLoopMin = Math.max(0, yOff >> 7);
     final int xLoopMax = Math.min(width, (int) Math.ceil(negXOff / 128.0));
