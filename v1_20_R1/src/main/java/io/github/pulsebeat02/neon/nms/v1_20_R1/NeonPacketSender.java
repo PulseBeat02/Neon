@@ -7,26 +7,35 @@ import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutMap;
+import net.minecraft.network.syncher.DataWatcher;
+import net.minecraft.network.syncher.DataWatcherObject;
+import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public final class MapPacketSender implements PacketSender {
+public final class NeonPacketSender implements PacketSender {
   private static final int PACKET_THRESHOLD_MS;
   private static final Set<Object> PACKET_DIFFERENTIATION;
 
@@ -37,13 +46,11 @@ public final class MapPacketSender implements PacketSender {
 
   private final Map<UUID, PlayerConnection> connections;
   private final Map<UUID, Long> lastUpdated;
-  private final Set<Integer> maps;
   private final String handlerName;
 
   {
     this.connections = new ConcurrentHashMap<>();
     this.lastUpdated = new ConcurrentHashMap<>();
-    this.maps = new TreeSet<>();
     this.handlerName = "neon_handler_1171";
   }
 
@@ -52,12 +59,14 @@ public final class MapPacketSender implements PacketSender {
       final UUID[] viewers,
       final @NotNull ByteBuf rgb,
       final int map,
-      final int height,
       final int width,
-      final int videoWidth,
-      final int xOff,
-      final int yOff) {
+      final int height,
+      final int videoWidth) {
     final int vidHeight = rgb.capacity() / videoWidth;
+    final int pixW = width << 7;
+    final int pixH = height << 7;
+    final int xOff = (pixW - width) >> 1;
+    final int yOff = (pixH - height) >> 1;
     final int negXOff = xOff + videoWidth;
     final int negYOff = yOff + vidHeight;
     final int xLoopMin = Math.max(0, xOff >> 7);
@@ -100,22 +109,13 @@ public final class MapPacketSender implements PacketSender {
 
   private void sendMapPackets(final UUID[] viewers, final PacketPlayOutMap[] packetArray) {
     if (viewers == null) {
-      this.sendMapPacketsToAll(packetArray);
+      for (final UUID uuid : this.connections.keySet()) {
+        this.sendMapPacketsToViewers(uuid, packetArray);
+      }
     } else {
-      this.sendMapPacketsToSpecified(viewers, packetArray);
-    }
-  }
-
-  private void sendMapPacketsToSpecified(
-      final UUID[] viewers, final PacketPlayOutMap[] packetArray) {
-    for (final UUID uuid : viewers) {
-      this.sendMapPacketsToViewers(uuid, packetArray);
-    }
-  }
-
-  private void sendMapPacketsToAll(final PacketPlayOutMap[] packetArray) {
-    for (final UUID uuid : this.connections.keySet()) {
-      this.sendMapPacketsToViewers(uuid, packetArray);
+      for (final UUID uuid : viewers) {
+        this.sendMapPacketsToViewers(uuid, packetArray);
+      }
     }
   }
 
@@ -127,7 +127,9 @@ public final class MapPacketSender implements PacketSender {
         return;
       }
       this.updateTime(uuid);
-      this.sendSeparatePackets(packetArray, connection);
+      for (final PacketPlayOutMap packet : packetArray) {
+        connection.a(packet);
+      }
     }
   }
 
@@ -135,12 +137,57 @@ public final class MapPacketSender implements PacketSender {
     this.lastUpdated.put(uuid, System.currentTimeMillis());
   }
 
-  private void sendSeparatePackets(
-      final PacketPlayOutMap[] packetArray, final PlayerConnection connection) {
+  @Override
+  public void displayEntities(
+      @NotNull final UUID[] viewers,
+      @NotNull final Location location,
+      @NotNull final Entity[] entities,
+      @NotNull final ByteBuf data,
+      @NotNull final String character,
+      final int width,
+      final int height) {
+    final int maxHeight = Math.min(height, entities.length);
+    final PacketPlayOutEntityMetadata[] packets = new PacketPlayOutEntityMetadata[maxHeight];
+    int index = 0;
+    for (int i = 0; i < maxHeight; i++) {
+      final IChatMutableComponent component = IChatMutableComponent.a(ComponentContents.a);
+      for (int x = 0; x < width; x++) {
+        final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);
+        p.b(ChatModifier.a.a(ChatHexColor.a(data.getInt(index++) & 0xFFFFFF)));
+        p.a(IChatBaseComponent.a(character));
+        component.a(p);
+      }
+      final Entity entity = entities[i];
+      final int id = ((CraftEntity) entity).getHandle().af();
+      final DataWatcherObject<IChatBaseComponent> object =
+          new DataWatcherObject<>(2, DataWatcherRegistry.f);
+      final List<DataWatcher.b<?>> list = List.of(DataWatcher.b.a(object, component));
+      final PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(id, list);
+      packets[i] = packet;
+    }
+    this.sendEntityPackets(viewers, packets);
+  }
+
+  private void sendEntityPackets(
+      @NotNull final UUID[] viewers, @NotNull final PacketPlayOutEntityMetadata[] packets) {
+    if (viewers == null) {
+      for (final UUID uuid : this.connections.keySet()) {
+        this.sendEntityPacketToViewers(uuid, packets);
+      }
+    } else {
+      for (final UUID uuid : viewers) {
+        this.sendEntityPacketToViewers(uuid, packets);
+      }
+    }
+  }
+
+  private void sendEntityPacketToViewers(
+      @NotNull final UUID uuid, @NotNull final PacketPlayOutEntityMetadata @NotNull [] packets) {
+    final PlayerConnection connection = this.connections.get(uuid);
     if (connection == null) {
       return;
     }
-    for (final PacketPlayOutMap packet : packetArray) {
+    for (final PacketPlayOutEntityMetadata packet : packets) {
       connection.a(packet);
     }
   }
@@ -190,20 +237,5 @@ public final class MapPacketSender implements PacketSender {
 
   private void removeConnection(final Player player) {
     this.connections.remove(player.getUniqueId());
-  }
-
-  @Override
-  public boolean isMapRegistered(final int id) {
-    return this.maps.contains(id);
-  }
-
-  @Override
-  public void unregisterMap(final int id) {
-    this.maps.remove(id);
-  }
-
-  @Override
-  public void registerMap(final int id) {
-    this.maps.add(id);
   }
 }

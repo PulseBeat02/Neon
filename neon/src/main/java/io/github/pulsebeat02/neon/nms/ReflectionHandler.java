@@ -28,7 +28,7 @@ public class ReflectionHandler {
   }
 
   private static @NotNull Class<?> getPacketHandlerClass() throws ClassNotFoundException {
-    return Class.forName("io.github.pulsebeat02.neon.nms.%s.MapPacketSender".formatted(VERSION));
+    return Class.forName("io.github.pulsebeat02.neon.nms.%s.NeonPacketSender".formatted(VERSION));
   }
 
   public static @NotNull String getVersion() {
