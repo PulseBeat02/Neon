@@ -117,4 +117,8 @@ public final class Neon extends JavaPlugin {
       this.browser = null;
     }
   }
+
+  public @NotNull MinecraftBrowser getBrowser() {
+    return this.browser;
+  }
 }

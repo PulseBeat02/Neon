@@ -42,17 +42,20 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   }
 
   private @NotNull final Neon neon;
+  private @NotNull final BrowserSettings settings;
   private CefRenderHandler renderer;
 
   public MinecraftBrowser(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     super(CEF_CLIENT, neon.getConfiguration().getHomePageUrl(), null, null, null);
     this.neon = neon;
+    this.settings = settings;
     this.renderer = new MinecraftBrowserRenderer(neon, settings);
     this.setupBrowser(settings);
   }
 
   private MinecraftBrowser(
       @NotNull final Neon neon,
+      @NotNull final BrowserSettings settings,
       @NotNull final CefClient client,
       @NotNull final String url,
       @NotNull final CefRequestContext context,
@@ -61,6 +64,7 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
       @NotNull final Point inspectAt) {
     super(client, url, context, parent, inspectAt);
     this.neon = neon;
+    this.settings = settings;
     this.renderer = renderer;
   }
 
@@ -78,7 +82,9 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
     builder.addJcefArgs("--no-sandbox");
     builder.addJcefArgs("--off-screen-rendering-enabled");
     builder.addJcefArgs("--disable-gpu");
-    builder.addJcefArgs("--disable-gpu-vsync");
+    builder.addJcefArgs("--show-fps-counter");
+    builder.addJcefArgs("--enable-begin-frame-scheduling");
+    builder.addJcefArgs("--off-screen-frame-rate=20");
     return builder.build();
   }
 
@@ -113,7 +119,8 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
       final CefRequestContext context,
       final CefBrowser_N parent,
       final Point inspectAt) {
-    return new MinecraftBrowser(this.neon, client, url, context, this.renderer, parent, inspectAt);
+    return new MinecraftBrowser(
+        this.neon, this.settings, client, url, context, this.renderer, parent, inspectAt);
   }
 
   private void createBrowser() {
@@ -192,5 +199,13 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   @Override
   public void updateDragCursor(final CefBrowser browser, final int operation) {
     this.renderer.updateDragCursor(browser, operation);
+  }
+
+  public @NotNull Neon getNeon() {
+    return this.neon;
+  }
+
+  public @NotNull BrowserSettings getSettings() {
+    return this.settings;
   }
 }

@@ -61,11 +61,8 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
   @Override
   public boolean getScreenInfo(
       @NotNull final CefBrowser browser, @NotNull final CefScreenInfo screenInfo) {
-    final double scale = 1.0;
-    final int depth = 32;
-    final int componentDepth = 8;
     final Rectangle bounds = BROWSER_RECTANGLE.getBounds();
-    screenInfo.Set(scale, depth, componentDepth, false, bounds, bounds);
+    screenInfo.Set(1, 32, 8, false, bounds, bounds);
     return true;
   }
 
