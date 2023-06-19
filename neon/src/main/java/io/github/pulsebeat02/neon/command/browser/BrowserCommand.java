@@ -22,6 +22,7 @@ public final class BrowserCommand extends BaseCommand {
             .requires(super::testPermission)
             .then(new BrowserLoadCommand(neon).getNode())
             .then(new BrowserConfigureCommand(neon).getNode())
+            .then(new BrowserDestroyCommand(neon).getNode())
             .build();
   }
 
@@ -34,7 +35,9 @@ public final class BrowserCommand extends BaseCommand {
             "/browser configure map [width:height] [blockWidth:blockHeight] [algorithm]",
             "Configures a browser using map callbacks",
             "/browser configure entity [width:height] [display type] [character]",
-            "Configures a browser using entity callbacks"));
+            "Configures a browser using entity callbacks",
+            "/browser destroy",
+            "Destroys the browser"));
   }
 
   @Override

@@ -1,4 +1,5 @@
 browser {
+  destroy;
   load {
     type brigadier:string single_word {
       url brigadier:string greedy_phrase;

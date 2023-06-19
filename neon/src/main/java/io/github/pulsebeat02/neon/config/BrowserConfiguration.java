@@ -48,6 +48,7 @@ public final class BrowserConfiguration {
     this.blockDimension = new ImmutableDimension(5, 5);
     this.character = "█";
     this.selection = EntitySelection.HOLOGRAM;
+    this.location = this.createLocation();
     this.readFile();
     this.savePeriodically();
   }

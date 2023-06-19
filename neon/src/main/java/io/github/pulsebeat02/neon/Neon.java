@@ -7,6 +7,7 @@ import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
+import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -109,7 +110,13 @@ public final class Neon extends JavaPlugin {
     if (this.browser != null) {
       this.browser.close(true);
       this.browser = null;
+      this.stopRenderer();
     }
+  }
+
+  private void stopRenderer() {
+    final RenderMethod method = this.browser.getRenderMethod();
+    method.destroy();
   }
 
   public @NotNull MinecraftBrowser getBrowser() {

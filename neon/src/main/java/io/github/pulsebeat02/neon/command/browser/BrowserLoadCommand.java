@@ -70,6 +70,8 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
       return SINGLE_SUCCESS;
     }
 
+    this.neon.shutdownBrowser();
+
     final MinecraftBrowser browser = new MinecraftBrowser(this.neon, settings, method, url);
     browser.createImmediately();
     browser.loadURL(url);
