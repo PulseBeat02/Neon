@@ -1,15 +1,23 @@
 browser {
-  load;
-  algorithm {
-    algorithm brigadier:string single_word;
+  load {
+    type brigadier:string single_word {
+      url brigadier:string greedy_phrase;
+    } 
   }
-  resolution {
-    resolution brigadier:string greedy_phrase;
-  }
-  block-dimension {
-    block-dimension brigadier:string greedy_phrase;
-  }
-  homepage-url {
-    url brigadier:string greedy_phrase;
+  configure {
+    map {
+      resolution brigadier:string single_word {
+        block-dimension brigadier:string single_word {
+          algorithm brigadier:string single_word;
+        }
+      }
+    }
+    entity {
+      resolution brigadier:string single_word {
+        entity brigadier:string single_word {
+          character brigadier:string greedy_phrase;
+        }
+      }
+    }
   }
 }

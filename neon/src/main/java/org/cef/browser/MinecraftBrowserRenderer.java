@@ -5,6 +5,7 @@ import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.dither.DitherHandler;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import io.github.pulsebeat02.neon.video.RenderMethod;
 import io.netty.buffer.ByteBuf;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -26,16 +27,16 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
 
   private @NotNull final Rectangle viewArea;
   private @NotNull final BrowserSettings settings;
-  private @NotNull final PacketSender sender;
+  private @NotNull final RenderMethod method;
 
   public MinecraftBrowserRenderer(
-      @NotNull final Neon neon, @NotNull final BrowserSettings settings) {
-    final ImmutableDimension dimension = settings.getDimension();
+      @NotNull final BrowserSettings settings, @NotNull final RenderMethod method) {
+    final ImmutableDimension dimension = settings.getResolution();
     final int width = dimension.getWidth();
     final int height = dimension.getHeight();
     this.viewArea = new Rectangle(0, 0, width, height);
     this.settings = settings;
-    this.sender = neon.getPacketSender();
+    this.method = method;
   }
 
   @Override
@@ -47,10 +48,8 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
       final int width,
       final int height) {
     final DitherHandler handler = this.settings.getHandler();
-    final int blockWidth = this.settings.getBlockWidth();
-    final int blockHeight = this.settings.getBlockHeight();
-    final ByteBuf buf = handler.dither(buffer, blockWidth);
-    this.sender.displayMaps(null, buf, 0, blockWidth, blockHeight, width, height);
+    final ImmutableDimension blockDimension = this.settings.getBlockDimension();
+    this.method.render(handler.dither(buffer, blockDimension.getWidth()));
   }
 
   @Override

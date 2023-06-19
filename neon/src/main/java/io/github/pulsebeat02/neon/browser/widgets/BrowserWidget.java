@@ -1,8 +1,7 @@
 package io.github.pulsebeat02.neon.browser.widgets;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.nio.IntBuffer;
+import org.jetbrains.annotations.NotNull;
 
 public final class BrowserWidget {
 

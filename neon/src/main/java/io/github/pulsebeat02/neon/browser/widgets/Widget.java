@@ -19,10 +19,6 @@ public enum Widget {
     this.widget = widget;
   }
 
-  public @NotNull BrowserWidget getWidget() {
-    return this.widget;
-  }
-
   public static @NotNull BrowserWidget createWidget(
       @NotNull final String resource, final int x, final int y) {
     try (final InputStream stream = ResourceUtils.getResourceAsStream(resource)) {
@@ -34,5 +30,9 @@ public enum Widget {
     } catch (final Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public @NotNull BrowserWidget getWidget() {
+    return this.widget;
   }
 }

@@ -1,8 +1,6 @@
 [neon]
-homepage_url = "https://www.google.com"
 algorithm = "FILTER_LITE"
-dimension = [640, 640]
-block_width = 5
-block_height = 5
+resolution = [640, 640]
+block_dimension = [5, 5]
 character = "█"
-location = ["world", "0", "0", "0"]
+entity_selection = "HOLOGRAM"

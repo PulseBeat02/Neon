@@ -13,7 +13,6 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.cef.browser.MinecraftBrowser;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 public final class Neon extends JavaPlugin {
@@ -95,7 +94,7 @@ public final class Neon extends JavaPlugin {
     return this.configuration;
   }
 
-  public @NonNull BukkitAudiences audience() {
+  public @NotNull BukkitAudiences audience() {
     if (this.audience == null) {
       throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
     }
@@ -104,11 +103,6 @@ public final class Neon extends JavaPlugin {
 
   public @NotNull PacketSender getPacketSender() {
     return this.sender;
-  }
-
-  public void setBrowser(@NotNull final MinecraftBrowser browser) {
-    this.shutdownBrowser();
-    this.browser = browser;
   }
 
   private void shutdownBrowser() {
@@ -120,5 +114,10 @@ public final class Neon extends JavaPlugin {
 
   public @NotNull MinecraftBrowser getBrowser() {
     return this.browser;
+  }
+
+  public void setBrowser(@NotNull final MinecraftBrowser browser) {
+    this.shutdownBrowser();
+    this.browser = browser;
   }
 }

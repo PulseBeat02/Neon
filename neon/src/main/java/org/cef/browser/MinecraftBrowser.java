@@ -13,6 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+
+import io.github.pulsebeat02.neon.video.RenderMethod;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -45,11 +47,15 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   private @NotNull final BrowserSettings settings;
   private CefRenderHandler renderer;
 
-  public MinecraftBrowser(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
-    super(CEF_CLIENT, neon.getConfiguration().getHomePageUrl(), null, null, null);
+  public MinecraftBrowser(
+      @NotNull final Neon neon,
+      @NotNull final BrowserSettings settings,
+      @NotNull final RenderMethod method,
+      @NotNull final String url) {
+    super(CEF_CLIENT, url, null, null, null);
     this.neon = neon;
     this.settings = settings;
-    this.renderer = new MinecraftBrowserRenderer(neon, settings);
+    this.renderer = new MinecraftBrowserRenderer(settings, method);
     this.setupBrowser(settings);
   }
 
@@ -95,7 +101,7 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   }
 
   private void setupBrowser(@NotNull final BrowserSettings settings) {
-    final ImmutableDimension dimension = settings.getDimension();
+    final ImmutableDimension dimension = settings.getResolution();
     final int width = dimension.getWidth();
     final int height = dimension.getHeight();
     this.setFocus(true);

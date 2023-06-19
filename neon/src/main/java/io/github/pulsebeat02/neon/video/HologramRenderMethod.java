@@ -3,7 +3,6 @@ package io.github.pulsebeat02.neon.video;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Consumer;
 import org.jetbrains.annotations.NotNull;

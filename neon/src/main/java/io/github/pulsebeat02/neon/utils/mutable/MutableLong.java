@@ -1,7 +1,5 @@
 package io.github.pulsebeat02.neon.utils.mutable;
 
-import org.jetbrains.annotations.NotNull;
-
 public final class MutableLong {
 
   private long number;

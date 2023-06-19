@@ -2,8 +2,8 @@ package io.github.pulsebeat02.neon.event;
 
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
-import io.github.pulsebeat02.neon.browser.widgets.BrowserWidget;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
+import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import java.util.Optional;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -31,6 +31,19 @@ public final class BrowserClickListener implements Listener {
   public BrowserClickListener(@NotNull final Neon neon) {
     this.neon = neon;
     this.lastInteraction = System.currentTimeMillis();
+  }
+
+  public static @NotNull Optional<Location> calculateVector(
+      @NotNull final Location planeLoc,
+      @NotNull final Vector plane,
+      @NotNull final Location origin,
+      @NotNull final Vector direction) {
+    if (plane.dot(direction) == 0) {
+      return Optional.empty();
+    }
+    final double distance =
+        (plane.dot(planeLoc.toVector()) - plane.dot(origin.toVector())) / plane.dot(direction);
+    return Optional.of(origin.clone().add(direction.multiply(distance)));
   }
 
   @EventHandler
@@ -79,9 +92,7 @@ public final class BrowserClickListener implements Listener {
     final Location eye = player.getEyeLocation();
     final Vector direction = player.getLocation().getDirection();
     final int[] coords = this.getBoardCoords(frame, eye, direction);
-    if (coords.length == 0) {
-      return;
-    }
+    if (coords.length == 0) {}
   }
 
   private void activateWidget(final int[] coords) {}
@@ -141,7 +152,8 @@ public final class BrowserClickListener implements Listener {
 
     final MinecraftBrowser browser = this.neon.getBrowser();
     final BrowserSettings settings = browser.getSettings();
-    final int blockWidth = settings.getBlockWidth();
+    final ImmutableDimension blockDimension = settings.getBlockDimension();
+    final int blockWidth = blockDimension.getWidth();
     final int gridX = (id - 1) % blockWidth;
     final int gridY = (id - 1) / blockWidth;
     final int trueX = x + (gridX * 128);
@@ -150,27 +162,15 @@ public final class BrowserClickListener implements Listener {
     return new int[] {trueX, trueY};
   }
 
-  public static @NotNull Optional<Location> calculateVector(
-      @NotNull final Location planeLoc,
-      @NotNull final Vector plane,
-      @NotNull final Location origin,
-      @NotNull final Vector direction) {
-    if (plane.dot(direction) == 0) {
-      return Optional.empty();
-    }
-    final double distance =
-        (plane.dot(planeLoc.toVector()) - plane.dot(origin.toVector())) / plane.dot(direction);
-    return Optional.of(origin.clone().add(direction.multiply(distance)));
-  }
-
   private boolean checkValidMap(@NotNull final ItemStack stack) {
     final ItemMeta meta = stack.getItemMeta();
     if (!(meta instanceof final MapMeta mapMeta)) {
       return false;
     }
     final BrowserConfiguration configuration = this.neon.getConfiguration();
-    final int width = configuration.getBlockWidth();
-    final int height = configuration.getBlockHeight();
+    final ImmutableDimension dimension = configuration.getBlockDimension();
+    final int width = dimension.getWidth();
+    final int height = dimension.getHeight();
     final int max = width * height - 1;
     final int id = mapMeta.getMapId();
     return id <= max;

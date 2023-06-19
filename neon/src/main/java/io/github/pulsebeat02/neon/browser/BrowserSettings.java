@@ -4,8 +4,6 @@ import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.dither.DitherHandler;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import java.util.UUID;
-
-import io.github.pulsebeat02.neon.utils.immutable.ImmutableLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -14,24 +12,21 @@ import org.jetbrains.annotations.NotNull;
 public final class BrowserSettings {
 
   private @NotNull final UUID[] players;
-  private final int blockWidth;
-  private final int blockHeight;
   private @NotNull final String character;
-  private @NotNull final ImmutableDimension dimension;
+  private @NotNull final ImmutableDimension resolution;
+  private @NotNull final ImmutableDimension blockDimension;
   private @NotNull final DitherHandler handler;
   private @NotNull final Location location;
 
   public BrowserSettings(
-      final int blockWidth,
-      final int blockHeight,
-      @NotNull final ImmutableDimension dimension,
+      @NotNull final ImmutableDimension resolution,
+      @NotNull final ImmutableDimension blockDimension,
       @NotNull final String character,
       @NotNull final Location location,
       @NotNull final DitherHandler handler) {
     this.players = this.getAllPlayerUUIDs();
-    this.blockWidth = blockWidth;
-    this.blockHeight = blockHeight;
-    this.dimension = dimension;
+    this.resolution = resolution;
+    this.blockDimension = blockDimension;
     this.character = character;
     this.location = location;
     this.handler = handler;
@@ -39,13 +34,12 @@ public final class BrowserSettings {
 
   public static @NotNull BrowserSettings ofSettings(
       @NotNull final BrowserConfiguration configuration) {
-    final int blockWidth = configuration.getBlockWidth();
-    final int blockHeight = configuration.getBlockHeight();
-    final ImmutableDimension dimension = configuration.getDimension();
+    final ImmutableDimension blockDimension = configuration.getBlockDimension();
+    final ImmutableDimension dimension = configuration.getResolution();
     final DitherHandler handler = configuration.getAlgorithm().getHandler();
     final String character = configuration.getCharacter();
     final Location location = configuration.getLocation();
-    return new BrowserSettings(blockWidth, blockHeight, dimension, character, location, handler);
+    return new BrowserSettings(dimension, blockDimension, character, location, handler);
   }
 
   private @NotNull UUID[] getAllPlayerUUIDs() {
@@ -56,20 +50,12 @@ public final class BrowserSettings {
     return this.players;
   }
 
-  public int getBlockWidth() {
-    return this.blockWidth;
-  }
-
-  public @NotNull ImmutableDimension getDimension() {
-    return this.dimension;
+  public @NotNull ImmutableDimension getResolution() {
+    return this.resolution;
   }
 
   public @NotNull DitherHandler getHandler() {
     return this.handler;
-  }
-
-  public int getBlockHeight() {
-    return this.blockHeight;
   }
 
   public @NotNull String getCharacter() {
@@ -78,5 +64,9 @@ public final class BrowserSettings {
 
   public @NotNull Location getLocation() {
     return this.location;
+  }
+
+  public @NotNull ImmutableDimension getBlockDimension() {
+    return this.blockDimension;
   }
 }

@@ -3,6 +3,7 @@ package io.github.pulsebeat02.neon.command.browser;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.command.BaseCommand;
+import io.github.pulsebeat02.neon.command.browser.configure.BrowserConfigureCommand;
 import io.github.pulsebeat02.neon.locale.LocaleParent;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
@@ -20,10 +21,7 @@ public final class BrowserCommand extends BaseCommand {
         this.literal(this.getName())
             .requires(super::testPermission)
             .then(new BrowserLoadCommand(neon).getNode())
-            .then(new BrowserDitherCommand(neon).getNode())
-            .then(new BrowserResolutionCommand(neon).getNode())
-            .then(new BrowserBlockCommand(neon).getNode())
-            .then(new BrowserHomeUrlCommand(neon).getNode())
+            .then(new BrowserConfigureCommand(neon).getNode())
             .build();
   }
 
@@ -33,14 +31,10 @@ public final class BrowserCommand extends BaseCommand {
         Map.of(
             "/browser load",
             "Starts the browser",
-            "/browser algorithm [algorithm]",
-            "Sets the dithering algorithm",
-            "/browser resolution [resolution]",
-            "Sets the resolution of the screen",
-            "/browser block-dimension [dimension]",
-            "Sets the block dimension of itemframes of the screen",
-            "/browser homepage-url [url]",
-            "Sets the homepage url of the browser"));
+            "/browser configure map [width:height] [blockWidth:blockHeight] [algorithm]",
+            "Configures a browser using map callbacks",
+            "/browser configure entity [width:height] [display type] [character]",
+            "Configures a browser using entity callbacks"));
   }
 
   @Override

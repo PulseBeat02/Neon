@@ -1,9 +1,9 @@
 package io.github.pulsebeat02.neon.config;
 
-import com.google.common.primitives.Ints;
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 import io.github.pulsebeat02.neon.Neon;
+import io.github.pulsebeat02.neon.command.browser.configure.EntitySelection;
 import io.github.pulsebeat02.neon.dither.Algorithm;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import io.github.pulsebeat02.neon.utils.immutable.ImmutableLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -35,23 +33,21 @@ public final class BrowserConfiguration {
   }
 
   private @NotNull final Path configurationPath;
-  private @NotNull String homePageUrl;
   private @NotNull Algorithm algorithm;
-  private @NotNull ImmutableDimension dimension;
+  private @NotNull ImmutableDimension resolution;
+  private @NotNull ImmutableDimension blockDimension;
   private @NotNull String character;
   private @NotNull Location location;
-  private int blockWidth;
-  private int blockHeight;
+  private @NotNull EntitySelection selection;
 
   public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
     this.configurationPath = neon.getDataFolder().toPath().resolve("neon.toml");
     this.checkFile();
-    this.homePageUrl = "https://www.google.com";
     this.algorithm = Algorithm.FILTER_LITE;
-    this.dimension = new ImmutableDimension(640, 640);
-    this.blockWidth = 5;
+    this.resolution = new ImmutableDimension(640, 640);
+    this.blockDimension = new ImmutableDimension(5, 5);
     this.character = "█";
-    this.location = this.createLocation();
+    this.selection = EntitySelection.HOLOGRAM;
     this.readFile();
     this.savePeriodically();
   }
@@ -89,13 +85,11 @@ public final class BrowserConfiguration {
 
     final NeonTable configTable = new NeonTable();
     final Map<String, Object> table = configTable.neon;
-    table.put("homepage_url", this.homePageUrl);
     table.put("algorithm", this.algorithm.name());
-    table.put("dimension", this.createDimension(this.dimension));
-    table.put("block_width", this.blockWidth);
-    table.put("block_height", this.blockHeight);
+    table.put("resolution", this.createDimension(this.resolution));
+    table.put("block_dimension", this.createDimension(this.blockDimension));
     table.put("character", this.character);
-    table.put("location", this.createLocation(this.location));
+    table.put("selection", this.selection.name());
 
     final File file = this.configurationPath.toFile();
     final TomlWriter writer = TomlProvider.getTomlWriter();
@@ -109,41 +103,28 @@ public final class BrowserConfiguration {
     return List.of(width, height);
   }
 
-  private @NotNull @Unmodifiable List<String> createLocation(@NotNull final Location location) {
-    final String name = location.getWorld().getName();
-    final double x = location.getX();
-    final double y = location.getY();
-    final double z = location.getZ();
-    return List.of(name, String.valueOf(x), String.valueOf(y), String.valueOf(z));
-  }
-
   private void readFile() {
     final File file = this.configurationPath.toFile();
     final Toml toml = TomlProvider.getToml().read(file);
-    this.homePageUrl = toml.getString("neon.homepage_url");
     this.algorithm = this.parseAlgorithm(toml);
-    this.dimension = this.parseDimension(toml);
-    this.blockWidth = toml.getLong("neon.block_width").intValue();
-    this.blockHeight = toml.getLong("neon.block_height").intValue();
+    this.resolution = this.parseDimension(toml, "neon.resolution");
+    this.blockDimension = this.parseDimension(toml, "neon.block_dimension");
     this.character = toml.getString("neon.character");
-    this.location = this.parseLocation(toml);
+    this.selection = this.parseEntitySelection(toml);
   }
 
-  private @NotNull Location parseLocation(@NotNull final Toml toml) {
-    final List<String> list = toml.getList("neon.location");
-    final World world = Bukkit.getWorld(list.get(0));
-    final int x = Ints.tryParse(list.get(1));
-    final int y = Ints.tryParse(list.get(2));
-    final int z = Ints.tryParse(list.get(3));
-    return new Location(world, x, y, z);
+  private @NotNull EntitySelection parseEntitySelection(@NotNull final Toml toml) {
+    return EntitySelection.ofKey(toml.getString("neon.entity_selection"))
+        .orElse(EntitySelection.HOLOGRAM);
   }
 
   private @NotNull Algorithm parseAlgorithm(@NotNull final Toml toml) {
     return Algorithm.ofKey(toml.getString("neon.algorithm")).orElse(Algorithm.FILTER_LITE);
   }
 
-  private @NotNull ImmutableDimension parseDimension(@NotNull final Toml toml) {
-    final List<Long> list = toml.getList("neon.dimension");
+  private @NotNull ImmutableDimension parseDimension(
+      @NotNull final Toml toml, @NotNull final String key) {
+    final List<Long> list = toml.getList(key);
     final int width = list.get(0).intValue();
     final int height = list.get(1).intValue();
     return new ImmutableDimension(width, height);
@@ -169,10 +150,6 @@ public final class BrowserConfiguration {
     }
   }
 
-  public @NotNull String getHomePageUrl() {
-    return this.homePageUrl;
-  }
-
   public @NotNull Path getConfigurationPath() {
     return this.configurationPath;
   }
@@ -181,43 +158,47 @@ public final class BrowserConfiguration {
     return this.algorithm;
   }
 
-  public @NotNull ImmutableDimension getDimension() {
-    return this.dimension;
-  }
-
-  public int getBlockWidth() {
-    return this.blockWidth;
-  }
-
-  public void setHomePageUrl(@NotNull final String homePageUrl) {
-    this.homePageUrl = homePageUrl;
-  }
-
   public void setAlgorithm(@NotNull final Algorithm algorithm) {
     this.algorithm = algorithm;
   }
 
-  public void setDimension(@NotNull final ImmutableDimension dimension) {
-    this.dimension = dimension;
+  public @NotNull ImmutableDimension getResolution() {
+    return this.resolution;
   }
 
-  public void setBlockWidth(final int blockWidth) {
-    this.blockWidth = blockWidth;
+  public void setResolution(@NotNull final ImmutableDimension resolution) {
+    this.resolution = resolution;
   }
 
-  public int getBlockHeight() {
-    return this.blockHeight;
+  public @NotNull ImmutableDimension getBlockDimension() {
+    return this.blockDimension;
   }
 
-  public void setBlockHeight(final int blockHeight) {
-    this.blockHeight = blockHeight;
+  public void setBlockDimension(@NotNull final ImmutableDimension blockDimension) {
+    this.blockDimension = blockDimension;
   }
 
   public @NotNull String getCharacter() {
     return this.character;
   }
 
+  public void setCharacter(@NotNull final String character) {
+    this.character = character;
+  }
+
+  public @NotNull EntitySelection getSelection() {
+    return this.selection;
+  }
+
+  public void setEntitySelection(@NotNull final EntitySelection selection) {
+    this.selection = selection;
+  }
+
   public @NotNull Location getLocation() {
     return this.location;
+  }
+
+  public void setLocation(@NotNull final Location location) {
+    this.location = location;
   }
 }

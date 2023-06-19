@@ -62,15 +62,15 @@ public enum Algorithm {
     this.handler = handler;
   }
 
-  public @NotNull DitherHandler getHandler() {
-    return this.handler;
-  }
-
   private static @NotNull BayerDither ordered(final int[] @NotNull [] matrix, final int max) {
     return new BayerDither(new OrderedPixelMapper(matrix, max, 0.005f));
   }
 
   public static @NotNull Optional<Algorithm> ofKey(@NotNull final String key) {
     return Optional.ofNullable(KEY_LOOKUP.get(key));
+  }
+
+  public @NotNull DitherHandler getHandler() {
+    return this.handler;
   }
 }

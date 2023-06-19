@@ -5,7 +5,6 @@ import io.github.pulsebeat02.neon.utils.DitherUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class FloydSteinbergDither implements DitherHandler {

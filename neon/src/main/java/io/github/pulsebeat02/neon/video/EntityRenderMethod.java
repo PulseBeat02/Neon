@@ -17,7 +17,6 @@ public abstract class EntityRenderMethod<T extends Entity> extends RenderAdapter
   private @NotNull final String character;
   private final int width;
   private final int height;
-
   private @NotNull final Location location;
   private @NotNull Entity[] entities;
 
@@ -26,7 +25,7 @@ public abstract class EntityRenderMethod<T extends Entity> extends RenderAdapter
     this.sender = neon.getPacketSender();
     this.character = settings.getCharacter();
     this.location = settings.getLocation();
-    final ImmutableDimension dimension = settings.getDimension();
+    final ImmutableDimension dimension = settings.getResolution();
     this.width = dimension.getWidth();
     this.height = dimension.getHeight();
   }

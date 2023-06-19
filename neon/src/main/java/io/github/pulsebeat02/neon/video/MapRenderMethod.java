@@ -18,15 +18,19 @@ public final class MapRenderMethod extends RenderAdapter {
   public MapRenderMethod(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     super(neon);
     this.sender = neon.getPacketSender();
-    this.blockWidth = settings.getBlockWidth();
-    this.blockHeight = settings.getBlockHeight();
-    final ImmutableDimension dimension = settings.getDimension();
+
+    final ImmutableDimension blockDimension = settings.getBlockDimension();
+    this.blockWidth = blockDimension.getWidth();
+    this.blockHeight = blockDimension.getHeight();
+
+    final ImmutableDimension dimension = settings.getResolution();
     this.width = dimension.getWidth();
     this.height = dimension.getHeight();
   }
 
   @Override
   public void render(@NotNull final ByteBuf buf) {
-    this.sender.displayMaps(null, buf, 0, this.blockWidth, this.blockHeight, this.width, this.height);
+    this.sender.displayMaps(
+        null, buf, 0, this.blockWidth, this.blockHeight, this.width, this.height);
   }
 }

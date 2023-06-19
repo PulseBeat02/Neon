@@ -10,7 +10,7 @@ public final class Xoroshiro128PlusRandom extends Random {
   private static final float FLOAT_UNIT = 0x1.0p-24f;
 
   @Serial private static final long serialVersionUID = -7653551394619089245L;
-
+  private static final AtomicLong UNIQUE = new AtomicLong(8682522807148012L);
   private long s0, s1;
 
   public Xoroshiro128PlusRandom() {
@@ -26,8 +26,6 @@ public final class Xoroshiro128PlusRandom extends Random {
       this.s1 = MurmurHash3.hash(this.s0);
     }
   }
-
-  private static final AtomicLong UNIQUE = new AtomicLong(8682522807148012L);
 
   private static long createSeed() {
     for (; ; ) {

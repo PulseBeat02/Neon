@@ -52,17 +52,19 @@ public interface LocaleParent {
     return argument -> format(info0(key, List.of(text(createFinalText(argument, function), AQUA))));
   }
 
-  static @NotNull <T, U> BiComponent<Sender, T, U> info(
+  static @NotNull <T, U, V> TriComponent<Sender, T, U, V> info(
       @NotNull final String key,
       @Nullable final Function<T, String> function1,
-      @Nullable final Function<U, String> function2) {
-    return (argument1, argument2) ->
+      @Nullable final Function<U, String> function2,
+      @Nullable final Function<V, String> function3) {
+    return (argument1, argument2, argument3) ->
         format(
             info0(
                 key,
                 List.of(
                     text(createFinalText(argument1, function1), AQUA),
-                    text(createFinalText(argument2, function2), AQUA))));
+                    text(createFinalText(argument2, function2), AQUA),
+                    text(createFinalText(argument3, function3), AQUA))));
   }
 
   static @NotNull Component info0(
