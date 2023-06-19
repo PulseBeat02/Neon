@@ -12,15 +12,17 @@ public final class BrowserSettings {
 
   private @NotNull final UUID[] players;
   private final int blockWidth;
+  private final int blockHeight;
   private @NotNull final ImmutableDimension dimension;
   private @NotNull final DitherHandler handler;
 
   public BrowserSettings(
-      final int blockWidth,
+      final int blockWidth, final int blockHeight,
       @NotNull final ImmutableDimension dimension,
       @NotNull final DitherHandler handler) {
     this.players = this.getAllPlayerUUIDs();
     this.blockWidth = blockWidth;
+    this.blockHeight = blockHeight;
     this.dimension = dimension;
     this.handler = handler;
   }
@@ -28,9 +30,10 @@ public final class BrowserSettings {
   public static @NotNull BrowserSettings ofSettings(
       @NotNull final BrowserConfiguration configuration) {
     final int blockWidth = configuration.getBlockWidth();
+    final int blockHeight = configuration.getBlockHeight();
     final ImmutableDimension dimension = configuration.getDimension();
     final DitherHandler handler = configuration.getAlgorithm().getHandler();
-    return new BrowserSettings(blockWidth, dimension, handler);
+    return new BrowserSettings(blockWidth, blockHeight, dimension, handler);
   }
 
   private @NotNull UUID[] getAllPlayerUUIDs() {
@@ -51,5 +54,9 @@ public final class BrowserSettings {
 
   public @NotNull DitherHandler getHandler() {
     return this.handler;
+  }
+
+  public int getBlockHeight() {
+    return this.blockHeight;
   }
 }

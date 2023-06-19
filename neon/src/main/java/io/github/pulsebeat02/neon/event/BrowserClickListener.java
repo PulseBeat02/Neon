@@ -1,13 +1,10 @@
 package io.github.pulsebeat02.neon.event;
 
 import io.github.pulsebeat02.neon.Neon;
-import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -18,11 +15,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.jetbrains.annotations.NotNull;
 
-public final class BrowserClickEvent implements Listener {
+public final class BrowserClickListener implements Listener {
 
   private final Neon neon;
 
-  public BrowserClickEvent(@NotNull final Neon neon) {
+  public BrowserClickListener(@NotNull final Neon neon) {
     this.neon = neon;
   }
 

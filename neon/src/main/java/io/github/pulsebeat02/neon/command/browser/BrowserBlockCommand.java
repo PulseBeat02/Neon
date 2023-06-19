@@ -1,8 +1,8 @@
 package io.github.pulsebeat02.neon.command.browser;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static io.github.pulsebeat02.neon.command.ArgumentUtils.checkDimensionBoundaries;
 import static io.github.pulsebeat02.neon.command.Permission.has;
-import static io.github.pulsebeat02.neon.command.browser.BrowserResolutionCommand.checkDimensionBoundaries;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;

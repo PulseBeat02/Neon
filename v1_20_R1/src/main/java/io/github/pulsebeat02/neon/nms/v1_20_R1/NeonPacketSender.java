@@ -234,7 +234,6 @@ public final class NeonPacketSender implements PacketSender {
       pipeline.remove(this.handlerName);
     }
   }
-
   private void removeConnection(final Player player) {
     this.connections.remove(player.getUniqueId());
   }

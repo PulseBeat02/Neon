@@ -9,7 +9,6 @@ import io.netty.buffer.ByteBuf;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.nio.ByteBuffer;
-import java.util.UUID;
 import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefScreenInfo;
@@ -48,10 +47,10 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
       final int width,
       final int height) {
     final DitherHandler handler = this.settings.getHandler();
-    final UUID[] viewers = this.settings.getPlayers();
     final int blockWidth = this.settings.getBlockWidth();
+    final int blockHeight = this.settings.getBlockHeight();
     final ByteBuf buf = handler.dither(buffer, blockWidth);
-    this.sender.displayMaps(viewers, buf, 0, width, height, blockWidth);
+    this.sender.displayMaps(null, buf, 0, blockWidth, blockHeight, width, height);
   }
 
   @Override
