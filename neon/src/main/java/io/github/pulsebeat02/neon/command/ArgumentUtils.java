@@ -1,5 +1,6 @@
 package io.github.pulsebeat02.neon.command;
 
+import com.google.common.primitives.Ints;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.locale.Locale;
 import java.util.Optional;
@@ -67,5 +68,25 @@ public final class ArgumentUtils {
       return true;
     }
     return false;
+  }
+
+  public static @NotNull Optional<int[]> checkDimensionBoundaries(
+      @NotNull final Audience sender, @NotNull final String str) {
+    final String[] dims = str.split(":");
+    if (dims.length != 2) {
+      sender.sendMessage(Locale.INVALID_RESOLUTION.build());
+      return Optional.empty();
+    }
+    final Optional<Integer> width = parseInt(dims[0]);
+    final Optional<Integer> height = parseInt(dims[1]);
+    if (width.isPresent() && height.isPresent()) {
+      return Optional.of(new int[] {width.get(), height.get()});
+    }
+    sender.sendMessage(Locale.INVALID_RESOLUTION.build());
+    return Optional.empty();
+  }
+
+  public static @NotNull Optional<Integer> parseInt(@NotNull final String num) {
+    return Optional.ofNullable(Ints.tryParse(num));
   }
 }

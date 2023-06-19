@@ -42,7 +42,7 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   }
 
   private @NotNull final Neon neon;
-  private @NotNull final CefRenderHandler renderer;
+  private CefRenderHandler renderer;
 
   public MinecraftBrowser(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     super(CEF_CLIENT, neon.getConfiguration().getHomePageUrl(), null, null, null);
@@ -82,12 +82,16 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
     return builder.build();
   }
 
-  private void setupBrowser(@NotNull final BrowserSettings settings) {
+  @Override
+  public void close(final boolean force) {
+    super.close(force);
+    this.renderer = null;
+  }
 
+  private void setupBrowser(@NotNull final BrowserSettings settings) {
     final ImmutableDimension dimension = settings.getDimension();
     final int width = dimension.getWidth();
     final int height = dimension.getHeight();
-
     this.setFocus(true);
     this.wasResized(width, height);
   }
@@ -160,8 +164,13 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   }
 
   @Override
-  public void onPaint(final CefBrowser browser, final boolean popup, final Rectangle[] dirtyRects, final ByteBuffer buffer,
-      final int width, final int height) {
+  public void onPaint(
+      final CefBrowser browser,
+      final boolean popup,
+      final Rectangle[] dirtyRects,
+      final ByteBuffer buffer,
+      final int width,
+      final int height) {
     this.renderer.onPaint(browser, popup, dirtyRects, buffer, width, height);
   }
 
@@ -171,7 +180,12 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   }
 
   @Override
-  public boolean startDragging(final CefBrowser browser, final CefDragData dragData, final int mask, final int x, final int y) {
+  public boolean startDragging(
+      final CefBrowser browser,
+      final CefDragData dragData,
+      final int mask,
+      final int x,
+      final int y) {
     return this.renderer.startDragging(browser, dragData, mask, x, y);
   }
 

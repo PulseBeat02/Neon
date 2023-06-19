@@ -120,7 +120,7 @@ public final class BrowserConfiguration {
 
   private void createFolders() throws IOException {
     final Path parent = this.configurationPath.getParent();
-    if (Files.notExists(parent) || !Files.isDirectory(parent)) {
+    if (Files.notExists(parent)) {
       Files.createDirectories(parent);
     }
   }

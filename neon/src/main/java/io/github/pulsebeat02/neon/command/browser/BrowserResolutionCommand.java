@@ -1,9 +1,9 @@
 package io.github.pulsebeat02.neon.command.browser;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static io.github.pulsebeat02.neon.command.ArgumentUtils.checkDimensionBoundaries;
 import static io.github.pulsebeat02.neon.command.Permission.has;
 
-import com.google.common.primitives.Ints;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -79,22 +79,6 @@ public final class BrowserResolutionCommand implements CommandSegment.Literal<Co
     this.setDimensions(width, height);
     audience.sendMessage(Locale.SET_RESOLUTION.build(width, height));
     return SINGLE_SUCCESS;
-  }
-
-  public static @NotNull Optional<int[]> checkDimensionBoundaries(
-      @NotNull final Audience sender, @NotNull final String str) {
-    final String[] dims = str.split(":");
-    final Optional<Integer> width = parseInt(dims[0]);
-    final Optional<Integer> height = parseInt(dims[1]);
-    if (width.isPresent() && height.isPresent()) {
-      return Optional.of(new int[] {width.get(), height.get()});
-    }
-    sender.sendMessage(Locale.INVALID_RESOLUTION.build());
-    return Optional.empty();
-  }
-
-  public static @NotNull Optional<Integer> parseInt(@NotNull final String num) {
-    return Optional.ofNullable(Ints.tryParse(num));
   }
 
   private void setDimensions(final int width, final int height) {
