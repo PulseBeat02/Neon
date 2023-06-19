@@ -105,7 +105,7 @@ public final class Neon extends JavaPlugin {
     return this.sender;
   }
 
-  private void shutdownBrowser() {
+  public void shutdownBrowser() {
     if (this.browser != null) {
       this.browser.close(true);
       this.browser = null;

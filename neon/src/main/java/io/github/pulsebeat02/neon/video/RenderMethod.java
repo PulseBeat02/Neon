@@ -8,4 +8,6 @@ public interface RenderMethod {
   void setup();
 
   void render(@NotNull final ByteBuf buf);
+
+  void destroy();
 }

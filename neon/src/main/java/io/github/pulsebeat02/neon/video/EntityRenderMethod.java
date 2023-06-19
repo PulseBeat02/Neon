@@ -45,6 +45,14 @@ public abstract class EntityRenderMethod<T extends Entity> extends RenderAdapter
     }
   }
 
+  @Override
+  public void destroy() {
+    super.destroy();
+    for (final Entity entity : this.entities) {
+      entity.remove();
+    }
+  }
+
   public abstract @NotNull Class<T> getEntityClass();
 
   public abstract @NotNull Consumer<T> handleEntity();

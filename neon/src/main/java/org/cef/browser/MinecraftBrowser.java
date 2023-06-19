@@ -6,6 +6,7 @@ import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.browser.CefProgressHandler;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -13,8 +14,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-
-import io.github.pulsebeat02.neon.video.RenderMethod;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -45,6 +44,8 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
 
   private @NotNull final Neon neon;
   private @NotNull final BrowserSettings settings;
+
+  private @NotNull final RenderMethod method;
   private CefRenderHandler renderer;
 
   public MinecraftBrowser(
@@ -55,6 +56,7 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
     super(CEF_CLIENT, url, null, null, null);
     this.neon = neon;
     this.settings = settings;
+    this.method = method;
     this.renderer = new MinecraftBrowserRenderer(settings, method);
     this.setupBrowser(settings);
   }
@@ -62,6 +64,7 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   private MinecraftBrowser(
       @NotNull final Neon neon,
       @NotNull final BrowserSettings settings,
+      @NotNull final RenderMethod method,
       @NotNull final CefClient client,
       @NotNull final String url,
       @NotNull final CefRequestContext context,
@@ -71,6 +74,7 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
     super(client, url, context, parent, inspectAt);
     this.neon = neon;
     this.settings = settings;
+    this.method = method;
     this.renderer = renderer;
   }
 
@@ -126,7 +130,15 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
       final CefBrowser_N parent,
       final Point inspectAt) {
     return new MinecraftBrowser(
-        this.neon, this.settings, client, url, context, this.renderer, parent, inspectAt);
+        this.neon,
+        this.settings,
+        this.method,
+        client,
+        url,
+        context,
+        this.renderer,
+        parent,
+        inspectAt);
   }
 
   private void createBrowser() {
@@ -213,5 +225,9 @@ public class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
 
   public @NotNull BrowserSettings getSettings() {
     return this.settings;
+  }
+
+  public @NotNull RenderMethod getRenderMethod() {
+    return this.method;
   }
 }

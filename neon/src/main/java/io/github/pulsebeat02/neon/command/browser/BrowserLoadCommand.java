@@ -76,6 +76,8 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
 
     this.neon.setBrowser(browser);
 
+    audience.sendMessage(Locale.LOAD_BROWSER.build(url));
+
     return SINGLE_SUCCESS;
   }
 

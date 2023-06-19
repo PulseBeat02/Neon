@@ -14,6 +14,9 @@ public abstract class RenderAdapter implements RenderMethod {
   @Override
   public void setup() {}
 
+  @Override
+  public void destroy() {}
+
   public @NotNull Neon getNeon() {
     return this.neon;
   }
