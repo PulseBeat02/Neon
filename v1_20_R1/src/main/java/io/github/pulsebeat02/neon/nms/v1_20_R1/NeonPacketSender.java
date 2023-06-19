@@ -7,8 +7,6 @@ import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,8 +54,8 @@ public final class NeonPacketSender implements PacketSender {
 
   @Override
   public void displayMaps(
-      final UUID[] viewers,
-      final @NotNull ByteBuf rgb,
+      @NotNull final UUID[] viewers,
+      @NotNull final ByteBuf rgb,
       final int map,
       final int width,
       final int height,
@@ -202,13 +200,13 @@ public final class NeonPacketSender implements PacketSender {
     this.addConnection(bukkitPlayer, conn);
   }
 
-  private void addChannelPipeline(final Channel channel) {
+  private void addChannelPipeline(@NotNull final Channel channel) {
     if (channel != null) {
       this.removeChannelPipelineHandler(channel);
     }
   }
 
-  private void addConnection(final Player player, final PlayerConnection conn) {
+  private void addConnection(@NotNull final Player player, @NotNull final PlayerConnection conn) {
     this.connections.put(player.getUniqueId(), conn);
   }
 
@@ -222,19 +220,20 @@ public final class NeonPacketSender implements PacketSender {
     this.removeConnection(bukkitPlayer);
   }
 
-  private void removeChannelPipeline(final Channel channel) {
+  private void removeChannelPipeline(@NotNull final Channel channel) {
     if (channel != null) {
       this.removeChannelPipelineHandler(channel);
     }
   }
 
-  private void removeChannelPipelineHandler(final Channel channel) {
+  private void removeChannelPipelineHandler(@NotNull final Channel channel) {
     final ChannelPipeline pipeline = channel.pipeline();
     if (pipeline.get(this.handlerName) != null) {
       pipeline.remove(this.handlerName);
     }
   }
-  private void removeConnection(final Player player) {
+
+  private void removeConnection(@NotNull final Player player) {
     this.connections.remove(player.getUniqueId());
   }
 }

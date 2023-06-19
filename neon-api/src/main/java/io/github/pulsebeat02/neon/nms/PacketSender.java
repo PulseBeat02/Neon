@@ -1,5 +1,6 @@
 package io.github.pulsebeat02.neon.nms;
 
+import io.github.pulsebeat02.neon.utils.immutable.ImmutableLocation;
 import io.netty.buffer.ByteBuf;
 import java.util.UUID;
 
@@ -10,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 public interface PacketSender {
 
   void displayMaps(
-      final UUID[] viewers,
-      final @NotNull ByteBuf rgb,
+      @NotNull final UUID[] viewers,
+      @NotNull final ByteBuf rgb,
       final int map,
       final int mapWidth,
       final int mapHeight,

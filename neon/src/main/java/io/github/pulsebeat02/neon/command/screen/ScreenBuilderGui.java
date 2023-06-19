@@ -48,8 +48,8 @@ public final class ScreenBuilderGui {
     this.pane = new StaticPane(9, 5);
     this.material = Material.OAK_PLANKS;
     this.viewer = player;
-    this.width = MutableInt.ofInteger(5);
-    this.height = MutableInt.ofInteger(5);
+    this.width = new MutableInt(5);
+    this.height = new MutableInt(5);
     this.initialize();
     this.gui.show(player);
   }

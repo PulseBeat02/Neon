@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class BrowserClickListener implements Listener {
 
-  private final Neon neon;
+  private @NotNull final Neon neon;
 
   public BrowserClickListener(@NotNull final Neon neon) {
     this.neon = neon;

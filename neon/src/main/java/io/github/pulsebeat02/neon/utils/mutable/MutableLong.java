@@ -6,20 +6,8 @@ public final class MutableLong {
 
   private long number;
 
-  MutableLong(final long number) {
+  public MutableLong(final long number) {
     this.number = number;
-  }
-
-  public static @NotNull MutableLong ofNumber(@NotNull final Number number) {
-    return ofLong(number.longValue());
-  }
-
-  public static @NotNull MutableLong ofLong(final long number) {
-    return new MutableLong(number);
-  }
-
-  public static @NotNull MutableLong ofString(@NotNull final String string) {
-    return ofLong(Long.parseLong(string));
   }
 
   public void increment() {

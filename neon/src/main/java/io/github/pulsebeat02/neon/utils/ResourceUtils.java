@@ -19,8 +19,6 @@ public final class ResourceUtils {
   }
 
   public static @NotNull Reader getResourceAsReader(@NotNull final String name) {
-    return new BufferedReader(
-        new InputStreamReader(
-            requireNonNull(ResourceUtils.class.getClassLoader().getResourceAsStream(name))));
+    return new BufferedReader(new InputStreamReader(getResourceAsStream(name)));
   }
 }

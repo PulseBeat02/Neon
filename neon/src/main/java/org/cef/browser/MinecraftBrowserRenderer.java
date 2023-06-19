@@ -31,9 +31,9 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
   public MinecraftBrowserRenderer(
       @NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     final ImmutableDimension dimension = settings.getDimension();
-    final int x = dimension.getWidth();
-    final int y = dimension.getHeight();
-    this.viewArea = new Rectangle(0, 0, x, y);
+    final int width = dimension.getWidth();
+    final int height = dimension.getHeight();
+    this.viewArea = new Rectangle(0, 0, width, height);
     this.settings = settings;
     this.sender = neon.getPacketSender();
   }

@@ -15,11 +15,11 @@ public enum Widget {
 
   private @NotNull final BrowserWidget widget;
 
-  Widget(final BrowserWidget widget) {
+  Widget(@NotNull final BrowserWidget widget) {
     this.widget = widget;
   }
 
-  public BrowserWidget getWidget() {
+  public @NotNull BrowserWidget getWidget() {
     return this.widget;
   }
 

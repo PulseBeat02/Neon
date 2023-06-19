@@ -1,20 +1,22 @@
 package io.github.pulsebeat02.neon.browser.widgets;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.IntBuffer;
 
 public final class BrowserWidget {
 
-  private final IntBuffer buffer;
+  private @NotNull final IntBuffer buffer;
   private final int x;
   private final int y;
 
-  public BrowserWidget(final IntBuffer buffer, final int x, final int y) {
+  public BrowserWidget(@NotNull final IntBuffer buffer, final int x, final int y) {
     this.buffer = buffer;
     this.x = x;
     this.y = y;
   }
 
-  public IntBuffer getBuffer() {
+  public @NotNull IntBuffer getBuffer() {
     return this.buffer;
   }
 

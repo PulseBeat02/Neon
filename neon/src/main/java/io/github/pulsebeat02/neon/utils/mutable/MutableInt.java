@@ -6,20 +6,8 @@ public final class MutableInt {
 
   private int number;
 
-  MutableInt(final int number) {
+  public MutableInt(final int number) {
     this.number = number;
-  }
-
-  public static @NotNull MutableInt ofNumber(@NotNull final Number number) {
-    return ofInteger(number.intValue());
-  }
-
-  public static @NotNull MutableInt ofInteger(final int number) {
-    return new MutableInt(number);
-  }
-
-  public static @NotNull MutableInt ofString(@NotNull final String string) {
-    return ofInteger(Integer.parseInt(string));
   }
 
   public void increment() {

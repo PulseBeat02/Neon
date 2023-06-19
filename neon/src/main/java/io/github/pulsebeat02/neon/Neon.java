@@ -32,13 +32,21 @@ public final class Neon extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    this.audience = BukkitAudiences.create(this);
-    this.console = this.audience.console();
-    this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
+    this.registerAdventure();
+    this.registerServerImplementation();
     this.readConfigurationFile();
     this.registerCommands();
     this.registerStats();
     this.registerEvents();
+  }
+
+  private void registerAdventure() {
+    this.audience = BukkitAudiences.create(this);
+    this.console = this.audience.console();
+  }
+
+  private void registerServerImplementation() {
+    this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
   }
 
   @Override

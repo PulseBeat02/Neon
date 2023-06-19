@@ -1,5 +1,6 @@
 package io.github.pulsebeat02.neon.config;
 
+import com.google.common.primitives.Ints;
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 import io.github.pulsebeat02.neon.Neon;
@@ -17,7 +18,13 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import io.github.pulsebeat02.neon.utils.immutable.ImmutableLocation;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 public final class BrowserConfiguration {
 
@@ -31,8 +38,9 @@ public final class BrowserConfiguration {
   private @NotNull String homePageUrl;
   private @NotNull Algorithm algorithm;
   private @NotNull ImmutableDimension dimension;
+  private @NotNull String character;
+  private @NotNull Location location;
   private int blockWidth;
-
   private int blockHeight;
 
   public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
@@ -42,8 +50,15 @@ public final class BrowserConfiguration {
     this.algorithm = Algorithm.FILTER_LITE;
     this.dimension = new ImmutableDimension(640, 640);
     this.blockWidth = 5;
+    this.character = "█";
+    this.location = this.createLocation();
     this.readFile();
     this.savePeriodically();
+  }
+
+  private @NotNull Location createLocation() {
+    final World world = Bukkit.getWorld("world");
+    return new Location(world, 0, 0, 0);
   }
 
   public void shutdownConfiguration() {
@@ -52,7 +67,8 @@ public final class BrowserConfiguration {
   }
 
   private void savePeriodically() {
-    SCHEDULER_EXECUTOR.scheduleAtFixedRate(this::saveFile, 10, 10, TimeUnit.MINUTES);
+    final Runnable task = this::saveFile;
+    SCHEDULER_EXECUTOR.scheduleAtFixedRate(task, 10, 10, TimeUnit.MINUTES);
   }
 
   private void saveFile() {
@@ -75,13 +91,30 @@ public final class BrowserConfiguration {
     final Map<String, Object> table = configTable.neon;
     table.put("homepage_url", this.homePageUrl);
     table.put("algorithm", this.algorithm.name());
-    table.put("dimension", List.of(this.dimension.getWidth(), this.dimension.getHeight()));
+    table.put("dimension", this.createDimension(this.dimension));
     table.put("block_width", this.blockWidth);
     table.put("block_height", this.blockHeight);
+    table.put("character", this.character);
+    table.put("location", this.createLocation(this.location));
 
     final File file = this.configurationPath.toFile();
     final TomlWriter writer = TomlProvider.getTomlWriter();
     writer.write(configTable, file);
+  }
+
+  private @NotNull @Unmodifiable List<Integer> createDimension(
+      @NotNull final ImmutableDimension dimension) {
+    final int width = dimension.getWidth();
+    final int height = dimension.getHeight();
+    return List.of(width, height);
+  }
+
+  private @NotNull @Unmodifiable List<String> createLocation(@NotNull final Location location) {
+    final String name = location.getWorld().getName();
+    final double x = location.getX();
+    final double y = location.getY();
+    final double z = location.getZ();
+    return List.of(name, String.valueOf(x), String.valueOf(y), String.valueOf(z));
   }
 
   private void readFile() {
@@ -92,6 +125,17 @@ public final class BrowserConfiguration {
     this.dimension = this.parseDimension(toml);
     this.blockWidth = toml.getLong("neon.block_width").intValue();
     this.blockHeight = toml.getLong("neon.block_height").intValue();
+    this.character = toml.getString("neon.character");
+    this.location = this.parseLocation(toml);
+  }
+
+  private @NotNull Location parseLocation(@NotNull final Toml toml) {
+    final List<String> list = toml.getList("neon.location");
+    final World world = Bukkit.getWorld(list.get(0));
+    final int x = Ints.tryParse(list.get(1));
+    final int y = Ints.tryParse(list.get(2));
+    final int z = Ints.tryParse(list.get(3));
+    return new Location(world, x, y, z);
   }
 
   private @NotNull Algorithm parseAlgorithm(@NotNull final Toml toml) {
@@ -167,5 +211,13 @@ public final class BrowserConfiguration {
 
   public void setBlockHeight(final int blockHeight) {
     this.blockHeight = blockHeight;
+  }
+
+  public @NotNull String getCharacter() {
+    return this.character;
+  }
+
+  public @NotNull Location getLocation() {
+    return this.location;
   }
 }
