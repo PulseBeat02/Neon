@@ -72,7 +72,7 @@ public final class ArgumentUtils {
 
   public static @NotNull Optional<int[]> checkDimensionBoundaries(
       @NotNull final Audience sender, @NotNull final String str) {
-    final String[] dims = str.split(":");
+    final String[] dims = str.split("x");
     if (dims.length != 2) {
       sender.sendMessage(Locale.INVALID_RESOLUTION.build());
       return Optional.empty();

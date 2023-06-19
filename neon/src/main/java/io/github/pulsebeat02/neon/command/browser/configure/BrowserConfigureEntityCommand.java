@@ -56,7 +56,7 @@ public final class BrowserConfigureEntityCommand implements CommandSegment.Liter
     final Audience audience = this.neon.audience().sender(sender);
     final String resolutionArg = context.getArgument("resolution", String.class);
     final String entityArg = context.getArgument("entity", String.class);
-    final String character = context.getArgument("character", String.class);
+    final String characterArg = context.getArgument("character", String.class);
 
     final Optional<int[]> optionalResolution = checkDimensionBoundaries(audience, resolutionArg);
     if (optionalResolution.isEmpty()) {
@@ -69,6 +69,8 @@ public final class BrowserConfigureEntityCommand implements CommandSegment.Liter
       return SINGLE_SUCCESS;
     }
 
+    final Optional<String> optionalCharacter = BrowserSuggestionUtils.getCharacter(characterArg);
+    final String character = optionalCharacter.orElse(characterArg);
     final int[] resolution = optionalResolution.get();
     final EntitySelection entity = optionalEntity.get();
     this.config.setResolution(new ImmutableDimension(resolution[0], resolution[1]));

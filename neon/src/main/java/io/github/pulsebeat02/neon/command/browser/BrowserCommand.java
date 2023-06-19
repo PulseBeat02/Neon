@@ -29,7 +29,7 @@ public final class BrowserCommand extends BaseCommand {
   public @NotNull Component usage() {
     return LocaleParent.getCommandUsageComponent(
         Map.of(
-            "/browser load",
+            "/browser load [entity|map] [url]",
             "Starts the browser",
             "/browser configure map [width:height] [blockWidth:blockHeight] [algorithm]",
             "Configures a browser using map callbacks",
