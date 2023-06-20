@@ -7,6 +7,7 @@ import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
+import io.github.pulsebeat02.neon.repository.PackageManager;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
 import net.kyori.adventure.audience.Audience;
@@ -35,6 +36,7 @@ public final class Neon extends JavaPlugin {
     this.registerAdventure();
     this.registerServerImplementation();
     this.readConfigurationFile();
+    this.installPackages();
     this.registerCommands();
     this.registerStats();
     this.registerEvents();
@@ -54,6 +56,14 @@ public final class Neon extends JavaPlugin {
     this.shutdownBrowser();
     this.shutdownConfiguration();
     this.shutdownAdventure();
+  }
+
+  private void installPackages() {
+    try {
+      new PackageManager(this);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void shutdownConfiguration() {

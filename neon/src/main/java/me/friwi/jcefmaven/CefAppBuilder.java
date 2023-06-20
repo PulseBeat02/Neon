@@ -67,33 +67,33 @@ public class CefAppBuilder {
      * Constructs a new CefAppBuilder instance.
      */
     public CefAppBuilder() {
-        installDir = DEFAULT_INSTALL_DIR;
-        progressHandler = DEFAULT_PROGRESS_HANDLER;
-        jcefArgs = new LinkedList<>();
-        jcefArgs.addAll(DEFAULT_JCEF_ARGS);
-        cefSettings = DEFAULT_CEF_SETTINGS.clone();
-        mirrors = new HashSet<>();
-        mirrors.add("https://github.com/jcefmaven/jcefmaven/releases/download/{mvn_version}/jcef-natives-{platform}-{tag}.jar");
-        mirrors.add("https://repo.maven.apache.org/maven2/me/friwi/jcef-natives-{platform}/{tag}/jcef-natives-{platform}-{tag}.jar");
+        this.installDir = DEFAULT_INSTALL_DIR;
+        this.progressHandler = DEFAULT_PROGRESS_HANDLER;
+        this.jcefArgs = new LinkedList<>();
+        this.jcefArgs.addAll(DEFAULT_JCEF_ARGS);
+        this.cefSettings = DEFAULT_CEF_SETTINGS.clone();
+        this.mirrors = new HashSet<>();
+        this.mirrors.add("https://github.com/jcefmaven/jcefmaven/releases/download/{mvn_version}/jcef-natives-{platform}-{tag}.jar");
+        this.mirrors.add("https://repo.maven.apache.org/maven2/me/friwi/jcef-natives-{platform}/{tag}/jcef-natives-{platform}-{tag}.jar");
     }
 
     /**
-     * Sets the install directory to use. Defaults to "./jcef-bundle".
+     * Sets the pget directory to use. Defaults to "./jcef-bundle".
      *
-     * @param installDir the directory to install to
+     * @param installDir the directory to pget to
      */
-    public void setInstallDir(File installDir) {
+    public void setInstallDir(final File installDir) {
         Objects.requireNonNull(installDir, "installDir cannot be null");
         this.installDir = installDir;
     }
 
     /**
-     * Specify a progress handler to receive install progress updates.
+     * Specify a progress handler to receive pget progress updates.
      * Defaults to "new ConsoleProgressHandler()".
      *
      * @param progressHandler a progress handler to use
      */
-    public void setProgressHandler(IProgressHandler progressHandler) {
+    public void setProgressHandler(final IProgressHandler progressHandler) {
         Objects.requireNonNull(progressHandler, "progressHandler cannot be null");
         this.progressHandler = progressHandler;
     }
@@ -109,7 +109,7 @@ public class CefAppBuilder {
      * @return A mutable list of arguments to pass to the JCef library
      */
     public List<String> getJcefArgs() {
-        return jcefArgs;
+        return this.jcefArgs;
     }
 
     /**
@@ -122,9 +122,9 @@ public class CefAppBuilder {
      *
      * @param args the arguments to add
      */
-    public void addJcefArgs(String... args) {
+    public void addJcefArgs(final String... args) {
         Objects.requireNonNull(args, "args cannot be null");
-        jcefArgs.addAll(Arrays.asList(args));
+        this.jcefArgs.addAll(Arrays.asList(args));
     }
 
     /**
@@ -137,7 +137,7 @@ public class CefAppBuilder {
      * @return the embedded {@link org.cef.CefSettings} instance
      */
     public CefSettings getCefSettings() {
-        return cefSettings;
+        return this.cefSettings;
     }
 
     /**
@@ -145,7 +145,7 @@ public class CefAppBuilder {
      *
      * @param handlerAdapter the adapter to attach
      */
-    public void setAppHandler(MavenCefAppHandlerAdapter handlerAdapter) {
+    public void setAppHandler(final MavenCefAppHandlerAdapter handlerAdapter) {
         CefApp.addAppHandler(handlerAdapter);
     }
 
@@ -160,7 +160,7 @@ public class CefAppBuilder {
      * @return A copy of all mirrors that are currently in use. First element will be attempted first.
      */
     public Collection<String> getMirrors() {
-        return new HashSet<>(mirrors);
+        return new HashSet<>(this.mirrors);
     }
 
     /**
@@ -171,14 +171,14 @@ public class CefAppBuilder {
      * {platform}: The desired platform for the download (e.g. linux-amd64) <br/>
      * {tag}: The desired version tag for the download (e.g. jcef-08efede+cef-100.0.14+g4e5ba66+chromium-100.0.4896.75)
      */
-    public void setMirrors(Collection<String> mirrors) {
+    public void setMirrors(final Collection<String> mirrors) {
         Objects.requireNonNull(mirrors, "mirrors can not be null");
         this.mirrors.clear();
         this.mirrors.addAll(mirrors);
     }
 
     /**
-     * Helper method to install the native libraries/resources. Useful for triggering an install ahead of actually
+     * Helper method to pget the native libraries/resources. Useful for triggering an pget ahead of actually
      * needing to create a CEF app instance.  This method is NOT thread safe and the caller must ensure only one thread
      * will call this method at a time.
      *
@@ -192,12 +192,14 @@ public class CefAppBuilder {
             return this;
         }
         this.progressHandler.handleProgress(EnumProgress.LOCATING, EnumProgress.NO_ESTIMATION);
-        boolean installOk = CefInstallationChecker.checkInstallation(this.installDir);
+        final boolean installOk = CefInstallationChecker.checkInstallation(this.installDir);
         if (!installOk) {
-            //Perform install
-            //Clear install dir
+            //Perform pget
+            //Clear pget dir
             FileUtils.deleteDir(this.installDir);
-            if (!this.installDir.mkdirs()) throw new IOException("Could not create installation directory");
+            if (!this.installDir.mkdirs()) {
+                throw new IOException("Could not create installation directory");
+            }
             //Fetch a native input stream
             InputStream nativesIn = PackageClasspathStreamer.streamNatives(
                     CefBuildInfo.fromClasspath(), EnumPlatform.getCurrentPlatform());
@@ -206,12 +208,12 @@ public class CefAppBuilder {
                 if (nativesIn == null) {
                     this.progressHandler.handleProgress(EnumProgress.DOWNLOADING, EnumProgress.NO_ESTIMATION);
                     downloading = true;
-                    File download = new File(this.installDir, "download.zip.temp");
+                    final File download = new File(this.installDir, "download.zip.temp");
                     PackageDownloader.downloadNatives(
                             CefBuildInfo.fromClasspath(), EnumPlatform.getCurrentPlatform(),
                             download, f -> {
                                 this.progressHandler.handleProgress(EnumProgress.DOWNLOADING, f);
-                            }, mirrors);
+                            }, this.mirrors);
                     nativesIn = new ZipInputStream(new FileInputStream(download));
                     ZipEntry entry;
                     boolean found = false;
@@ -246,8 +248,8 @@ public class CefAppBuilder {
                 UnquarantineUtil.unquarantine(this.installDir);
             }
             //Lock installation
-            if (!(new File(installDir, "install.lock").createNewFile())) {
-                throw new IOException("Could not create install.lock to complete installation");
+            if (!(new File(this.installDir, "pget.lock").createNewFile())) {
+                throw new IOException("Could not create pget.lock to complete installation");
             }
         }
         this.installed = true;
@@ -270,13 +272,13 @@ public class CefAppBuilder {
             return this.instance;
         }
         //Check if we are in the process of building an instance
-        synchronized (lock) {
-            if (building) {
+        synchronized (this.lock) {
+            if (this.building) {
                 //Check if instance was not created in the meantime
                 //to prevent race conditions
                 if (this.instance == null) {
                     //Wait until building completed on another thread
-                    lock.wait();
+                    this.lock.wait();
                 }
                 return this.instance;
             }
@@ -284,7 +286,7 @@ public class CefAppBuilder {
         }
         this.install();
         this.progressHandler.handleProgress(EnumProgress.INITIALIZING, EnumProgress.NO_ESTIMATION);
-        synchronized (lock) {
+        synchronized (this.lock) {
             //Setting the instance has to occur in the synchronized block
             //to prevent race conditions
             this.instance = CefInitializer.initialize(this.installDir, this.jcefArgs, this.cefSettings);
@@ -293,7 +295,7 @@ public class CefAppBuilder {
             //Notify progress handler
             this.progressHandler.handleProgress(EnumProgress.INITIALIZED, EnumProgress.NO_ESTIMATION);
             //Resume waiting threads
-            lock.notifyAll();
+            this.lock.notifyAll();
         }
         return this.instance;
     }
