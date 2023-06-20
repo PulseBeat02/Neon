@@ -5,12 +5,13 @@ import io.github.pulsebeat02.neon.utils.DitherUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class FloydSteinbergDither implements DitherHandler {
 
   @Override
-  public @NotNull ByteBuf dither(@NotNull final ByteBuf buffer, final int width) {
+  public @NotNull ByteBuf dither(@NotNull final IntBuffer buffer, final int width) {
     final int length = buffer.capacity();
     final int height = length / width;
     final int widthMinus = width - 1;
@@ -27,7 +28,7 @@ public class FloydSteinbergDither implements DitherHandler {
         for (int x = 0; x < width; x++) {
           final boolean hasNextX = x < widthMinus;
           final int index = yIndex + x;
-          final int rgb = buffer.getByte(index);
+          final int rgb = buffer.get(index);
           final int b1 = rgb >> 24 & 0xFF;
           final int g1 = rgb >> 16 & 0xFF;
           final int r1 = rgb >> 8 & 0xFF;
@@ -74,7 +75,7 @@ public class FloydSteinbergDither implements DitherHandler {
         for (int x = width - 1; x >= 0; x--) {
           final boolean hasNextX = x > 0;
           final int index = yIndex + x;
-          final int rgb = buffer.getByte(index);
+          final int rgb = buffer.get(index);
           final int b1 = rgb >> 24 & 0xFF;
           final int g1 = rgb >> 16 & 0xFF;
           final int r1 = rgb >> 8 & 0xFF;

@@ -19,6 +19,7 @@ import io.github.pulsebeat02.neon.video.ParticleRenderMethod;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
@@ -71,17 +72,23 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
     }
 
     this.neon.shutdownBrowser();
-    method.setup();
 
+    CompletableFuture.runAsync(
+            () -> this.createBrowser(settings, method, url), ExecutorProvider.BROWSER_SERVICE)
+        .thenRun(() -> audience.sendMessage(Locale.LOAD_BROWSER.build(url)));
+
+    return SINGLE_SUCCESS;
+  }
+
+  private void createBrowser(
+      @NotNull final BrowserSettings settings,
+      @NotNull final RenderMethod method,
+      @NotNull final String url) {
+    method.setup();
     final MinecraftBrowser browser = new MinecraftBrowser(this.neon, settings, method, url);
     browser.createImmediately();
     browser.loadURL(url);
-
     this.neon.setBrowser(browser);
-
-    audience.sendMessage(Locale.LOAD_BROWSER.build(url));
-
-    return SINGLE_SUCCESS;
   }
 
   private boolean checkUrl(@NotNull final String url) {

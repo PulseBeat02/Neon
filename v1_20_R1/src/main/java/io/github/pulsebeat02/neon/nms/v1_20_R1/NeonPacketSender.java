@@ -7,6 +7,7 @@ import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -141,7 +142,7 @@ public final class NeonPacketSender implements PacketSender {
       @NotNull final UUID[] viewers,
       @NotNull final Location location,
       @NotNull final Entity[] entities,
-      @NotNull final ByteBuf data,
+      @NotNull final IntBuffer data,
       @NotNull final String character,
       final int width,
       final int height) {
@@ -151,7 +152,7 @@ public final class NeonPacketSender implements PacketSender {
     for (int i = 0; i < maxHeight; i++) {
       final IChatMutableComponent component = IChatMutableComponent.a(ComponentContents.a);
       for (int x = 0; x < width; x++) {
-        final int bgra = data.getByte(index++);
+        final int bgra = data.get(index++);
         final int rgba =
             (bgra & 0x00ff0000) >> 16 | (bgra & 0xff00ff00) | (bgra & 0x000000ff) << 16;
         final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);

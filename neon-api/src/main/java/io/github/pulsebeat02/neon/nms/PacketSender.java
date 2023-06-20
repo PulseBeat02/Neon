@@ -2,6 +2,7 @@ package io.github.pulsebeat02.neon.nms;
 
 import io.netty.buffer.ByteBuf;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.UUID;
 
 import org.bukkit.Location;
@@ -23,7 +24,7 @@ public interface PacketSender {
       @NotNull final UUID[] viewers,
       @NotNull final Location location,
       @NotNull final Entity[] entities,
-      @NotNull final ByteBuf data,
+      @NotNull final IntBuffer data,
       @NotNull final String character,
       final int width,
       final int height);
