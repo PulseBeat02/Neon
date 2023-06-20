@@ -9,8 +9,6 @@ export LIBRARY_PATH="$ROOT/usr/lib:$ROOT/lib:$ROOT/usr/lib/x86_64-linux-gnu:$ROO
 export PKG_CONFIG_PATH="$ROOT/usr/share/pkgconfig:$ROOT/usr/lib/pkgconfig:$ROOT/usr/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
 done
 
-apt-get update --fix-missing
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MARKER='\033[1m[NOTROOT]\033[0m'
 cd $DIR

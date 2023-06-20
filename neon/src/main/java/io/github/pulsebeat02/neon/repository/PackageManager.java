@@ -23,21 +23,24 @@ public final class PackageManager {
 
   static {
     // some os's don't even have some of these bare-bones dependencies...
-    JCEF_DEPENDENCIES = Set.of("libxtst6", "libxi6", "libnss3-tools");
+    JCEF_DEPENDENCIES = Set.of("libxtst6", "libxi6", "libnss3");
   }
 
   private @NotNull final Neon neon;
   private @NotNull final Path folder;
   private @NotNull final Path script;
+  private @NotNull final Path updateRepo;
 
   public PackageManager(@NotNull final Neon neon) throws IOException {
     this.neon = neon;
     this.folder = neon.getDataFolder().toPath().resolve("apt");
     this.script = this.folder.resolve("notroot");
+    this.updateRepo = this.folder.resolve("update");
     if (this.isUnix()) {
       this.createFolders();
-      this.copyScript();
+      this.copyScripts();
       this.setExecutePermissions();
+      this.updateRepositories();
       this.installPackages();
       this.loadLibraries();
     }
@@ -48,21 +51,52 @@ public final class PackageManager {
     return OS.contains("nux");
   }
 
+  private void updateRepositories() throws IOException {
+    final ProcessBuilder builder = new ProcessBuilder(this.updateRepo.toAbsolutePath().toString());
+    this.captureOutput(builder);
+  }
+
+  private void captureOutput(@NotNull final ProcessBuilder builder) throws IOException {
+    final Process p = builder.start();
+    String line;
+    InputStreamReader isr = new InputStreamReader(p.getInputStream());
+    BufferedReader rdr = new BufferedReader(isr);
+    while ((line = rdr.readLine()) != null) {
+      this.neon.logConsole("PACKAGE INSTALLER INFO: %s".formatted(line));
+    }
+    isr = new InputStreamReader(p.getErrorStream());
+    rdr = new BufferedReader(isr);
+    while ((line = rdr.readLine()) != null) {
+      this.neon.logConsole("PACKAGE INSTALLER ERROR: %s".formatted(line));
+    }
+    try {
+      p.waitFor();
+      isr.close();
+      rdr.close();
+    } catch (final InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private void createFolders() throws IOException {
     if (!Files.isDirectory(this.folder)) {
       Files.createDirectories(this.folder);
     }
   }
 
-  private void copyScript() throws IOException {
+  private void copyScripts() throws IOException {
     try (final InputStream stream = ResourceUtils.getResourceAsStream("package/notroot")) {
+      Files.copy(stream, this.script, StandardCopyOption.REPLACE_EXISTING);
+    }
+    try (final InputStream stream = ResourceUtils.getResourceAsStream("package/update")) {
       Files.copy(stream, this.script, StandardCopyOption.REPLACE_EXISTING);
     }
   }
 
   private void setExecutePermissions() throws IOException {
-    final Set<PosixFilePermission> ownerWritable = PosixFilePermissions.fromString("rwxrwxrwx");
-    Files.setPosixFilePermissions(this.script, ownerWritable);
+    final Set<PosixFilePermission> all = PosixFilePermissions.fromString("rwxrwxrwx");
+    Files.setPosixFilePermissions(this.script, all);
+    Files.setPosixFilePermissions(this.updateRepo, all);
   }
 
   private void installPackages() {
@@ -78,31 +112,9 @@ public final class PackageManager {
   }
 
   private void installPackageWithoutRoot(@NotNull final String packageName) throws IOException {
-
     final ProcessBuilder builder =
         new ProcessBuilder(this.script.toAbsolutePath().toString(), "install", packageName);
-    final Process p = builder.start();
-
-    String line;
-    InputStreamReader isr = new InputStreamReader(p.getInputStream());
-    BufferedReader rdr = new BufferedReader(isr);
-    while ((line = rdr.readLine()) != null) {
-      this.neon.logConsole("PACKAGE INSTALLER INFO: %s".formatted(line));
-    }
-
-    isr = new InputStreamReader(p.getErrorStream());
-    rdr = new BufferedReader(isr);
-    while ((line = rdr.readLine()) != null) {
-      this.neon.logConsole("PACKAGE INSTALLER ERROR: %s".formatted(line));
-    }
-
-    try {
-      p.waitFor();
-      isr.close();
-      rdr.close();
-    } catch (final InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    this.captureOutput(builder);
   }
 
   private void loadLibraries() throws IOException {
