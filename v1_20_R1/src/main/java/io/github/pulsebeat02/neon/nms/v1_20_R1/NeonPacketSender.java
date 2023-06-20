@@ -20,6 +20,7 @@ import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutMap;
 import net.minecraft.network.syncher.DataWatcher;
+import net.minecraft.network.syncher.DataWatcher.b;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.network.PlayerConnection;
@@ -150,24 +151,18 @@ public final class NeonPacketSender implements PacketSender {
     for (int i = 0; i < maxHeight; i++) {
       final IChatMutableComponent component = IChatMutableComponent.a(ComponentContents.a);
       for (int x = 0; x < width; x++) {
+        final int bgra = data.getByte(index++);
+        final int rgba =
+            (bgra & 0x00ff0000) >> 16 | (bgra & 0xff00ff00) | (bgra & 0x000000ff) << 16;
         final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);
-        final int c = data.getInt(index++);
-        final int b = c >> 24 & 0xFF;
-        final int g = c >> 16 & 0xFF;
-        final int r = c >> 8 & 0xFF;
-        final int a = c & 0xFF;
-        final int rgba = (r << 24) | (g << 16) | (b << 8) | a;
         p.b(ChatModifier.a.a(ChatHexColor.a(rgba & 0xFFFFFF)));
         p.a(IChatBaseComponent.a(character));
         component.a(p);
       }
-      final Entity entity = entities[i];
-      final int id = ((CraftEntity) entity).getHandle().af();
+      final int id = ((CraftEntity) entities[i]).getHandle().af();
       final DataWatcherObject<IChatBaseComponent> object =
           new DataWatcherObject<>(2, DataWatcherRegistry.f);
-      final List<DataWatcher.b<?>> list = List.of(DataWatcher.b.a(object, component));
-      final PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(id, list);
-      packets[i] = packet;
+      packets[i] = new PacketPlayOutEntityMetadata(id, List.of(DataWatcher.b.a(object, component)));
     }
     this.sendEntityPackets(viewers, packets);
   }

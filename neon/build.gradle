@@ -14,6 +14,9 @@ dependencies {
     compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
     compileOnly 'org.apache.commons:commons-compress:1.23.0'
 
+    testImplementation 'io.netty:netty-all:5.0.0.Alpha2'
+    testImplementation 'me.friwi:jcefmaven:110.0.25'
+
     implementation project(':neon-api')
     implementation project(':v1_20_R1')
     implementation 'org.bstats:bstats-bukkit:3.0.2'

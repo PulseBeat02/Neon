@@ -60,7 +60,7 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
   public boolean getScreenInfo(
       @NotNull final CefBrowser browser, @NotNull final CefScreenInfo screenInfo) {
     final Rectangle bounds = BROWSER_RECTANGLE.getBounds();
-    screenInfo.Set(1, 32, 8, false, bounds, bounds);
+    screenInfo.Set(1, 1, 1, false, bounds, bounds);
     return true;
   }
 

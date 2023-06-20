@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class MapRenderMethod extends RenderAdapter {
 
-  private final BrowserSettings settings;
-  private final PacketSender sender;
+  private @NotNull final Neon neon;
+  private @NotNull final PacketSender sender;
   private final int width;
   private final int height;
   private final int blockWidth;
@@ -20,12 +20,10 @@ public final class MapRenderMethod extends RenderAdapter {
   public MapRenderMethod(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     super(neon);
     this.sender = neon.getPacketSender();
-    this.settings = neon.getBrowser().getSettings();
-
+    this.neon = neon;
     final ImmutableDimension blockDimension = settings.getBlockDimension();
     this.blockWidth = blockDimension.getWidth();
     this.blockHeight = blockDimension.getHeight();
-
     final ImmutableDimension dimension = settings.getResolution();
     this.width = dimension.getWidth();
     this.height = dimension.getHeight();
@@ -33,7 +31,7 @@ public final class MapRenderMethod extends RenderAdapter {
 
   @Override
   public void render(@NotNull final ByteBuf buf) {
-    final ByteBuf buffer = this.settings.getHandler().dither(buf, this.width);
+    final ByteBuf buffer = this.neon.getBrowser().getSettings().getHandler().dither(buf, this.width);
     this.sender.displayMaps(
         null, buffer, 0, this.blockWidth, this.blockHeight, this.width, this.height);
   }

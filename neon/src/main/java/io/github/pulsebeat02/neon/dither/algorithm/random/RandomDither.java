@@ -39,10 +39,14 @@ public final class RandomDither implements DitherHandler {
       final int yIndex = y * width;
       for (int x = 0; x < width; x++) {
         final int index = yIndex + x;
-        final int color = buffer.getInt(index);
-        int b = color >> 24 & 0xFF;
-        int g = color >> 16 & 0xFF;
-        int r = color >> 8 & 0xFF;
+        final int color = buffer.getByte(index);
+        final int b1 = color >> 24 & 0xFF;
+        final int g1 = color >> 16 & 0xFF;
+        final int r1 = color >> 8 & 0xFF;
+        final int a1 = color & 0xFF;
+        int r = (1 - a1) * 255 + a1 * b1;
+        int g = (1 - a1) * 255 + a1 * g1;
+        int b = (1 - a1) * 255 + a1 * r1;
         r = (r += this.random()) > 255 ? 255 : Math.max(r, 0);
         g = (g += this.random()) > 255 ? 255 : Math.max(g, 0);
         b = (b += this.random()) > 255 ? 255 : Math.max(b, 0);
