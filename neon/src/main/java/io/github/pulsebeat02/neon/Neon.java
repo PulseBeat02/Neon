@@ -37,9 +37,14 @@ public final class Neon extends JavaPlugin {
     this.registerServerImplementation();
     this.readConfigurationFile();
     this.installPackages();
+    this.registerBrowser();
     this.registerCommands();
     this.registerStats();
     this.registerEvents();
+  }
+
+  private void registerBrowser() {
+    MinecraftBrowser.init();
   }
 
   private void registerAdventure() {

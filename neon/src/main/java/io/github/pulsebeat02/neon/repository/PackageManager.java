@@ -11,23 +11,46 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Locale;
 import java.util.Set;
-
-import org.cef.OS;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 public final class PackageManager {
 
+  private static final Set<String> JCEF_DEPENDENCIES;
+
+  static {
+    // some os's don't even have some of these bare-bones dependencies...
+    JCEF_DEPENDENCIES = Set.of("libxtst6", "libxi6", "libnss3-tools");
+  }
+
   private @NotNull final Neon neon;
+  private @NotNull final Path folder;
   private @NotNull final Path script;
 
   public PackageManager(@NotNull final Neon neon) throws IOException {
     this.neon = neon;
-    this.script = neon.getDataFolder().toPath().resolve("notroot");
-    if (OS.isLinux()) {
+    this.folder = neon.getDataFolder().toPath().resolve("apt");
+    this.script = this.folder.resolve("notroot");
+    if (this.isUnix()) {
+      this.createFolders();
       this.copyScript();
       this.setExecutePermissions();
       this.installPackages();
+      this.loadLibraries();
+    }
+  }
+
+  private boolean isUnix() {
+    final String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+    return OS.contains("nux");
+  }
+
+  private void createFolders() throws IOException {
+    if (!Files.isDirectory(this.folder)) {
+      Files.createDirectories(this.folder);
     }
   }
 
@@ -42,12 +65,20 @@ public final class PackageManager {
     Files.setPosixFilePermissions(this.script, ownerWritable);
   }
 
-  private void installPackages() throws IOException {
-    this.installPackageWithoutRoot("apt-rdepends");
-    this.installPackageWithoutRoot("libxtst6");
+  private void installPackages() {
+    JCEF_DEPENDENCIES.forEach(this::installPackage);
+  }
+
+  private void installPackage(@NotNull final String name) {
+    try {
+      this.installPackageWithoutRoot(name);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void installPackageWithoutRoot(@NotNull final String packageName) throws IOException {
+
     final ProcessBuilder builder =
         new ProcessBuilder(this.script.toAbsolutePath().toString(), "install", packageName);
     final Process p = builder.start();
@@ -67,8 +98,41 @@ public final class PackageManager {
 
     try {
       p.waitFor();
+      isr.close();
+      rdr.close();
     } catch (final InterruptedException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void loadLibraries() throws IOException {
+    final Path libs = this.folder.resolve("usr").resolve("lib");
+    try (final Stream<Path> folder = Files.list(libs)) {
+      final Path first = this.findFirstArchFolder(folder);
+      this.handleLibrarySo(first);
+    }
+  }
+
+  private void handleLibrarySo(@NotNull final Path first) throws IOException {
+    try (final Stream<Path> files = Files.list(first)) {
+      final Set<Path> set = this.findFile(files);
+      for (final Path path : set) {
+        final Path absolute = path.toAbsolutePath();
+        final String nativePath = absolute.toString();
+        this.neon.logConsole("Loading Native Library: %s".formatted(nativePath));
+        System.load(nativePath);
+      }
+    }
+  }
+
+  private @NotNull Path findFirstArchFolder(@NotNull final Stream<Path> stream) {
+    return stream.filter(Files::isDirectory).findFirst().orElseThrow();
+  }
+
+  private @NotNull Set<Path> findFile(@NotNull final Stream<Path> stream) {
+    return stream
+        .parallel()
+        .filter(file -> file.getFileName().toString().contains(".so"))
+        .collect(Collectors.toUnmodifiableSet());
   }
 }

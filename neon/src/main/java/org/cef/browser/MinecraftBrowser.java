@@ -108,6 +108,8 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
     return new Rectangle(0, 0, width, height);
   }
 
+  public static void init() {}
+
   private static @NotNull CefApp createApp()
       throws UnsupportedPlatformException,
           CefInitializationException,
