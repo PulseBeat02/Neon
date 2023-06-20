@@ -13,6 +13,7 @@ dependencies {
     compileOnly 'me.lucko:commodore:2.2'
     compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
     compileOnly 'org.apache.commons:commons-compress:1.23.0'
+    implementation 'org.jogamp.jogl:jogl-all:2.3.2'
 
     testImplementation 'io.netty:netty-all:5.0.0.Alpha2'
     testImplementation 'me.friwi:jcefmaven:110.0.25'
