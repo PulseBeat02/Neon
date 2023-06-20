@@ -19,69 +19,81 @@ import java.util.logging.Logger;
  */
 public class CefInitializer {
 
-    private static final Logger LOGGER = Logger.getLogger(CefInitializer.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(CefInitializer.class.getName());
 
-    private static final String JAVA_LIBRARY_PATH = "java.library.path";
+  private static final String JAVA_LIBRARY_PATH = "java.library.path";
 
-    public static CefApp initialize(final File installDir, final List<String> cefArgs, final CefSettings cefSettings) throws UnsupportedPlatformException, CefInitializationException {
-        Objects.requireNonNull(installDir, "installDir cannot be null");
-        Objects.requireNonNull(cefArgs, "cefArgs cannot be null");
-        Objects.requireNonNull(cefSettings, "cefSettings cannot be null");
+  public static CefApp initialize(
+      final File installDir, final List<String> cefArgs, final CefSettings cefSettings)
+      throws UnsupportedPlatformException, CefInitializationException {
+    Objects.requireNonNull(installDir, "installDir cannot be null");
+    Objects.requireNonNull(cefArgs, "cefArgs cannot be null");
+    Objects.requireNonNull(cefSettings, "cefSettings cannot be null");
 
-        try {
-            //Patch java library path to scan the pget dir of our application
-            //This is required for jcef to find all resources
-            String path = System.getProperty(JAVA_LIBRARY_PATH);
-            if (!path.endsWith(File.pathSeparator)) {
-                path += File.pathSeparator;
-            }
-            path += installDir.getAbsolutePath();
-            System.setProperty(JAVA_LIBRARY_PATH, path);
+    try {
+      // Patch java library path to scan the notroot dir of our application
+      // This is required for jcef to find all resources
+      String path = System.getProperty(JAVA_LIBRARY_PATH);
+      if (!path.endsWith(File.pathSeparator)) {
+        path += File.pathSeparator;
+      }
+      path += installDir.getAbsolutePath();
+      System.setProperty(JAVA_LIBRARY_PATH, path);
 
-            //Remove dependency loader from jcef (causes unnecessary errors due to wrong library names in jcef)
-            SystemBootstrap.setLoader(libname -> {
-            });
+      // Remove dependency loader from jcef (causes unnecessary errors due to wrong library names in
+      // jcef)
+      SystemBootstrap.setLoader(libname -> {});
 
-            try {
-                // Load native libraries for jcef, as the jvm does not update the java library path
-                System.loadLibrary("jawt");
-            } catch (final UnsatisfiedLinkError e) {
-                LOGGER.warning("Error while loading jawt library: " + e.getMessage());
-            }
+      try {
+        // Load native libraries for jcef, as the jvm does not update the java library path
+        System.loadLibrary("jawt");
+      } catch (final UnsatisfiedLinkError e) {
+        LOGGER.warning("Error while loading jawt library: " + e.getMessage());
+      }
 
-            //Platform dependent loading code
-            if (EnumPlatform.getCurrentPlatform().getOs().isWindows()) {
-                System.load(new File(installDir, "chrome_elf.dll").getAbsolutePath());
-                System.load(new File(installDir, "libcef.dll").getAbsolutePath());
-                System.load(new File(installDir, "jcef.dll").getAbsolutePath());
-            } else if (EnumPlatform.getCurrentPlatform().getOs().isLinux()) {
-                //Load jcef native library
-                System.load(new File(installDir, "libjcef.so").getAbsolutePath());
-                //Initialize cef
-                final boolean success = CefApp.startup(cefArgs.toArray(new String[0]));
-                if (!success) {
-                    throw new CefInitializationException("JCef did not initialize correctly!");
-                }
-                //Load native cef library
-                System.load(new File(installDir, "libcef.so").getAbsolutePath());
-            } else if (EnumPlatform.getCurrentPlatform().getOs().isMacOSX()) {
-                //Load jcef native library
-                System.load(new File(installDir, "libjcef.dylib").getAbsolutePath());
-                //Append required arguments for macosx
-                cefArgs.add(0, "--framework-dir-path=" + installDir.getAbsolutePath() + "/Chromium Embedded Framework.framework");
-                cefArgs.add(0, "--main-bundle-path=" + installDir.getAbsolutePath() + "/jcef Helper.app");
-                cefArgs.add(0, "--browser-subprocess-path=" + installDir.getAbsolutePath() + "/jcef Helper.app/Contents/MacOS/jcef Helper");
-                cefSettings.browser_subprocess_path = installDir.getAbsolutePath() + "/jcef Helper.app/Contents/MacOS/jcef Helper";
-                //Initialize cef
-                final boolean success = CefApp.startup(cefArgs.toArray(new String[0]));
-                if (!success) {
-                    throw new CefInitializationException("JCef did not initialize correctly!");
-                }
-            }
-            //Configure cef settings and create app instance (currently nothing to configure, may change in the future)
-            return CefApp.getInstance(cefArgs.toArray(new String[0]), cefSettings);
-        } catch (final RuntimeException e) {
-            throw new CefInitializationException("Error while initializing JCef", e);
+      // Platform dependent loading code
+      if (EnumPlatform.getCurrentPlatform().getOs().isWindows()) {
+        System.load(new File(installDir, "chrome_elf.dll").getAbsolutePath());
+        System.load(new File(installDir, "libcef.dll").getAbsolutePath());
+        System.load(new File(installDir, "jcef.dll").getAbsolutePath());
+      } else if (EnumPlatform.getCurrentPlatform().getOs().isLinux()) {
+        // Load jcef native library
+        System.load(new File(installDir, "libjcef.so").getAbsolutePath());
+        // Initialize cef
+        final boolean success = CefApp.startup(cefArgs.toArray(new String[0]));
+        if (!success) {
+          throw new CefInitializationException("JCef did not initialize correctly!");
         }
+        // Load native cef library
+        System.load(new File(installDir, "libcef.so").getAbsolutePath());
+      } else if (EnumPlatform.getCurrentPlatform().getOs().isMacOSX()) {
+        // Load jcef native library
+        System.load(new File(installDir, "libjcef.dylib").getAbsolutePath());
+        // Append required arguments for macosx
+        cefArgs.add(
+            0,
+            "--framework-dir-path="
+                + installDir.getAbsolutePath()
+                + "/Chromium Embedded Framework.framework");
+        cefArgs.add(0, "--main-bundle-path=" + installDir.getAbsolutePath() + "/jcef Helper.app");
+        cefArgs.add(
+            0,
+            "--browser-subprocess-path="
+                + installDir.getAbsolutePath()
+                + "/jcef Helper.app/Contents/MacOS/jcef Helper");
+        cefSettings.browser_subprocess_path =
+            installDir.getAbsolutePath() + "/jcef Helper.app/Contents/MacOS/jcef Helper";
+        // Initialize cef
+        final boolean success = CefApp.startup(cefArgs.toArray(new String[0]));
+        if (!success) {
+          throw new CefInitializationException("JCef did not initialize correctly!");
+        }
+      }
+      // Configure cef settings and create app instance (currently nothing to configure, may change
+      // in the future)
+      return CefApp.getInstance(cefArgs.toArray(new String[0]), cefSettings);
+    } catch (final RuntimeException e) {
+      throw new CefInitializationException("Error while initializing JCef", e);
     }
+  }
 }

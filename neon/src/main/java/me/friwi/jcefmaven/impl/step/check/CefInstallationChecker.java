@@ -16,33 +16,34 @@ import java.util.logging.Logger;
  * @author Fritz Windisch
  */
 public class CefInstallationChecker {
-    private static final Logger LOGGER = Logger.getLogger(CefInstallationChecker.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(CefInstallationChecker.class.getName());
 
-    public static boolean checkInstallation(final File installDir) throws UnsupportedPlatformException {
-        Objects.requireNonNull(installDir, "installDir cannot be null");
-        final File buildInfo = new File(installDir, "build_meta.json");
-        if (!(new File(installDir, "pget.lock").exists())) {
-            return false;
-        }
-        if (!(buildInfo.exists())) {
-            return false;
-        }
-        final CefBuildInfo installed;
-        try {
-            installed = CefBuildInfo.fromFile(buildInfo);
-        } catch (final IOException e) {
-            LOGGER.log(Level.WARNING, "Error while parsing existing installation. Reinstalling.", e);
-            return false;
-        }
-        final CefBuildInfo required;
-        try {
-            required = CefBuildInfo.fromClasspath();
-        } catch (final IOException e) {
-            LOGGER.log(Level.WARNING, "Error while parsing existing installation. Reinstalling.", e);
-            return false;
-        }
-        //The pget is ok when tag and platform match
-        return required.getReleaseTag().equals(installed.getReleaseTag())
-                && installed.getPlatform().equals(EnumPlatform.getCurrentPlatform().getIdentifier());
+  public static boolean checkInstallation(final File installDir)
+      throws UnsupportedPlatformException {
+    Objects.requireNonNull(installDir, "installDir cannot be null");
+    final File buildInfo = new File(installDir, "build_meta.json");
+    if (!(new File(installDir, "notroot.lock").exists())) {
+      return false;
     }
+    if (!(buildInfo.exists())) {
+      return false;
+    }
+    final CefBuildInfo installed;
+    try {
+      installed = CefBuildInfo.fromFile(buildInfo);
+    } catch (final IOException e) {
+      LOGGER.log(Level.WARNING, "Error while parsing existing installation. Reinstalling.", e);
+      return false;
+    }
+    final CefBuildInfo required;
+    try {
+      required = CefBuildInfo.fromClasspath();
+    } catch (final IOException e) {
+      LOGGER.log(Level.WARNING, "Error while parsing existing installation. Reinstalling.", e);
+      return false;
+    }
+    // The notroot is ok when tag and platform match
+    return required.getReleaseTag().equals(installed.getReleaseTag())
+        && installed.getPlatform().equals(EnumPlatform.getCurrentPlatform().getIdentifier());
+  }
 }
