@@ -2,29 +2,45 @@ package io.github.pulsebeat02.neon.video;
 
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
+import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Entity;
 import org.bukkit.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 
 public final class HologramRenderMethod extends EntityRenderMethod {
 
+  private final int height;
+  private @NotNull final Location location;
+
   public HologramRenderMethod(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     super(neon, settings);
+    this.location = settings.getLocation();
+    final ImmutableDimension dimension = settings.getResolution();
+    this.height = dimension.getHeight();
   }
 
   @Override
-  public @NotNull Class<?> getEntityClass() {
-    return EntityType.ARMOR_STAND.getEntityClass();
+  public void setup() {
+    super.setup();
+    final Location spawn = this.location.clone();
+    final World world = spawn.getWorld();
+    final Entity[] entities = this.getEntities();
+    for (int i = this.height - 1; i >= 0; i--) {
+      final Consumer<ArmorStand> handleEntity = this::handleEntity;
+      entities[i] = world.spawn(spawn, ArmorStand.class, handleEntity);
+      entities[i].setCustomName(this.repeat(this.height));
+      entities[i].setCustomNameVisible(true);
+      spawn.add(0.0, 0.225, 0.0);
+    }
   }
 
-  @Override
-  public @NotNull Consumer<?> handleEntity() {
-    return (entity) -> {
-      final ArmorStand stand = (ArmorStand) entity;
-      stand.setInvulnerable(true);
-      stand.setVisible(false);
-      stand.setGravity(false);
-    };
+  public void handleEntity(@NotNull final Entity entity) {
+    final ArmorStand stand = (ArmorStand) entity;
+    stand.setInvulnerable(true);
+    stand.setVisible(false);
+    stand.setGravity(false);
   }
 }

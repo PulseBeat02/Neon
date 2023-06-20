@@ -57,20 +57,20 @@ public final class NeonPacketSender implements PacketSender {
       @NotNull final UUID[] viewers,
       @NotNull final ByteBuf rgb,
       final int map,
-      final int width,
-      final int height,
+      final int mapWidth,
+      final int mapHeight,
       final int videoWidth,
       final int videoHeight) {
-    final int pixW = width << 7;
-    final int pixH = height << 7;
-    final int xOff = (pixW - width) >> 1;
-    final int yOff = (pixH - height) >> 1;
+    final int pixW = mapWidth << 7;
+    final int pixH = mapHeight << 7;
+    final int xOff = (pixW - videoWidth) >> 1;
+    final int yOff = (pixH - videoHeight) >> 1;
     final int negXOff = xOff + videoWidth;
     final int negYOff = yOff + videoHeight;
     final int xLoopMin = Math.max(0, xOff >> 7);
     final int yLoopMin = Math.max(0, yOff >> 7);
-    final int xLoopMax = Math.min(width, (int) Math.ceil(negXOff / 128.0));
-    final int yLoopMax = Math.min(height, (int) Math.ceil(negYOff / 128.0));
+    final int xLoopMax = Math.min(mapWidth, (int) Math.ceil(negXOff / 128.0));
+    final int yLoopMax = Math.min(mapHeight, (int) Math.ceil(negYOff / 128.0));
     final PacketPlayOutMap[] packetArray =
         new PacketPlayOutMap[(xLoopMax - xLoopMin) * (yLoopMax - yLoopMin)];
     int arrIndex = 0;
@@ -92,7 +92,7 @@ public final class NeonPacketSender implements PacketSender {
             mapData[(iy - topY) * xDiff + ix - topX] = rgb.getByte(indexY + relX + ix - xOff);
           }
         }
-        final int mapId = map + width * y + x;
+        final int mapId = map + mapWidth * y + x;
         final byte b = (byte) 0;
         final boolean display = false;
         final List<MapIcon> icons = new ArrayList<>();
@@ -151,7 +151,13 @@ public final class NeonPacketSender implements PacketSender {
       final IChatMutableComponent component = IChatMutableComponent.a(ComponentContents.a);
       for (int x = 0; x < width; x++) {
         final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);
-        p.b(ChatModifier.a.a(ChatHexColor.a(data.getInt(index++) & 0xFFFFFF)));
+        final int c = data.getInt(index++);
+        final int b = c >> 24 & 0xFF;
+        final int g = c >> 16 & 0xFF;
+        final int r = c >> 8 & 0xFF;
+        final int a = c & 0xFF;
+        final int rgba = (r << 24) | (g << 16) | (b << 8) | a;
+        p.b(ChatModifier.a.a(ChatHexColor.a(rgba & 0xFFFFFF)));
         p.a(IChatBaseComponent.a(character));
         component.a(p);
       }

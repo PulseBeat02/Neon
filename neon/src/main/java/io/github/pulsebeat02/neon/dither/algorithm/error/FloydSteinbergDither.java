@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class FloydSteinbergDither implements DitherHandler {
 
   @Override
-  public @NotNull ByteBuf dither(@NotNull final ByteBuffer buffer, final int width) {
+  public @NotNull ByteBuf dither(@NotNull final ByteBuf buffer, final int width) {
     final int length = buffer.capacity();
     final int height = length / width;
     final int widthMinus = width - 1;
@@ -27,10 +27,10 @@ public class FloydSteinbergDither implements DitherHandler {
         for (int x = 0; x < width; x++) {
           final boolean hasNextX = x < widthMinus;
           final int index = yIndex + x;
-          final int rgb = buffer.get(index);
-          int blue = rgb >> 16 & 0xFF;
-          int green = rgb >> 8 & 0xFF;
-          int red = rgb & 0xFF;
+          final int rgb = buffer.getInt(index);
+          int blue = rgb >> 24 & 0xFF;
+          int green = rgb >> 16 & 0xFF;
+          int red = rgb >> 8 & 0xFF;
           red = (red += buf1[bufferIndex++]) > 255 ? 255 : Math.max(red, 0);
           green = (green += buf1[bufferIndex++]) > 255 ? 255 : Math.max(green, 0);
           blue = (blue += buf1[bufferIndex++]) > 255 ? 255 : Math.max(blue, 0);
@@ -70,10 +70,10 @@ public class FloydSteinbergDither implements DitherHandler {
         for (int x = width - 1; x >= 0; x--) {
           final boolean hasNextX = x > 0;
           final int index = yIndex + x;
-          final int rgb = buffer.get(index);
-          int blue = rgb >> 16 & 0xFF;
-          int green = rgb >> 8 & 0xFF;
-          int red = rgb & 0xFF;
+          final int rgb = buffer.getInt(index);
+          int blue = rgb >> 24 & 0xFF;
+          int green = rgb >> 16 & 0xFF;
+          int red = rgb >> 8 & 0xFF;
           blue = (blue += buf1[bufferIndex--]) > 255 ? 255 : Math.max(blue, 0);
           green = (green += buf1[bufferIndex--]) > 255 ? 255 : Math.max(green, 0);
           red = (red += buf1[bufferIndex--]) > 255 ? 255 : Math.max(red, 0);

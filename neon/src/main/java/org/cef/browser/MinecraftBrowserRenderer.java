@@ -7,6 +7,7 @@ import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.nio.ByteBuffer;
@@ -47,9 +48,7 @@ public final class MinecraftBrowserRenderer implements CefRenderHandler {
       @NotNull final ByteBuffer buffer,
       final int width,
       final int height) {
-    final DitherHandler handler = this.settings.getHandler();
-    final ImmutableDimension blockDimension = this.settings.getBlockDimension();
-    this.method.render(handler.dither(buffer, blockDimension.getWidth()));
+    this.method.render(Unpooled.wrappedBuffer(buffer));
   }
 
   @Override

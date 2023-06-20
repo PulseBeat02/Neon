@@ -1,7 +1,7 @@
 package io.github.pulsebeat02.neon.nms;
 
-import io.github.pulsebeat02.neon.utils.immutable.ImmutableLocation;
 import io.netty.buffer.ByteBuf;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import org.bukkit.Location;

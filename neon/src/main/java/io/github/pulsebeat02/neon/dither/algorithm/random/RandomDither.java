@@ -31,7 +31,7 @@ public final class RandomDither implements DitherHandler {
   }
 
   @Override
-  public @NotNull ByteBuf dither(@NotNull final ByteBuffer buffer, final int width) {
+  public @NotNull ByteBuf dither(@NotNull final ByteBuf buffer, final int width) {
     final int length = buffer.capacity();
     final int height = length / width;
     final ByteBuf data = Unpooled.buffer(length);
@@ -39,10 +39,10 @@ public final class RandomDither implements DitherHandler {
       final int yIndex = y * width;
       for (int x = 0; x < width; x++) {
         final int index = yIndex + x;
-        final int color = buffer.get(index);
-        int b = (color >> 16) & 0xFF;
-        int g = (color >> 8) & 0xFF;
-        int r = (color) & 0xFF;
+        final int color = buffer.getInt(index);
+        int b = color >> 24 & 0xFF;
+        int g = color >> 16 & 0xFF;
+        int r = color >> 8 & 0xFF;
         r = (r += this.random()) > 255 ? 255 : Math.max(r, 0);
         g = (g += this.random()) > 255 ? 255 : Math.max(g, 0);
         b = (b += this.random()) > 255 ? 255 : Math.max(b, 0);
