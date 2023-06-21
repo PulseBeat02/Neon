@@ -7,6 +7,7 @@ import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
+import io.github.pulsebeat02.neon.repository.JuNest;
 import io.github.pulsebeat02.neon.repository.PackageManager;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
@@ -66,6 +67,7 @@ public final class Neon extends JavaPlugin {
   private void installPackages() {
     try {
       new PackageManager(this);
+      // new JuNest(this);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }

@@ -1,0 +1,54 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]-$0}" )" && pwd )"
+for ROOT in $DIR $DIR/deb
+do
+export PATH="$DIR:$DIR/bin:$DIR/sbin:$ROOT/usr/bin:$ROOT/usr/sbin:$PATH:$ROOT/usr/games"
+export CPATH="$ROOT/include:$ROOT/usr/include:$CPATH"
+export LD_LIBRARY_PATH="$ROOT/usr/lib:$ROOT/lib:$ROOT/usr/lib/x86_64-linux-gnu:$ROOT/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+export LIBRARY_PATH="$ROOT/usr/lib:$ROOT/lib:$ROOT/usr/lib/x86_64-linux-gnu:$ROOT/lib/x86_64-linux-gnu:$LIBRARY_PATH"
+export PKG_CONFIG_PATH="$ROOT/usr/share/pkgconfig:$ROOT/usr/lib/pkgconfig:$ROOT/usr/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+done
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+MARKER='\033[1m[NOTROOT]\033[0m'
+cd $DIR
+which apt-get 2> /dev/null >&2
+if [ $? -eq 0 ]; then
+    MODE="apt"
+else
+    which yum 2> /dev/null >&2
+    if [ $? -eq 0 ]; then
+        MODE="yum"
+    else
+        echo -e "$MARKER I can't found apt or yum"
+        exit 1
+    fi
+fi
+
+deps=("fonts-liberation;1:1.07.4-9" "libappindicator3-1;0.4.92-7" "libasound2;1.1.8-1" "libatk-bridge2.0-0;2.30.0-5" "libatk1.0-0;2.30.0-5" "libc6;2.28-10+deb10u2" "libcairo2;1.16.0-4+deb10u1" "libcups2;2.2.10-6+deb10u7" "libdbus-1-3;1.12.24-0+deb10u1" "libexpat1;2.2.6-2+deb10u6" "libfontconfig1;2.13.1-2" "libgbm1;18.3.6-2+deb10u1" "libgcc1;1:8.3.0-6" "libglib2.0-0;2.58.3-2+deb10u4" "libgtk-3-0;3.24.5-1" "libnspr4;2:4.20-1" "libnss3;2:3.42.1-1+deb10u6" "libpango-1.0-0;1.42.4-8~deb10u1" "libpangocairo-1.0-0;1.42.4-8~deb10u1" "libstdc++6;8.3.0-6" "libx11-6;2:1.6.7-1+deb10u2" "libx11-xcb1;2:1.6.7-1+deb10u2" "libxcb1;1.13.1-2" "libxcomposite1;1:0.4.4-2" "libxcursor1;1:1.1.15-2" "libxdamage1;1:1.1.4-3+b3" "libxext6;2:1.3.3-1+b2" "libxfixes3;1:5.0.3-1" "libxi6;2:1.7.9-1" "libxrandr2;2:1.5.1-1" "libxrender1;1:0.9.10-1" "libxss1;1:1.2.3-1" "libxtst6;2:1.2.3-1" "lsb-release;10.2019051400" "wget;1.20.1-1.1" "xdg-utils;1.1.3-1+deb10u1")
+
+for package in ${deps[@]}; do
+
+  NAME=$(echo $package | cut -d ";" -f 1)
+
+  if [ "$MODE" = "apt" ]; then
+    rm -rf deb
+    mkdir deb &&
+    cd deb &&
+    apt-get download $NAME
+    cd .. &&
+    for deb in deb/*.deb; do
+      dpkg -x $deb .
+    done
+  fi
+
+  if [ "$MODE" = "yum" ]; then
+    rm -rf rpm
+    mkdir rpm &&
+    cd rpm &&
+    yumdownloader $NAME &&
+    cd .. &&
+    rpm2cpio rpm/*.rpm | cpio -idmvu
+  fi
+
+done

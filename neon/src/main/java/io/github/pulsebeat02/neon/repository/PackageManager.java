@@ -1,6 +1,7 @@
 package io.github.pulsebeat02.neon.repository;
 
 import io.github.pulsebeat02.neon.Neon;
+import io.github.pulsebeat02.neon.utils.ProcessUtils;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,28 +20,18 @@ import org.jetbrains.annotations.NotNull;
 
 public final class PackageManager {
 
-  private static final Set<String> JCEF_DEPENDENCIES;
-
-  static {
-    // some os's don't even have some of these bare-bones dependencies...
-    JCEF_DEPENDENCIES = Set.of("libxtst6", "libxi6", "libnss3");
-  }
-
   private @NotNull final Neon neon;
   private @NotNull final Path folder;
   private @NotNull final Path script;
-  private @NotNull final Path updateRepo;
 
   public PackageManager(@NotNull final Neon neon) throws IOException {
     this.neon = neon;
     this.folder = neon.getDataFolder().toPath().resolve("apt");
-    this.script = this.folder.resolve("notroot");
-    this.updateRepo = this.folder.resolve("update");
+    this.script = this.folder.resolve("install");
     if (this.isUnix()) {
       this.createFolders();
       this.copyScripts();
       this.setExecutePermissions();
-      this.updateRepositories();
       this.installPackages();
       this.loadLibraries();
     }
@@ -51,33 +42,6 @@ public final class PackageManager {
     return OS.contains("nux");
   }
 
-  private void updateRepositories() throws IOException {
-    final ProcessBuilder builder = new ProcessBuilder(this.updateRepo.toAbsolutePath().toString());
-    this.captureOutput(builder);
-  }
-
-  private void captureOutput(@NotNull final ProcessBuilder builder) throws IOException {
-    final Process p = builder.start();
-    String line;
-    InputStreamReader isr = new InputStreamReader(p.getInputStream());
-    BufferedReader rdr = new BufferedReader(isr);
-    while ((line = rdr.readLine()) != null) {
-      this.neon.logConsole("PACKAGE INSTALLER INFO: %s".formatted(line));
-    }
-    isr = new InputStreamReader(p.getErrorStream());
-    rdr = new BufferedReader(isr);
-    while ((line = rdr.readLine()) != null) {
-      this.neon.logConsole("PACKAGE INSTALLER ERROR: %s".formatted(line));
-    }
-    try {
-      p.waitFor();
-      isr.close();
-      rdr.close();
-    } catch (final InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   private void createFolders() throws IOException {
     if (!Files.isDirectory(this.folder)) {
       Files.createDirectories(this.folder);
@@ -85,10 +49,7 @@ public final class PackageManager {
   }
 
   private void copyScripts() throws IOException {
-    try (final InputStream stream = ResourceUtils.getResourceAsStream("package/notroot")) {
-      Files.copy(stream, this.script, StandardCopyOption.REPLACE_EXISTING);
-    }
-    try (final InputStream stream = ResourceUtils.getResourceAsStream("package/update")) {
+    try (final InputStream stream = ResourceUtils.getResourceAsStream("package/install")) {
       Files.copy(stream, this.script, StandardCopyOption.REPLACE_EXISTING);
     }
   }
@@ -96,25 +57,19 @@ public final class PackageManager {
   private void setExecutePermissions() throws IOException {
     final Set<PosixFilePermission> all = PosixFilePermissions.fromString("rwxrwxrwx");
     Files.setPosixFilePermissions(this.script, all);
-    Files.setPosixFilePermissions(this.updateRepo, all);
   }
 
   private void installPackages() {
-    JCEF_DEPENDENCIES.forEach(this::installPackage);
-  }
-
-  private void installPackage(@NotNull final String name) {
     try {
-      this.installPackageWithoutRoot(name);
+      this.installPackagesWithoutRoot();
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void installPackageWithoutRoot(@NotNull final String packageName) throws IOException {
-    final ProcessBuilder builder =
-        new ProcessBuilder(this.script.toAbsolutePath().toString(), "install", packageName);
-    this.captureOutput(builder);
+  private void installPackagesWithoutRoot() throws IOException {
+    final ProcessBuilder builder = new ProcessBuilder(this.script.toAbsolutePath().toString());
+    ProcessUtils.captureOutput(builder, this.neon::logConsole);
   }
 
   private void loadLibraries() throws IOException {
