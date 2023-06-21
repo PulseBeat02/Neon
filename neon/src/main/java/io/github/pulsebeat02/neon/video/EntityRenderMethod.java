@@ -6,6 +6,7 @@ import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.netty.buffer.ByteBuf;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +44,7 @@ public abstract class EntityRenderMethod extends RenderAdapter {
   }
 
   @Override
-  public void render(@NotNull final ByteBuf buf) {
+  public void render(@NotNull final IntBuffer buf) {
     this.sender.displayEntities(
         null, this.location, this.entities, buf, this.character, this.width, this.height);
   }

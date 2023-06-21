@@ -2,6 +2,7 @@ package org.cef.browser;
 
 import static java.util.Objects.requireNonNull;
 
+import com.jogamp.nativewindow.NativeSurface;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import io.github.pulsebeat02.neon.Neon;
@@ -9,16 +10,25 @@ import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.browser.CefProgressHandler;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.github.pulsebeat02.neon.video.RenderMethod;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DragGestureEvent;
+import java.awt.dnd.DragGestureRecognizer;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceAdapter;
+import java.awt.dnd.DragSourceDropEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import javax.swing.SwingUtilities;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -26,6 +36,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.cef.CefApp;
 import org.cef.CefClient;
+import org.cef.CefSettings;
+import org.cef.CefSettings.LogSeverity;
+import org.cef.OS;
 import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefScreenInfo;
@@ -34,15 +47,11 @@ import org.jetbrains.annotations.Nullable;
 
 public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHandler {
   private static @NotNull final CefClient CEF_CLIENT;
-  private static @NotNull final Point INITIAL_POINT;
-  private static @NotNull final Rectangle BROWSER_RECTANGLE;
 
   static {
     try {
       final CefApp CEF_APP = createApp();
       CEF_CLIENT = CEF_APP.createClient();
-      INITIAL_POINT = new Point(0, 0);
-      BROWSER_RECTANGLE = new Rectangle(0, 0, 1, 1);
     } catch (final UnsupportedPlatformException
         | CefInitializationException
         | IOException
@@ -57,9 +66,15 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
   private @NotNull final RenderMethod method;
   private @NotNull final Rectangle viewArea;
   private @Nullable GLCanvas canvas;
+  private @Nullable CefRequestContext context;
+  private @Nullable CefBrowser_N parent;
+  private @NotNull Point screenPoint;
+  private final @NotNull Rectangle browserRect;
   private int depth;
   private int componentDepth;
   private double scaleFactor;
+  private long windowHandle;
+  private boolean justCreated;
 
   public MinecraftBrowser(
       @NotNull final Neon neon,
@@ -78,27 +93,107 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       @Nullable final CefBrowser_N parent,
       @Nullable final Point inspectAt) {
     super(CEF_CLIENT, url, context, parent, inspectAt);
+    this.context = context;
+    this.parent = parent;
     this.neon = neon;
     this.settings = settings;
     this.method = method;
     this.nativeRenderer = new CefRenderer(true);
     this.viewArea = this.getViewArea();
     this.canvas = this.createCanvas();
-    this.handleZoom();
+    this.depth = 32;
+    this.componentDepth = 8;
+    this.scaleFactor = 1.0;
+    this.browserRect = new Rectangle(0, 0, 1, 1);
+    this.screenPoint = new Point(0, 0);
+    this.windowHandle = 0;
   }
 
   private @NotNull GLCanvas createCanvas() {
     final GLProfile glprofile = GLProfile.getMaxFixedFunc(true);
     final GLCapabilities glcapabilities = new GLCapabilities(glprofile);
-    return new GLCanvas(glcapabilities);
+    return new RenderCanvas(glcapabilities);
   }
 
-  private void handleZoom() {
-    final Graphics g = this.canvas.getGraphics();
-    final GraphicsConfiguration config = ((Graphics2D) g).getDeviceConfiguration();
-    this.depth = config.getColorModel().getPixelSize();
-    this.componentDepth = config.getColorModel().getComponentSize()[0];
-    this.scaleFactor = ((Graphics2D) g).getTransform().getScaleX();
+  final class RenderCanvas extends GLCanvas {
+
+    private boolean removed = true;
+
+    public RenderCanvas(@NotNull final GLCapabilities glcapabilities) {
+      super(glcapabilities);
+      this.addGLEventListener(
+          new GLEventListener() {
+            @Override
+            public void reshape(
+                final GLAutoDrawable glautodrawable,
+                final int x,
+                final int y,
+                final int width,
+                final int height) {
+              int newWidth = width;
+              int newHeight = height;
+              if (OS.isMacintosh()) {
+                newWidth = (int) (width / MinecraftBrowser.this.scaleFactor);
+                newHeight = (int) (height / MinecraftBrowser.this.scaleFactor);
+              }
+              MinecraftBrowser.this.browserRect.setBounds(x, y, newWidth, newHeight);
+              MinecraftBrowser.this.screenPoint =
+                  MinecraftBrowser.this.canvas.getLocationOnScreen();
+              MinecraftBrowser.this.wasResized(newWidth, newHeight);
+            }
+
+            @Override
+            public void init(final GLAutoDrawable glautodrawable) {
+              MinecraftBrowser.this.nativeRenderer.initialize(glautodrawable.getGL().getGL2());
+            }
+
+            @Override
+            public void dispose(final GLAutoDrawable glautodrawable) {
+              MinecraftBrowser.this.nativeRenderer.cleanup(glautodrawable.getGL().getGL2());
+            }
+
+            @Override
+            public void display(final GLAutoDrawable glautodrawable) {
+              MinecraftBrowser.this.nativeRenderer.render(glautodrawable.getGL().getGL2());
+            }
+          });
+    }
+
+    @Override
+    public void paint(final Graphics g) {
+      MinecraftBrowser.this.createBrowserIfRequired(true);
+      if (g instanceof Graphics2D) {
+        final GraphicsConfiguration config = ((Graphics2D) g).getDeviceConfiguration();
+        MinecraftBrowser.this.depth = config.getColorModel().getPixelSize();
+        MinecraftBrowser.this.componentDepth = config.getColorModel().getComponentSize()[0];
+        MinecraftBrowser.this.scaleFactor = ((Graphics2D) g).getTransform().getScaleX();
+      }
+      super.paint(g);
+    }
+
+    @Override
+    public void addNotify() {
+      super.addNotify();
+      if (this.removed) {
+        MinecraftBrowser.this.notifyAfterParentChanged();
+        this.removed = false;
+      }
+    }
+
+    @Override
+    public void removeNotify() {
+      if (!this.removed) {
+        if (!MinecraftBrowser.this.isClosed()) {
+          MinecraftBrowser.this.notifyAfterParentChanged();
+        }
+        this.removed = true;
+      }
+      super.removeNotify();
+    }
+  }
+
+  private void notifyAfterParentChanged() {
+    this.getClient().onAfterParentChanged(this);
   }
 
   private @NotNull Rectangle getViewArea() {
@@ -115,26 +210,26 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
           CefInitializationException,
           IOException,
           InterruptedException {
+    final CefSettings settings = new CefSettings();
+    settings.log_severity = LogSeverity.LOGSEVERITY_WARNING;
     final CefAppBuilder builder = new CefAppBuilder();
     final Plugin plugin = requireNonNull(Bukkit.getPluginManager().getPlugin("Neon"));
     builder.setProgressHandler(new CefProgressHandler((Neon) plugin));
-    builder.addJcefArgs("--disable-gpu-compositing");
     builder.addJcefArgs("--disable-software-rasterizer");
-    builder.addJcefArgs("--disable-extensions");
     builder.addJcefArgs("--no-sandbox");
-    builder.addJcefArgs("--off-screen-rendering-enabled");
     builder.addJcefArgs("--disable-gpu");
-    builder.addJcefArgs("--enable-begin-frame-scheduling");
-    builder.addJcefArgs("--off-screen-frame-rate=20");
-    return builder.build();
+    builder.addJcefArgs("--disable-gpu-compositing");
+    builder.addJcefArgs("--log-level=1");
+    final CefApp app = builder.build();
+    app.setSettings(settings);
+    return app;
   }
 
-  private void notifyAfterParentChanged() {
-    this.getClient().onAfterParentChanged(this);
-  }
-
-  private void createBrowserIfRequired() {
-    final long windowHandle = 0;
+  private void createBrowserIfRequired(final boolean hasParent) {
+    long windowHandle = 0;
+    if (hasParent) {
+      windowHandle = this.getWindowHandle();
+    }
     if (this.getNativeRef("CefBrowser") == 0) {
       final CefBrowser_N parent = this.getParentBrowser();
       final CefClient client = this.getClient();
@@ -146,18 +241,41 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       } else {
         this.createBrowser(client, windowHandle, url, true, true, this.canvas, context);
       }
+    } else if (hasParent && this.justCreated) {
+      this.notifyAfterParentChanged();
+      this.setFocus(true);
+      this.justCreated = false;
     }
+  }
+
+  private long getWindowHandle() {
+    if (this.windowHandle == 0) {
+      final NativeSurface surface = this.canvas.getNativeSurface();
+      if (surface != null) {
+        surface.lockSurface();
+        this.windowHandle = this.getWindowHandle(surface.getSurfaceHandle());
+        surface.unlockSurface();
+      }
+    }
+    return this.windowHandle;
   }
 
   @Override
   public void close(final boolean force) {
-    super.close(force);
-    this.notifyAfterParentChanged();
+    if (this.context != null) {
+      this.context.dispose();
+      this.context = null;
+    }
+    if (this.parent != null) {
+      this.parent.closeDevTools();
+      this.parent = null;
+    }
     if (this.canvas != null) {
       this.canvas.setEnabled(false);
       this.canvas.destroy();
       this.canvas = null;
     }
+    super.close(force);
   }
 
   @Override
@@ -167,7 +285,8 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
 
   @Override
   public void createImmediately() {
-    this.createBrowserIfRequired();
+    this.justCreated = true;
+    this.createBrowserIfRequired(false);
   }
 
   @Override
@@ -182,7 +301,8 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       final CefRequestContext context,
       final CefBrowser_N parent,
       final Point inspectAt) {
-    return new MinecraftBrowser(this.neon, this.settings, this.method, url);
+    return new MinecraftBrowser(
+        this.neon, this.settings, this.method, url, context, parent, inspectAt);
   }
 
   @Override
@@ -204,19 +324,21 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       return;
     }
 
-    final GL2 gl2 = this.canvas != null ? this.canvas.getGL().getGL2() : null;
-    if (gl2 == null) {
+    if (context.makeCurrent() == GLContext.CONTEXT_NOT_CURRENT) {
       return;
     }
 
-    this.nativeRenderer.onPaint(
-        this.canvas.getGL().getGL2(), popup, dirtyRects, buffer, width, height);
+    final GL2 gl2 = this.canvas.getGL().getGL2();
+    this.nativeRenderer.onPaint(gl2, popup, dirtyRects, buffer, width, height);
     context.release();
+    SwingUtilities.invokeLater(() -> this.canvas.display());
 
-    this.method.render(this.retrieveFrame(gl2, height, width));
+    final IntBuffer rgba = this.retrieveFrame(gl2, width, height);
+    this.method.render(rgba);
   }
 
-  public ByteBuf retrieveFrame(@NotNull final GL2 gl2, final int height, final int width) {
+  public IntBuffer retrieveFrame(@NotNull final GL2 gl2, final int width, final int height) {
+
     final int textureId = this.nativeRenderer.getTextureID();
     final boolean useReadPixels = (textureId == 0);
     final ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 4);
@@ -234,7 +356,18 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
     } finally {
       gl2.getContext().release();
     }
-    return Unpooled.wrappedBuffer(buffer);
+
+    final IntBuffer raster = IntBuffer.allocate(width * height);
+    for (int i = 0; i < raster.capacity(); i++) {
+      final int r = (buffer.get() & 0xff);
+      final int g = (buffer.get() & 0xff);
+      final int b = (buffer.get() & 0xff);
+      final int a = (buffer.get() & 0xff);
+      final int c = ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF));
+      raster.put(i, c);
+    }
+
+    return raster;
   }
 
   @Override
@@ -245,7 +378,7 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
   @Override
   public boolean getScreenInfo(
       @NotNull final CefBrowser browser, @NotNull final CefScreenInfo screenInfo) {
-    final Rectangle bounds = BROWSER_RECTANGLE.getBounds();
+    final Rectangle bounds = this.browserRect.getBounds();
     screenInfo.Set(this.scaleFactor, this.depth, this.componentDepth, false, bounds, bounds);
     return true;
   }
@@ -253,7 +386,7 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
   @Override
   public @NotNull Point getScreenPoint(
       @NotNull final CefBrowser browser, @NotNull final Point viewPoint) {
-    final Point point = new Point(INITIAL_POINT);
+    final Point point = new Point(this.screenPoint);
     point.translate(viewPoint.x, viewPoint.y);
     return point;
   }
@@ -273,24 +406,72 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
 
   @Override
   public boolean onCursorChange(@NotNull final CefBrowser browser, final int cursorType) {
-    if (this.canvas != null) {
-      this.canvas.setCursor(new Cursor(cursorType));
-    }
+    SwingUtilities.invokeLater(() -> this.canvas.setCursor(new Cursor(cursorType)));
     return true;
+  }
+
+  @Override
+  public void updateDragCursor(final CefBrowser browser, final int operation) {}
+
+  private static int getDndAction(final int mask) {
+    int action = DnDConstants.ACTION_NONE;
+    if ((mask & CefDragData.DragOperations.DRAG_OPERATION_COPY)
+        == CefDragData.DragOperations.DRAG_OPERATION_COPY) {
+      action = DnDConstants.ACTION_COPY;
+    } else if ((mask & CefDragData.DragOperations.DRAG_OPERATION_MOVE)
+        == CefDragData.DragOperations.DRAG_OPERATION_MOVE) {
+      action = DnDConstants.ACTION_MOVE;
+    } else if ((mask & CefDragData.DragOperations.DRAG_OPERATION_LINK)
+        == CefDragData.DragOperations.DRAG_OPERATION_LINK) {
+      action = DnDConstants.ACTION_LINK;
+    }
+    return action;
+  }
+
+  private static final class SyntheticDragGestureRecognizer extends DragGestureRecognizer {
+    public SyntheticDragGestureRecognizer(
+        final Component c, final int action, final MouseEvent triggerEvent) {
+      super(new DragSource(), c, action);
+      this.appendEvent(triggerEvent);
+    }
+
+    @Override
+    protected void registerListeners() {}
+
+    @Override
+    protected void unregisterListeners() {}
   }
 
   @Override
   public boolean startDragging(
-      @NotNull final CefBrowser browser,
-      @NotNull final CefDragData dragData,
+      final CefBrowser browser,
+      final CefDragData dragData,
       final int mask,
       final int x,
       final int y) {
+    final int action = getDndAction(mask);
+    final MouseEvent triggerEvent =
+        new MouseEvent(this.canvas, MouseEvent.MOUSE_DRAGGED, 0, 0, x, y, 0, false);
+    final DragGestureEvent ev =
+        new DragGestureEvent(
+            new SyntheticDragGestureRecognizer(this.canvas, action, triggerEvent),
+            action,
+            new Point(x, y),
+            new ArrayList<>(Arrays.asList(triggerEvent)));
+    DragSource.getDefaultDragSource()
+        .startDrag(
+            ev,
+            /* dragCursor= */ null,
+            new StringSelection(dragData.getFragmentText()),
+            new DragSourceAdapter() {
+              @Override
+              public void dragDropEnd(final DragSourceDropEvent dsde) {
+                MinecraftBrowser.this.dragSourceEndedAt(dsde.getLocation(), action);
+                MinecraftBrowser.this.dragSourceSystemDragEnded();
+              }
+            });
     return true;
   }
-
-  @Override
-  public void updateDragCursor(@NotNull final CefBrowser browser, final int operation) {}
 
   public void sendNativeMouseEvent(@NotNull final MouseEvent event) {
     this.sendMouseEvent(event);

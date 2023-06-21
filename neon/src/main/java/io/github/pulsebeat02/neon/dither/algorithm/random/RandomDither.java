@@ -4,7 +4,7 @@ import io.github.pulsebeat02.neon.dither.DitherHandler;
 import io.github.pulsebeat02.neon.utils.DitherUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.random.RandomGenerator;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +31,7 @@ public final class RandomDither implements DitherHandler {
   }
 
   @Override
-  public @NotNull ByteBuf dither(@NotNull final ByteBuf buffer, final int width) {
+  public @NotNull ByteBuf dither(@NotNull final IntBuffer buffer, final int width) {
     final int length = buffer.capacity();
     final int height = length / width;
     final ByteBuf data = Unpooled.buffer(length);
@@ -39,7 +39,7 @@ public final class RandomDither implements DitherHandler {
       final int yIndex = y * width;
       for (int x = 0; x < width; x++) {
         final int index = yIndex + x;
-        final int color = buffer.getByte(index);
+        final int color = buffer.get(index);
         final int b1 = color >> 24 & 0xFF;
         final int g1 = color >> 16 & 0xFF;
         final int r1 = color >> 8 & 0xFF;

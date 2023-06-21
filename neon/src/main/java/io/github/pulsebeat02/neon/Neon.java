@@ -3,6 +3,7 @@ package io.github.pulsebeat02.neon;
 import static net.kyori.adventure.text.Component.text;
 
 import io.github.pulsebeat02.neon.command.CommandHandler;
+import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
@@ -38,14 +39,15 @@ public final class Neon extends JavaPlugin {
     this.registerServerImplementation();
     this.readConfigurationFile();
     this.installPackages();
-    this.registerBrowser();
+    this.registerStaticBlocks();
     this.registerCommands();
     this.registerStats();
     this.registerEvents();
   }
 
-  private void registerBrowser() {
+  private void registerStaticBlocks() {
     MinecraftBrowser.init();
+    ExecutorProvider.init();
   }
 
   private void registerAdventure() {
@@ -62,6 +64,11 @@ public final class Neon extends JavaPlugin {
     this.shutdownBrowser();
     this.shutdownConfiguration();
     this.shutdownAdventure();
+    this.shutdownExecutors();
+  }
+
+  private void shutdownExecutors() {
+    ExecutorProvider.shutdown();
   }
 
   private void installPackages() {

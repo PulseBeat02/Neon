@@ -53,7 +53,6 @@ class CefRenderer {
 
     // Create the texture.
     gl2.glGenTextures(1, this.texture_id_, 0);
-    assert (this.texture_id_[0] != 0);
 
     gl2.glBindTexture(gl2.GL_TEXTURE_2D, this.texture_id_[0]);
     gl2.glTexParameteri(gl2.GL_TEXTURE_2D, gl2.GL_TEXTURE_MIN_FILTER, gl2.GL_NEAREST);
@@ -72,8 +71,6 @@ class CefRenderer {
     if (this.use_draw_pixels_ || this.view_width_ == 0 || this.view_height_ == 0) {
       return;
     }
-
-    assert (this.initialized_context_ != null);
 
     final float[] vertex_data = { // tu,   tv,     x,     y,    z
       0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
