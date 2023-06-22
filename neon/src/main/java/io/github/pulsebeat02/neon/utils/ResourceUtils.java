@@ -21,4 +21,8 @@ public final class ResourceUtils {
   public static @NotNull Reader getResourceAsReader(@NotNull final String name) {
     return new BufferedReader(new InputStreamReader(getResourceAsStream(name)));
   }
+
+  public static @NotNull String getFilename(@NotNull final String url) {
+    return url.substring(url.lastIndexOf('/') + 1);
+  }
 }

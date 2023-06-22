@@ -2,14 +2,13 @@ package io.github.pulsebeat02.neon;
 
 import static net.kyori.adventure.text.Component.text;
 
+import io.github.pulsebeat02.neon.apt.PackageManager;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
-import io.github.pulsebeat02.neon.repository.JuNest;
-import io.github.pulsebeat02.neon.repository.PackageManager;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
 import net.kyori.adventure.audience.Audience;
@@ -73,8 +72,7 @@ public final class Neon extends JavaPlugin {
 
   private void installPackages() {
     try {
-      new PackageManager(this);
-      // new JuNest(this);
+      new PackageManager(this).installPackages();
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
