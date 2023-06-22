@@ -16,7 +16,6 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -93,14 +92,13 @@ public final class PackageManager {
 
   private void addNativePath() throws IOException {
     final Set<Path> paths = this.getUrls();
-    final URL[] arr = new URL[paths.size()];
-    int index = 0;
     for (final Path path : paths) {
-      arr[index++] = path.toUri().toURL();
+      try {
+        NativePathUtil.addNativeLibraryPath(path.toString());
+      } catch (final IllegalAccessException e) {
+        throw new AssertionError(e);
+      }
     }
-    final ClassLoader context = Thread.currentThread().getContextClassLoader();
-    final ClassLoader loader = URLClassLoader.newInstance(arr, context);
-    Thread.currentThread().setContextClassLoader(loader);
   }
 
   private @NotNull Set<Path> getUrls() throws IOException {

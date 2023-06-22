@@ -16,10 +16,9 @@ dependencies {
     compileOnly 'org.jogamp.gluegen:gluegen-rt-main:2.4.0'
     compileOnly 'org.jogamp.jogl:jogl-all-main:2.4.0'
     compileOnly 'org.jsoup:jsoup:1.16.1'
-
-    testImplementation 'io.netty:netty-all:5.0.0.Alpha2'
-    testImplementation 'me.friwi:jcefmaven:110.0.25'
-    testImplementation 'org.jsoup:jsoup:1.16.1'
+    compileOnly 'org.burningwave:core:12.62.7'
+    
+    testImplementation 'org.burningwave:core:12.62.7'
 
     implementation project(':neon-api')
     implementation project(':v1_20_R1')
