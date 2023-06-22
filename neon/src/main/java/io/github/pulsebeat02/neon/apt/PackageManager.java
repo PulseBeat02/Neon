@@ -12,8 +12,6 @@ import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,9 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -95,25 +92,22 @@ public final class PackageManager {
   }
 
   private void addNativePath() throws IOException {
-    final String pathToAdd = this.resolveNativeLibraryPath().toString();
-    final URL url = new URL(pathToAdd);
-    final ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
-    final ClassLoader urlCL = URLClassLoader.newInstance(new URL[] {url}, contextCL);
-    Thread.currentThread().setContextClassLoader(urlCL);
-  }
-
-  private @NotNull Path resolveNativeLibraryPath() throws IOException {
-    final Path folder = this.dest.resolve("usr").resolve("lib");
-    try (final Stream<Path> files = Files.list(folder)) {
-      return this.getPath(files);
+    final Set<Path> paths = this.getUrls();
+    final URL[] arr = new URL[paths.size()];
+    int index = 0;
+    for (final Path path : paths) {
+      arr[index++] = path.toUri().toURL();
     }
+    final ClassLoader context = Thread.currentThread().getContextClassLoader();
+    final ClassLoader loader = URLClassLoader.newInstance(arr, context);
+    Thread.currentThread().setContextClassLoader(loader);
   }
 
-  private @NotNull Path getPath(@NotNull final Stream<Path> files) {
-    return files
-        .filter(file -> file.getFileName().toString().startsWith(ORIGINAL_CPU_ARCH))
-        .findFirst()
-        .orElseThrow();
+  private @NotNull Set<Path> getUrls() throws IOException {
+    final Path folder = this.dest.resolve("usr").resolve("lib");
+    try (final Stream<Path> stream = Files.list(folder)) {
+      return stream.collect(Collectors.toUnmodifiableSet());
+    }
   }
 
   private void createFolders() throws IOException {
