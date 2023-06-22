@@ -12,14 +12,8 @@ import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureEvent;
-import java.awt.dnd.DragGestureRecognizer;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceAdapter;
-import java.awt.dnd.DragSourceDropEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
+import java.awt.dnd.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,7 +22,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -81,10 +75,11 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       @NotNull final BrowserSettings settings,
       @NotNull final RenderMethod method,
       @NotNull final String url) {
-    this(neon, settings, method, url, null, null, null);
+    this(CEF_CLIENT, neon, settings, method, url, null, null, null);
   }
 
   private MinecraftBrowser(
+      @NotNull final CefClient client,
       @NotNull final Neon neon,
       @NotNull final BrowserSettings settings,
       @NotNull final RenderMethod method,
@@ -92,104 +87,176 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       @Nullable final CefRequestContext context,
       @Nullable final CefBrowser_N parent,
       @Nullable final Point inspectAt) {
-    super(CEF_CLIENT, url, context, parent, inspectAt);
+    super(client, url, context, parent, inspectAt);
     this.context = context;
     this.parent = parent;
     this.neon = neon;
     this.settings = settings;
     this.method = method;
+    this.justCreated = false;
     this.nativeRenderer = new CefRenderer(true);
     this.viewArea = this.getViewArea();
-    this.canvas = this.createCanvas();
     this.depth = 32;
     this.componentDepth = 8;
     this.scaleFactor = 1.0;
     this.browserRect = new Rectangle(0, 0, 1, 1);
     this.screenPoint = new Point(0, 0);
     this.windowHandle = 0;
+    this.createGLCanvas();
   }
 
-  private @NotNull GLCanvas createCanvas() {
+  private void createGLCanvas() {
     final GLProfile glprofile = GLProfile.getMaxFixedFunc(true);
     final GLCapabilities glcapabilities = new GLCapabilities(glprofile);
-    return new RenderCanvas(glcapabilities);
-  }
+    this.canvas =
+        new GLCanvas(glcapabilities) {
+          private boolean removed_ = true;
 
-  final class RenderCanvas extends GLCanvas {
+          @Override
+          public void paint(final Graphics g) {
+            MinecraftBrowser.this.createBrowserIfRequired(true);
+            if (g instanceof Graphics2D) {
+              final GraphicsConfiguration config = ((Graphics2D) g).getDeviceConfiguration();
+              MinecraftBrowser.this.depth = config.getColorModel().getPixelSize();
+              MinecraftBrowser.this.componentDepth = config.getColorModel().getComponentSize()[0];
+              MinecraftBrowser.this.scaleFactor = ((Graphics2D) g).getTransform().getScaleX();
+            }
+            super.paint(g);
+          }
 
-    private boolean removed = true;
+          @Override
+          public void addNotify() {
+            super.addNotify();
+            if (this.removed_) {
+              MinecraftBrowser.this.notifyAfterParentChanged();
+              this.removed_ = false;
+            }
+          }
 
-    public RenderCanvas(@NotNull final GLCapabilities glcapabilities) {
-      super(glcapabilities);
-      this.addGLEventListener(
-          new GLEventListener() {
-            @Override
-            public void reshape(
-                final GLAutoDrawable glautodrawable,
-                final int x,
-                final int y,
-                final int width,
-                final int height) {
-              int newWidth = width;
-              int newHeight = height;
-              if (OS.isMacintosh()) {
-                newWidth = (int) (width / MinecraftBrowser.this.scaleFactor);
-                newHeight = (int) (height / MinecraftBrowser.this.scaleFactor);
+          @Override
+          public void removeNotify() {
+            if (!this.removed_) {
+              if (!MinecraftBrowser.this.isClosed()) {
+                MinecraftBrowser.this.notifyAfterParentChanged();
               }
-              MinecraftBrowser.this.browserRect.setBounds(x, y, newWidth, newHeight);
-              MinecraftBrowser.this.screenPoint =
-                  MinecraftBrowser.this.canvas.getLocationOnScreen();
-              MinecraftBrowser.this.wasResized(newWidth, newHeight);
+              this.removed_ = true;
             }
+            super.removeNotify();
+          }
+        };
 
-            @Override
-            public void init(final GLAutoDrawable glautodrawable) {
-              MinecraftBrowser.this.nativeRenderer.initialize(glautodrawable.getGL().getGL2());
+    this.canvas.addGLEventListener(
+        new GLEventListener() {
+          @Override
+          public void reshape(
+              final GLAutoDrawable glautodrawable,
+              final int x,
+              final int y,
+              final int width,
+              final int height) {
+            int newWidth = width;
+            int newHeight = height;
+            if (OS.isMacintosh()) {
+              newWidth = (int) (width / MinecraftBrowser.this.scaleFactor);
+              newHeight = (int) (height / MinecraftBrowser.this.scaleFactor);
             }
+            MinecraftBrowser.this.browserRect.setBounds(x, y, newWidth, newHeight);
+            MinecraftBrowser.this.screenPoint = MinecraftBrowser.this.canvas.getLocationOnScreen();
+            MinecraftBrowser.this.wasResized(newWidth, newHeight);
+          }
 
-            @Override
-            public void dispose(final GLAutoDrawable glautodrawable) {
-              MinecraftBrowser.this.nativeRenderer.cleanup(glautodrawable.getGL().getGL2());
-            }
+          @Override
+          public void init(final GLAutoDrawable glautodrawable) {
+            MinecraftBrowser.this.nativeRenderer.initialize(glautodrawable.getGL().getGL2());
+          }
 
-            @Override
-            public void display(final GLAutoDrawable glautodrawable) {
-              MinecraftBrowser.this.nativeRenderer.render(glautodrawable.getGL().getGL2());
-            }
-          });
-    }
+          @Override
+          public void dispose(final GLAutoDrawable glautodrawable) {
+            MinecraftBrowser.this.nativeRenderer.cleanup(glautodrawable.getGL().getGL2());
+          }
 
-    @Override
-    public void paint(final Graphics g) {
-      MinecraftBrowser.this.createBrowserIfRequired(true);
-      if (g instanceof Graphics2D) {
-        final GraphicsConfiguration config = ((Graphics2D) g).getDeviceConfiguration();
-        MinecraftBrowser.this.depth = config.getColorModel().getPixelSize();
-        MinecraftBrowser.this.componentDepth = config.getColorModel().getComponentSize()[0];
-        MinecraftBrowser.this.scaleFactor = ((Graphics2D) g).getTransform().getScaleX();
-      }
-      super.paint(g);
-    }
+          @Override
+          public void display(final GLAutoDrawable glautodrawable) {
+            MinecraftBrowser.this.nativeRenderer.render(glautodrawable.getGL().getGL2());
+          }
+        });
 
-    @Override
-    public void addNotify() {
-      super.addNotify();
-      if (this.removed) {
-        MinecraftBrowser.this.notifyAfterParentChanged();
-        this.removed = false;
-      }
-    }
+    this.canvas.addMouseListener(
+        new MouseListener() {
+          @Override
+          public void mousePressed(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
 
-    @Override
-    public void removeNotify() {
-      if (!this.removed) {
-        if (!MinecraftBrowser.this.isClosed()) {
-          MinecraftBrowser.this.notifyAfterParentChanged();
-        }
-        this.removed = true;
-      }
-      super.removeNotify();
-    }
+          @Override
+          public void mouseReleased(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
+
+          @Override
+          public void mouseEntered(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
+
+          @Override
+          public void mouseExited(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
+
+          @Override
+          public void mouseClicked(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
+        });
+
+    this.canvas.addMouseMotionListener(
+        new MouseMotionListener() {
+          @Override
+          public void mouseMoved(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
+
+          @Override
+          public void mouseDragged(final MouseEvent e) {
+            MinecraftBrowser.this.sendMouseEvent(e);
+          }
+        });
+
+    this.canvas.addMouseWheelListener(MinecraftBrowser.this::sendMouseWheelEvent);
+
+    this.canvas.addKeyListener(
+        new KeyListener() {
+          @Override
+          public void keyTyped(final KeyEvent e) {
+            MinecraftBrowser.this.sendKeyEvent(e);
+          }
+
+          @Override
+          public void keyPressed(final KeyEvent e) {
+            MinecraftBrowser.this.sendKeyEvent(e);
+          }
+
+          @Override
+          public void keyReleased(final KeyEvent e) {
+            MinecraftBrowser.this.sendKeyEvent(e);
+          }
+        });
+
+    this.canvas.setFocusable(true);
+    this.canvas.addFocusListener(
+        new FocusListener() {
+          @Override
+          public void focusLost(final FocusEvent e) {
+            MinecraftBrowser.this.setFocus(false);
+          }
+
+          @Override
+          public void focusGained(final FocusEvent e) {
+            MenuSelectionManager.defaultManager().clearSelectedPath();
+            MinecraftBrowser.this.setFocus(true);
+          }
+        });
+    new DropTarget(this.canvas, new CefDropTargetListener(this));
   }
 
   private void notifyAfterParentChanged() {
@@ -237,9 +304,9 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       final Point inspect = this.getInspectAt();
       final String url = this.getUrl();
       if (this.getParentBrowser() != null) {
-        this.createDevTools(parent, client, windowHandle, true, true, this.canvas, inspect);
+        this.createDevTools(parent, client, windowHandle, true, true, null, inspect);
       } else {
-        this.createBrowser(client, windowHandle, url, true, true, this.canvas, context);
+        this.createBrowser(client, windowHandle, url, true, true, null, context);
       }
     } else if (hasParent && this.justCreated) {
       this.notifyAfterParentChanged();
@@ -302,7 +369,7 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
       final CefBrowser_N parent,
       final Point inspectAt) {
     return new MinecraftBrowser(
-        this.neon, this.settings, this.method, url, context, parent, inspectAt);
+        client, this.neon, this.settings, this.method, url, context, parent, inspectAt);
   }
 
   @Override
@@ -394,8 +461,8 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
   @Override
   public void onPopupShow(@NotNull final CefBrowser browser, final boolean show) {
     if (!show) {
-      final CefBrowser_N parent = (CefBrowser_N) browser;
-      parent.invalidate();
+      this.nativeRenderer.clearPopupRects();
+      this.parent.invalidate();
     }
   }
 
