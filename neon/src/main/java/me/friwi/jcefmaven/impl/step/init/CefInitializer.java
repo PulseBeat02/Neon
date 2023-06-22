@@ -42,7 +42,17 @@ public class CefInitializer {
 
       // Remove dependency loader from jcef (causes unnecessary errors due to wrong library names in
       // jcef)
-      SystemBootstrap.setLoader(libname -> {});
+      SystemBootstrap.setLoader(new SystemBootstrap.Loader() {
+        @Override
+        public void loadLibrary(final String libname) {
+
+        }
+
+        @Override
+        public void load(final String libname) {
+
+        }
+      });
 
       try {
         // Load native libraries for jcef, as the jvm does not update the java library path

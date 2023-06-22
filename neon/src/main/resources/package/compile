@@ -1,0 +1,5 @@
+#!/bin/bash
+PWD=$(pwd)
+for deb in $PWD/*.deb; do
+  dpkg -x $deb .
+done

@@ -13,26 +13,35 @@ public class SystemBootstrap {
     /**
      * Simple interface for how a library by name should be loaded.
      */
-    static public interface Loader { public void loadLibrary(String libname); }
+    static public interface Loader { public void loadLibrary(String libname); public void load(String libname); }
 
     /**
      * Default implementation is to call System.loadLibrary
      */
     static private Loader loader_ = new Loader() {
         @Override
-        public void loadLibrary(String libname) {
+        public void loadLibrary(final String libname) {
             System.loadLibrary(libname);
+        }
+
+        @Override
+        public void load(final String libname) {
+            System.load(libname);
         }
     };
 
-    static public void setLoader(Loader loader) {
+    static public void setLoader(final Loader loader) {
         if (loader == null) {
             throw new NullPointerException("Loader cannot be null");
         }
         loader_ = loader;
     }
 
-    static public void loadLibrary(String libname) {
+    static public void loadLibrary(final String libname) {
         loader_.loadLibrary(libname);
+    }
+
+    static public void load(final String libname) {
+        loader_.load(libname);
     }
 }
