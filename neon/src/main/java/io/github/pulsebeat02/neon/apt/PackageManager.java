@@ -162,11 +162,34 @@ public final class PackageManager {
     this.loadNativeLibrary("libpangoft2-1.0");
     this.loadNativeLibrary("libxcb-shm0");
     this.loadNativeLibrary("libpixman-1");
-    this.loadNativeLibrary("ligcairo2");
+    this.loadNativeLibrary("libcairo2");
     this.loadNativeLibrary("libpangocairo-1.0-0");
-
-    this.loadNativeLibrary("libgtk-3");
+    this.loadNativeLibrary("libcairo-gobject");
+    this.loadNativeLibrary("libdbusmenu-glib4");
+    this.loadNativeLibrary("libdbusmenu-gtk3-4");
+    this.loadNativeLibrary("libjpeg62-turbo");
+    this.loadNativeLibrary("libjbig");
+    this.loadNativeLibrary("liblzma");
+    this.loadNativeLibrary("libzstd");
+    this.loadNativeLibrary("libwebp");
+    this.loadNativeLibrary("libtiff");
+    this.loadNativeLibrary("libgdk-pixbuf2.0-0");
     this.loadNativeLibrary("libappindicator3");
+    this.loadNativeLibrary("libepoxy");
+    this.loadNativeLibrary("libjson-glib-1.0");
+    this.loadNativeLibrary("libffi");
+    this.loadNativeLibrary("libwayland-client");
+    this.loadNativeLibrary("libwayland-cursor");
+    this.loadNativeLibrary("libwayland-egl");
+    this.loadNativeLibrary("libxinerama");
+    this.loadNativeLibrary("libicu63");
+    this.loadNativeLibrary("libxml2");
+    this.loadNativeLibrary("liblcms2");
+    this.loadNativeLibrary("libudev1");
+    this.loadNativeLibrary("libcolord2");
+    this.loadNativeLibrary("libsoup2.4");
+    this.loadNativeLibrary("librest-0.7");
+    this.loadNativeLibrary("libgtk-3");
   }
 
   private void loadNativeLibrary(@NotNull final String name) {
