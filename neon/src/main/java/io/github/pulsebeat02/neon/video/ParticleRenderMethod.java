@@ -2,14 +2,16 @@ package io.github.pulsebeat02.neon.video;
 
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
+import io.github.pulsebeat02.neon.utils.TaskUtils;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import java.util.concurrent.ExecutionException;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Consumer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class ParticleRenderMethod extends EntityRenderMethod {
 
@@ -33,16 +35,27 @@ public final class ParticleRenderMethod extends EntityRenderMethod {
     for (int i = this.height - 1; i >= 0; i--) {
       final Consumer<AreaEffectCloud> handleEntity = this::handleEntity;
       final int index = i;
-      new BukkitRunnable() {
-        @Override
-        public void run() {
-          entities[index] = world.spawn(spawn, AreaEffectCloud.class, handleEntity);
-        }
-      }.runTask(neon);
-      entities[i].setCustomName(this.repeat(this.height));
-      entities[i].setCustomNameVisible(true);
+      try {
+        TaskUtils.sync(neon, () -> this.spawnEntity(spawn, world, entities, handleEntity, index))
+            .get();
+      } catch (final InterruptedException | ExecutionException e) {
+        throw new RuntimeException(e);
+      }
       spawn.add(0.0, 0.225, 0.0);
     }
+  }
+
+  @Nullable
+  private Void spawnEntity(
+      @NotNull final Location spawn,
+      @NotNull final World world,
+      @NotNull final Entity[] entities,
+      final Consumer<AreaEffectCloud> handleEntity,
+      final int index) {
+    entities[index] = world.spawn(spawn, AreaEffectCloud.class, handleEntity);
+    entities[index].setCustomName(this.repeat(this.height));
+    entities[index].setCustomNameVisible(true);
+    return null;
   }
 
   public void handleEntity(@NotNull final Entity entity) {

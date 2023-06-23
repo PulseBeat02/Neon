@@ -1,7 +1,7 @@
 package io.github.pulsebeat02.neon.command.screen;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static io.github.pulsebeat02.neon.command.ArgumentUtils.requiresPlayer;
+import static io.github.pulsebeat02.neon.utils.ArgumentUtils.requiresPlayer;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;

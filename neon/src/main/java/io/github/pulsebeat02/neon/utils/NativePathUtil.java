@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon.apt;
+package io.github.pulsebeat02.neon.utils;
 
 import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import java.lang.reflect.Field;

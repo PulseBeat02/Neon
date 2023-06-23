@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.json.GsonProvider;
+import io.github.pulsebeat02.neon.utils.NativePathUtil;
 import io.github.pulsebeat02.neon.utils.NetworkUtils;
 import io.github.pulsebeat02.neon.utils.ProcessUtils;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;

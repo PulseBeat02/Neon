@@ -9,7 +9,7 @@ public final class ExecutorProvider {
   public static @NotNull final ExecutorService BROWSER_SERVICE;
 
   static {
-    BROWSER_SERVICE = Executors.newFixedThreadPool(1);
+    BROWSER_SERVICE = Executors.newCachedThreadPool();
   }
 
   public static void init() {}

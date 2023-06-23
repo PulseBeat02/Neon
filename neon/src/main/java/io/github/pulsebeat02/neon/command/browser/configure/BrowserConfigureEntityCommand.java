@@ -2,14 +2,14 @@ package io.github.pulsebeat02.neon.command.browser.configure;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static io.github.pulsebeat02.neon.command.ArgumentUtils.*;
+import static io.github.pulsebeat02.neon.utils.ArgumentUtils.*;
 import static io.github.pulsebeat02.neon.command.Permission.has;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.command.CommandSegment;
-import io.github.pulsebeat02.neon.command.browser.BrowserSuggestionUtils;
+import io.github.pulsebeat02.neon.utils.BrowserSuggestionUtils;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.locale.Locale;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;

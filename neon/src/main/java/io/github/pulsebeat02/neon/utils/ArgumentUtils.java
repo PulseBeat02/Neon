@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon.command;
+package io.github.pulsebeat02.neon.utils;
 
 import com.google.common.primitives.Ints;
 import io.github.pulsebeat02.neon.Neon;

@@ -7,6 +7,7 @@ import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.netty.buffer.ByteBuf;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import org.cef.browser.MinecraftBrowser;
 import org.jetbrains.annotations.NotNull;
 
 public final class MapRenderMethod extends RenderAdapter {
@@ -32,8 +33,11 @@ public final class MapRenderMethod extends RenderAdapter {
 
   @Override
   public void render(@NotNull final IntBuffer buf) {
-    final ByteBuf buffer = this.neon.getBrowser().getSettings().getHandler().dither(buf, this.width);
-    this.sender.displayMaps(
-        null, buffer, 0, this.blockWidth, this.blockHeight, this.width, this.height);
+    final MinecraftBrowser browser = this.neon.getBrowser();
+    if (browser != null) {
+      final ByteBuf buffer = browser.getSettings().getHandler().dither(buf, this.width);
+      this.sender.displayMaps(
+          null, buffer, 0, this.blockWidth, this.blockHeight, this.width, this.height);
+    }
   }
 }

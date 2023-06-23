@@ -8,7 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ProcessUtils {
 
-  private ProcessUtils() {}
+  private ProcessUtils() {
+    throw new UnsupportedOperationException("Utility class cannot be instantiated");
+  }
 
   public static void captureOutput(
       @NotNull final ProcessBuilder builder, @NotNull final Consumer<String> console)

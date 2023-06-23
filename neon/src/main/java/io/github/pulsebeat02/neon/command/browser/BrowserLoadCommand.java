@@ -9,10 +9,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
-import io.github.pulsebeat02.neon.command.ArgumentUtils;
 import io.github.pulsebeat02.neon.command.CommandSegment;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.locale.Locale;
+import io.github.pulsebeat02.neon.utils.ArgumentUtils;
+import io.github.pulsebeat02.neon.utils.BrowserSuggestionUtils;
 import io.github.pulsebeat02.neon.video.HologramRenderMethod;
 import io.github.pulsebeat02.neon.video.MapRenderMethod;
 import io.github.pulsebeat02.neon.video.ParticleRenderMethod;
@@ -75,7 +76,11 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
 
     CompletableFuture.runAsync(
             () -> this.createBrowser(settings, method, url), ExecutorProvider.BROWSER_SERVICE)
-        .thenRun(() -> audience.sendMessage(Locale.LOAD_BROWSER.build(url)));
+        .thenRun(() -> audience.sendMessage(Locale.LOAD_BROWSER.build(url)))
+        .exceptionally(
+            e -> {
+              throw new AssertionError(e);
+            });
 
     return SINGLE_SUCCESS;
   }

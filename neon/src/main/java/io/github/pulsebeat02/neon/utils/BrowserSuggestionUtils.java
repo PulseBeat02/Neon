@@ -1,4 +1,4 @@
-package io.github.pulsebeat02.neon.command.browser;
+package io.github.pulsebeat02.neon.utils;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -37,18 +37,12 @@ public final class BrowserSuggestionUtils {
     BLOCK_DIMENSION_SUGGESTIONS =
         List.of("1x1", "1x2", "3x3", "3x5", "5x5", "6x10", "8x14", "10x14", "8x8");
     CHARACTER_SUGGESTIONS =
-        Map.of(
-            "SQUARE",
-            "■",
-            "VERTICAL_RECTANGLE",
-            "█",
-            "HORIZONTAL_RECTANGLE",
-            "▬",
-            "ROUNDED_SQUARE",
-            "▢",
-            "SMILEY",
-            "\uD83D\uDE0A");
+        Map.of("SMALL_SQUARE", "▪", "BIG_SQUARE", "☐", "SMILEY", "☺", "FROWNEY", "☹");
     BROWSER_RENDER_TYPE_SUGGESTIONS = List.of("MAP", "ENTITY");
+  }
+
+  private BrowserSuggestionUtils() {
+    throw new UnsupportedOperationException("Utility class cannot be instantiated");
   }
 
   public static @NotNull CompletableFuture<Suggestions> suggestResolution(
