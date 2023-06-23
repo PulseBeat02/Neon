@@ -108,6 +108,7 @@ public final class PackageManager {
   }
 
   private void loadNativeLibraries() {
+    this.loadNativeLibrary("libgcc_s");
     this.loadNativeLibrary("libXi");
     this.loadNativeLibrary("libXtst");
     this.loadNativeLibrary("libnspr4");
@@ -129,7 +130,43 @@ public final class PackageManager {
     this.loadNativeLibrary("libXfixes");
     this.loadNativeLibrary("libXrandr");
     this.loadNativeLibrary("libwayland-server");
+    this.loadNativeLibrary("libxcb-randr");
     this.loadNativeLibrary("libgbm");
+    this.loadNativeLibrary("libxkbcommon");
+    this.loadNativeLibrary("libfribidi");
+    this.loadNativeLibrary("libdatrie");
+    this.loadNativeLibrary("libthai");
+    this.loadNativeLibrary("libmount");
+    this.loadNativeLibrary("libblkid");
+    this.loadNativeLibrary("libselinux");
+    this.loadNativeLibrary("libpcre");
+    this.loadNativeLibrary("libglib-2.0");
+    this.loadNativeLibrary("libgraphite2");
+    this.loadNativeLibrary("libharfbuzz");
+    this.loadNativeLibrary("libfontconfig");
+    this.loadNativeLibrary("libpango-1.0");
+    this.loadNativeLibrary("libbsd");
+    this.loadNativeLibrary("libxau");
+    this.loadNativeLibrary("libxdmcp6");
+    this.loadNativeLibrary("libxcb");
+    this.loadNativeLibrary("libx11");
+    this.loadNativeLibrary("libxext");
+    this.loadNativeLibrary("libasound");
+    this.loadNativeLibrary("libpng16");
+    this.loadNativeLibrary("libuuid");
+    this.loadNativeLibrary("libexpat");
+    this.loadNativeLibrary("libfreetype");
+    this.loadNativeLibrary("libxss");
+    this.loadNativeLibrary("libxrender");
+    this.loadNativeLibrary("libxcursor");
+    this.loadNativeLibrary("libpangoft2-1.0");
+    this.loadNativeLibrary("libxcb-shm0");
+    this.loadNativeLibrary("libpixman-1");
+    this.loadNativeLibrary("ligcairo2");
+    this.loadNativeLibrary("libpangocairo-1.0-0");
+
+    this.loadNativeLibrary("libgtk-3");
+    this.loadNativeLibrary("libappindicator3");
   }
 
   private void loadNativeLibrary(@NotNull final String name) {
@@ -144,8 +181,8 @@ public final class PackageManager {
       }
       for (final Path path : paths) {
         this.loadNativeLibraryIntoRuntime(path);
+        this.neon.logConsole("Loaded library %s".formatted(path));
       }
-      this.neon.logConsole("Loaded library %s".formatted(name));
     } catch (final IOException e) {
       throw new AssertionError(e);
     }
@@ -197,6 +234,7 @@ public final class PackageManager {
   private void downloadPackages() throws IOException {
     final Set<String> downloads = this.getDownloadUrls();
     for (final String url : downloads) {
+      this.neon.logConsole("Downloading %s".formatted(url));
       final String name = ResourceUtils.getFilename(url);
       final Path resolve = this.dest.resolve(name);
       NetworkUtils.downloadFile(url, resolve);
