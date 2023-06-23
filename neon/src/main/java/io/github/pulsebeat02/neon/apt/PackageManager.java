@@ -24,6 +24,9 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
@@ -146,34 +149,34 @@ public final class PackageManager {
     this.loadNativeLibrary("libfontconfig");
     this.loadNativeLibrary("libpango-1.0");
     this.loadNativeLibrary("libbsd");
-    this.loadNativeLibrary("libxau");
-    this.loadNativeLibrary("libxdmcp6");
-    this.loadNativeLibrary("libxcb");
-    this.loadNativeLibrary("libx11");
-    this.loadNativeLibrary("libxext");
+    this.loadNativeLibrary("libXau");
+    this.loadNativeLibrary("libxdmcp");
+    this.loadNativeLibrary("libXcb");
+    this.loadNativeLibrary("libX11");
+    this.loadNativeLibrary("libXext");
     this.loadNativeLibrary("libasound");
     this.loadNativeLibrary("libpng16");
     this.loadNativeLibrary("libuuid");
-    this.loadNativeLibrary("libexpat");
+    this.loadNativeLibrary("libexpatw");
     this.loadNativeLibrary("libfreetype");
-    this.loadNativeLibrary("libxss");
-    this.loadNativeLibrary("libxrender");
-    this.loadNativeLibrary("libxcursor");
+    this.loadNativeLibrary("libXss");
+    this.loadNativeLibrary("libXrender");
+    this.loadNativeLibrary("libXcursor");
     this.loadNativeLibrary("libpangoft2-1.0");
     this.loadNativeLibrary("libxcb-shm0");
     this.loadNativeLibrary("libpixman-1");
-    this.loadNativeLibrary("libcairo2");
-    this.loadNativeLibrary("libpangocairo-1.0-0");
+    this.loadNativeLibrary("libcairo");
+    this.loadNativeLibrary("libpangocairo-1.0");
     this.loadNativeLibrary("libcairo-gobject");
     this.loadNativeLibrary("libdbusmenu-glib4");
     this.loadNativeLibrary("libdbusmenu-gtk3-4");
-    this.loadNativeLibrary("libjpeg62-turbo");
+    this.loadNativeLibrary("libjpeg");
     this.loadNativeLibrary("libjbig");
     this.loadNativeLibrary("liblzma");
     this.loadNativeLibrary("libzstd");
     this.loadNativeLibrary("libwebp");
     this.loadNativeLibrary("libtiff");
-    this.loadNativeLibrary("libgdk-pixbuf2.0-0");
+    this.loadNativeLibrary("libgdk_pixbuf-2.0");
     this.loadNativeLibrary("libappindicator3");
     this.loadNativeLibrary("libepoxy");
     this.loadNativeLibrary("libjson-glib-1.0");
@@ -181,13 +184,13 @@ public final class PackageManager {
     this.loadNativeLibrary("libwayland-client");
     this.loadNativeLibrary("libwayland-cursor");
     this.loadNativeLibrary("libwayland-egl");
-    this.loadNativeLibrary("libxinerama");
-    this.loadNativeLibrary("libicu63");
+    this.loadNativeLibrary("libXinerama");
+    this.loadNativeLibrary("libicuuc");
     this.loadNativeLibrary("libxml2");
     this.loadNativeLibrary("liblcms2");
-    this.loadNativeLibrary("libudev1");
-    this.loadNativeLibrary("libcolord2");
-    this.loadNativeLibrary("libsoup2.4");
+    this.loadNativeLibrary("libudev");
+    this.loadNativeLibrary("libcolord");
+    this.loadNativeLibrary("libsoup-2.4");
     this.loadNativeLibrary("librest-0.7");
     this.loadNativeLibrary("libgtk-3");
   }
@@ -265,10 +268,20 @@ public final class PackageManager {
   }
 
   private @NotNull Set<String> getDownloadUrls() {
-    final Set<String> downloadUrlBases = new HashSet<>();
-    this.packages.parallelStream()
-        .forEach((pkg) -> this.handlePackageDownloadUrl(downloadUrlBases));
-    return downloadUrlBases;
+    final ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+    try {
+      return CompletableFuture.supplyAsync(
+              () -> {
+                final Set<String> downloadUrlBases = new HashSet<>();
+                this.packages.parallelStream()
+                    .forEach((pkg) -> this.handlePackageDownloadUrl(downloadUrlBases));
+                return downloadUrlBases;
+              },
+              forkJoinPool)
+          .get();
+    } catch (final InterruptedException | ExecutionException e) {
+      throw new AssertionError(e);
+    }
   }
 
   private void handlePackageDownloadUrl(@NotNull final Set<String> downloadUrlBases) {
