@@ -24,9 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
@@ -150,8 +147,8 @@ public final class PackageManager {
     this.loadNativeLibrary("libpango-1.0");
     this.loadNativeLibrary("libbsd");
     this.loadNativeLibrary("libXau");
-    this.loadNativeLibrary("libxdmcp");
-    this.loadNativeLibrary("libXcb");
+    this.loadNativeLibrary("libXdmcp");
+    this.loadNativeLibrary("libxcb");
     this.loadNativeLibrary("libX11");
     this.loadNativeLibrary("libXext");
     this.loadNativeLibrary("libasound");
@@ -163,13 +160,11 @@ public final class PackageManager {
     this.loadNativeLibrary("libXrender");
     this.loadNativeLibrary("libXcursor");
     this.loadNativeLibrary("libpangoft2-1.0");
-    this.loadNativeLibrary("libxcb-shm0");
+    this.loadNativeLibrary("libxcb-shm");
     this.loadNativeLibrary("libpixman-1");
     this.loadNativeLibrary("libcairo");
     this.loadNativeLibrary("libpangocairo-1.0");
     this.loadNativeLibrary("libcairo-gobject");
-    this.loadNativeLibrary("libdbusmenu-glib4");
-    this.loadNativeLibrary("libdbusmenu-gtk3-4");
     this.loadNativeLibrary("libjpeg");
     this.loadNativeLibrary("libjbig");
     this.loadNativeLibrary("liblzma");
@@ -177,6 +172,10 @@ public final class PackageManager {
     this.loadNativeLibrary("libwebp");
     this.loadNativeLibrary("libtiff");
     this.loadNativeLibrary("libgdk_pixbuf-2.0");
+    this.loadNativeLibrary("libXinerama");
+    this.loadNativeLibrary("libgdk-3");
+    this.loadNativeLibrary("libdbusmenu-glib");
+    this.loadNativeLibrary("libdbusmenu-gtk3");
     this.loadNativeLibrary("libappindicator3");
     this.loadNativeLibrary("libepoxy");
     this.loadNativeLibrary("libjson-glib-1.0");
@@ -184,7 +183,6 @@ public final class PackageManager {
     this.loadNativeLibrary("libwayland-client");
     this.loadNativeLibrary("libwayland-cursor");
     this.loadNativeLibrary("libwayland-egl");
-    this.loadNativeLibrary("libXinerama");
     this.loadNativeLibrary("libicuuc");
     this.loadNativeLibrary("libxml2");
     this.loadNativeLibrary("liblcms2");
@@ -268,20 +266,10 @@ public final class PackageManager {
   }
 
   private @NotNull Set<String> getDownloadUrls() {
-    final ForkJoinPool forkJoinPool = new ForkJoinPool(2);
-    try {
-      return CompletableFuture.supplyAsync(
-              () -> {
-                final Set<String> downloadUrlBases = new HashSet<>();
-                this.packages.parallelStream()
-                    .forEach((pkg) -> this.handlePackageDownloadUrl(downloadUrlBases));
-                return downloadUrlBases;
-              },
-              forkJoinPool)
-          .get();
-    } catch (final InterruptedException | ExecutionException e) {
-      throw new AssertionError(e);
-    }
+    final Set<String> downloadUrlBases = new HashSet<>();
+    this.packages.parallelStream()
+        .forEach((pkg) -> this.handlePackageDownloadUrl(downloadUrlBases));
+    return downloadUrlBases;
   }
 
   private void handlePackageDownloadUrl(@NotNull final Set<String> downloadUrlBases) {
