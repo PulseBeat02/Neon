@@ -33,5 +33,10 @@
   "libgcc1": "pool/main/g/gcc-8/",
   "libstdc++6": "pool/main/g/gcc-8/",
   "lsb-release": "pool/main/l/lsb/",
-  "libcairo2": "pool/main/c/cairo/"
+  "libcairo2": "pool/main/c/cairo/",
+  "libatspi2.0-0": "pool/main/a/at-spi2-core/",
+  "libavahi-common3": "pool/updates/main/a/avahi/",
+  "libavahi-client3": "pool/updates/main/a/avahi/",
+  "libdrm2": "pool/main/libd/libdrm/",
+  "libwayland-server0": "pool/main/w/wayland/"
 }

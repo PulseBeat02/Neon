@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.json.GsonProvider;
-import io.github.pulsebeat02.neon.utils.NativePathUtil;
 import io.github.pulsebeat02.neon.utils.NetworkUtils;
 import io.github.pulsebeat02.neon.utils.ProcessUtils;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;
@@ -43,9 +42,16 @@ public final class PackageManager {
     HTTP_CLIENT = HttpClient.newBuilder().build();
     ORIGINAL_CPU_ARCH = System.getProperty("os.arch");
     CPU_ARCH =
-        ORIGINAL_CPU_ARCH.equals("x86_64")
-            ? "amd64"
-            : ORIGINAL_CPU_ARCH.equals("aarch64") ? "arm64" : ORIGINAL_CPU_ARCH;
+        switch (ORIGINAL_CPU_ARCH) {
+          case "x86_64":
+          case "amd64":
+            yield "amd64";
+          case "aarch64":
+          case "arm64":
+            yield "arm64";
+          default:
+            yield ORIGINAL_CPU_ARCH;
+        };
   }
 
   private @NotNull final Neon neon;
@@ -64,13 +70,96 @@ public final class PackageManager {
 
   public void installPackages() throws IOException {
     if (this.isUnix()) {
-      this.createFolders();
-      this.copyScript();
-      this.changeScriptPermissions();
-      this.downloadPackages();
-      this.buildPackages();
-      this.addNativePath();
+      if (!this.checkPreviousInstallation()) {
+        this.createFolders();
+        this.copyScript();
+        this.changeScriptPermissions();
+        this.downloadPackages();
+        this.buildPackages();
+        this.deleteDebs();
+      }
+      this.loadNativeLibraries();
     }
+  }
+
+  private boolean checkPreviousInstallation() {
+    final Path libs = this.dest.resolve("usr").resolve("lib");
+    return Files.isDirectory(libs);
+  }
+
+  private void deleteDebs() {
+    try (final Stream<Path> stream = Files.list(this.dest)) {
+      stream.filter(this::isDebFile).forEach(this::deleteNativeDeb);
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private boolean isDebFile(@NotNull final Path path) {
+    return path.toString().endsWith(".deb");
+  }
+
+  private void deleteNativeDeb(@NotNull final Path path) {
+    try {
+      Files.deleteIfExists(path);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void loadNativeLibraries() {
+    this.loadNativeLibrary("libXi");
+    this.loadNativeLibrary("libXtst");
+    this.loadNativeLibrary("libnspr4");
+    this.loadNativeLibrary("libplds4");
+    this.loadNativeLibrary("libplc4");
+    this.loadNativeLibrary("libnssutil3");
+    this.loadNativeLibrary("libnss3");
+    this.loadNativeLibrary("libsmime3");
+    this.loadNativeLibrary("libatk-1.0");
+    this.loadNativeLibrary("libdbus-1");
+    this.loadNativeLibrary("libatspi");
+    this.loadNativeLibrary("libatk-bridge-2.0");
+    this.loadNativeLibrary("libavahi-common");
+    this.loadNativeLibrary("libavahi-client");
+    this.loadNativeLibrary("libcups");
+    this.loadNativeLibrary("libdrm");
+    this.loadNativeLibrary("libXcomposite");
+    this.loadNativeLibrary("libXdamage");
+    this.loadNativeLibrary("libXfixes");
+    this.loadNativeLibrary("libXrandr");
+    this.loadNativeLibrary("libwayland-server");
+    this.loadNativeLibrary("libgbm");
+  }
+
+  private void loadNativeLibrary(@NotNull final String name) {
+    try (final Stream<Path> stream = Files.walk(this.dest)) {
+      final Set<Path> paths =
+          stream
+              .parallel()
+              .filter(path -> this.checkLibrary(path, name))
+              .collect(Collectors.toUnmodifiableSet());
+      if (paths.size() == 0) {
+        throw new AssertionError("Could not find native library: %s".formatted(name));
+      }
+      for (final Path path : paths) {
+        this.loadNativeLibraryIntoRuntime(path);
+      }
+      this.neon.logConsole("Loaded library %s".formatted(name));
+    } catch (final IOException e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  private void loadNativeLibraryIntoRuntime(@NotNull final Path path) {
+    final String absolute = path.toAbsolutePath().toString();
+    System.load(absolute);
+  }
+
+  private boolean checkLibrary(@NotNull final Path path, @NotNull final String name) {
+    final String filename = path.getFileName().toString();
+    final String search = "%s.so".formatted(name);
+    return filename.startsWith(search);
   }
 
   private boolean isUnix() {
@@ -89,24 +178,6 @@ public final class PackageManager {
   private void changeScriptPermissions() throws IOException {
     final Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxrwxrwx");
     Files.setPosixFilePermissions(this.script, permissions);
-  }
-
-  private void addNativePath() throws IOException {
-    final Set<Path> paths = this.getUrls();
-    for (final Path path : paths) {
-      try {
-        NativePathUtil.addNativeLibraryPath(path.toString());
-      } catch (final IllegalAccessException e) {
-        throw new AssertionError(e);
-      }
-    }
-  }
-
-  private @NotNull Set<Path> getUrls() throws IOException {
-    final Path folder = this.dest.resolve("usr").resolve("lib");
-    try (final Stream<Path> stream = Files.list(folder)) {
-      return stream.collect(Collectors.toUnmodifiableSet());
-    }
   }
 
   private void createFolders() throws IOException {

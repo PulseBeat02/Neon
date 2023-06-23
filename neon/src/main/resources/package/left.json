@@ -1,0 +1,19 @@
+{
+  "libc6": "pool/updates/main/g/glibc/",
+  "libx11-6": "pool/main/libx/libx11/",
+  "libgtk-3-0": "pool/main/g/gtk+3.0/",
+  "libexpat1": "pool/updates/main/e/expat/",
+  "libpango-1.0-0": "pool/main/p/pango1.0/",
+  "libxrender1": "pool/main/libx/libxrender/",
+  "libpangocairo-1.0-0": "pool/main/p/pango1.0/",
+  "libxcb1": "pool/main/libx/libx11/",
+  "libglib2.0-0": "pool/updates/main/g/glib2.0/",
+  "libxss1": "pool/main/libx/libxss/",
+  "libappindicator3-1": "pool/main/liba/libappindicator/",
+  "libasound2": "pool/main/a/alsa-lib/",
+  "libxext6": "pool/main/libx/libxext/",
+  "libxcursor1": "pool/main/libx/libxcursor/",
+  "libfontconfig1": "pool/main/f/fontconfig/",
+  "libgcc1": "pool/main/g/gcc-8/",
+  "libstdc++6": "pool/main/g/gcc-8/"
+}
