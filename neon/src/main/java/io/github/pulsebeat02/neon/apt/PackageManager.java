@@ -108,89 +108,14 @@ public final class PackageManager {
   }
 
   private void loadNativeLibraries() {
-    this.loadNativeLibrary("libgcc_s");
-    this.loadNativeLibrary("libXi");
-    this.loadNativeLibrary("libXtst");
-    this.loadNativeLibrary("libnspr4");
-    this.loadNativeLibrary("libplds4");
-    this.loadNativeLibrary("libplc4");
-    this.loadNativeLibrary("libnssutil3");
-    this.loadNativeLibrary("libnss3");
-    this.loadNativeLibrary("libsmime3");
-    this.loadNativeLibrary("libatk-1.0");
-    this.loadNativeLibrary("libdbus-1");
-    this.loadNativeLibrary("libatspi");
-    this.loadNativeLibrary("libatk-bridge-2.0");
-    this.loadNativeLibrary("libavahi-common");
-    this.loadNativeLibrary("libavahi-client");
-    this.loadNativeLibrary("libcups");
-    this.loadNativeLibrary("libdrm");
-    this.loadNativeLibrary("libXcomposite");
-    this.loadNativeLibrary("libXdamage");
-    this.loadNativeLibrary("libXfixes");
-    this.loadNativeLibrary("libXrandr");
-    this.loadNativeLibrary("libwayland-server");
-    this.loadNativeLibrary("libxcb-randr");
-    this.loadNativeLibrary("libgbm");
-    this.loadNativeLibrary("libxkbcommon");
-    this.loadNativeLibrary("libfribidi");
-    this.loadNativeLibrary("libdatrie");
-    this.loadNativeLibrary("libthai");
-    this.loadNativeLibrary("libmount");
-    this.loadNativeLibrary("libblkid");
-    this.loadNativeLibrary("libselinux");
-    this.loadNativeLibrary("libpcre");
-    this.loadNativeLibrary("libglib-2.0");
-    this.loadNativeLibrary("libgraphite2");
-    this.loadNativeLibrary("libharfbuzz");
-    this.loadNativeLibrary("libfontconfig");
-    this.loadNativeLibrary("libpango-1.0");
-    this.loadNativeLibrary("libbsd");
-    this.loadNativeLibrary("libXau");
-    this.loadNativeLibrary("libXdmcp");
-    this.loadNativeLibrary("libxcb");
-    this.loadNativeLibrary("libX11");
-    this.loadNativeLibrary("libXext");
-    this.loadNativeLibrary("libasound");
-    this.loadNativeLibrary("libpng16");
-    this.loadNativeLibrary("libuuid");
-    this.loadNativeLibrary("libexpatw");
-    this.loadNativeLibrary("libfreetype");
-    this.loadNativeLibrary("libXss");
-    this.loadNativeLibrary("libXrender");
-    this.loadNativeLibrary("libXcursor");
-    this.loadNativeLibrary("libpangoft2-1.0");
-    this.loadNativeLibrary("libxcb-shm");
-    this.loadNativeLibrary("libpixman-1");
-    this.loadNativeLibrary("libcairo");
-    this.loadNativeLibrary("libpangocairo-1.0");
-    this.loadNativeLibrary("libcairo-gobject");
-    this.loadNativeLibrary("libjpeg");
-    this.loadNativeLibrary("libjbig");
-    this.loadNativeLibrary("liblzma");
-    this.loadNativeLibrary("libzstd");
-    this.loadNativeLibrary("libwebp");
-    this.loadNativeLibrary("libtiff");
-    this.loadNativeLibrary("libgdk_pixbuf-2.0");
-    this.loadNativeLibrary("libXinerama");
-    this.loadNativeLibrary("libgdk-3");
-    this.loadNativeLibrary("libdbusmenu-glib");
-    this.loadNativeLibrary("libdbusmenu-gtk3");
-    this.loadNativeLibrary("libappindicator3");
-    this.loadNativeLibrary("libepoxy");
-    this.loadNativeLibrary("libjson-glib-1.0");
-    this.loadNativeLibrary("libffi");
-    this.loadNativeLibrary("libwayland-client");
-    this.loadNativeLibrary("libwayland-cursor");
-    this.loadNativeLibrary("libwayland-egl");
-    this.loadNativeLibrary("libicuuc");
-    this.loadNativeLibrary("libxml2");
-    this.loadNativeLibrary("liblcms2");
-    this.loadNativeLibrary("libudev");
-    this.loadNativeLibrary("libcolord");
-    this.loadNativeLibrary("libsoup-2.4");
-    this.loadNativeLibrary("librest-0.7");
-    this.loadNativeLibrary("libgtk-3");
+    final Gson gson = GsonProvider.getGson();
+    try (final Reader reader = ResourceUtils.getResourceAsReader("package/load.json")) {
+      final Type type = new TypeToken<List<String>>() {}.getType();
+      final List<String> order =  gson.fromJson(reader, type);
+      order.forEach(this::loadNativeLibrary);
+    } catch (final Exception e) {
+      throw new AssertionError(e);
+    }
   }
 
   private void loadNativeLibrary(@NotNull final String name) {

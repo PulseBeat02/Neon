@@ -11,18 +11,10 @@ import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferInt;
-import java.awt.image.Raster;
-import java.awt.image.SinglePixelPackedSampleModel;
-import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.CompletableFuture;
-import javax.imageio.ImageIO;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -115,11 +107,6 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
     final CefAppBuilder builder = new CefAppBuilder();
     final Plugin plugin = requireNonNull(Bukkit.getPluginManager().getPlugin("Neon"));
     builder.setProgressHandler(new CefProgressHandler((Neon) plugin));
-    builder.addJcefArgs("--disable-software-rasterizer");
-    builder.addJcefArgs("--no-sandbox");
-    builder.addJcefArgs("--disable-gpu");
-    builder.addJcefArgs("--disable-gpu-compositing");
-    builder.addJcefArgs("--log-level=1");
     final CefApp app = builder.build();
     app.setSettings(settings);
     return app;
@@ -197,12 +184,17 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
     final int[] bufferArray = new int[length];
     for (int i = 0; i < length; i++) {
       final int bgra = buffer.getInt();
-      final int rgba = (bgra & 0x00ff0000) >> 16
-          | (bgra & 0xff00ff00)
-          | (bgra & 0x000000ff) << 16;
-      bufferArray[i] = rgba;
+      bufferArray[i] = this.toRGB(bgra);
     }
     this.method.render(IntBuffer.wrap(bufferArray));
+  }
+
+  public int toRGB(final int bgra) {
+    final int alpha = (bgra & 0xff000000) >> 24;
+    final int blue = (bgra & 0x00ff0000) >> 16;
+    final int green = (bgra & 0x0000ff00) >> 8;
+    final int red = (bgra & 0x000000ff);
+    return (red * alpha / 255) << 16 | (green * alpha / 255) << 8 | (blue * alpha / 255);
   }
 
   @Override
@@ -234,8 +226,7 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
   }
 
   @Override
-  public void onPopupSize(@NotNull final CefBrowser browser, @NotNull final Rectangle size) {
-  }
+  public void onPopupSize(@NotNull final CefBrowser browser, @NotNull final Rectangle size) {}
 
   @Override
   public boolean onCursorChange(@NotNull final CefBrowser browser, final int cursorType) {

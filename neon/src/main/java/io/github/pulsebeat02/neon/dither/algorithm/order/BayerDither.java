@@ -29,10 +29,10 @@ public class BayerDither implements DitherHandler {
       final int yIndex = y * width;
       for (int x = 0; x < width; x++) {
         final int index = yIndex + x;
-        final int color = buffer.get(index);
-        int r = color >> 24 & 0xFF;
-        int g = color >> 16 & 0xFF;
-        int b = color >> 8 & 0xFF;
+        final int rgb = buffer.get(index);
+        int r = rgb >> 16 & 0xFF;
+        int g = rgb >> 8 & 0xFF;
+        int b = rgb & 0xFF;
         r = (r += this.precalc[y % this.ydim][x % this.xdim]) > 255 ? 255 : Math.max(r, 0);
         g = (g += this.precalc[y % this.ydim][x % this.xdim]) > 255 ? 255 : Math.max(g, 0);
         b = (b += this.precalc[y % this.ydim][x % this.xdim]) > 255 ? 255 : Math.max(b, 0);

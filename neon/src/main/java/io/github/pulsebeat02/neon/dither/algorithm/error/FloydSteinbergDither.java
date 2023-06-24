@@ -29,9 +29,9 @@ public class FloydSteinbergDither implements DitherHandler {
           final boolean hasNextX = x < widthMinus;
           final int index = yIndex + x;
           final int rgb = buffer.get(index);
-          int red = rgb >> 24 & 0xFF;
-          int green = rgb >> 16 & 0xFF;
-          int blue = rgb >> 8 & 0xFF;
+          int red = rgb >> 16 & 0xFF;
+          int green = rgb >> 8 & 0xFF;
+          int blue = rgb & 0xFF;
           red = (red += buf1[bufferIndex++]) > 255 ? 255 : Math.max(red, 0);
           green = (green += buf1[bufferIndex++]) > 255 ? 255 : Math.max(green, 0);
           blue = (blue += buf1[bufferIndex++]) > 255 ? 255 : Math.max(blue, 0);
@@ -72,9 +72,9 @@ public class FloydSteinbergDither implements DitherHandler {
           final boolean hasNextX = x > 0;
           final int index = yIndex + x;
           final int rgb = buffer.get(index);
-          int red = rgb >> 24 & 0xFF;
-          int green = rgb >> 16 & 0xFF;
-          int blue = rgb >> 8 & 0xFF;
+          int red = rgb >> 16 & 0xFF;
+          int green = rgb >> 8 & 0xFF;
+          int blue = rgb & 0xFF;
           blue = (blue += buf1[bufferIndex--]) > 255 ? 255 : Math.max(blue, 0);
           green = (green += buf1[bufferIndex--]) > 255 ? 255 : Math.max(green, 0);
           red = (red += buf1[bufferIndex--]) > 255 ? 255 : Math.max(red, 0);

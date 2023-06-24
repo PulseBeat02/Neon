@@ -9,6 +9,7 @@ import java.nio.IntBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class FilterLiteDither implements DitherHandler {
+
   @Override
   public @NotNull ByteBuf dither(@NotNull final IntBuffer buffer, final int width) {
     final int length = buffer.capacity();
@@ -27,9 +28,9 @@ public class FilterLiteDither implements DitherHandler {
         for (int x = 0; x < width; ++x) {
           final int index = yIndex + x;
           final int rgb = buffer.get(index);
-          int red = rgb >> 24 & 0xFF;
-          int green = rgb >> 16 & 0xFF;
-          int blue = rgb >> 8 & 0xFF;
+          int red = rgb >> 16 & 0xFF;
+          int green = rgb >> 8 & 0xFF;
+          int blue = rgb & 0xFF;
           red = (red += buf1[bufferIndex++]) > 255 ? 255 : Math.max(red, 0);
           green = (green += buf1[bufferIndex++]) > 255 ? 255 : Math.max(green, 0);
           blue = (blue += buf1[bufferIndex++]) > 255 ? 255 : Math.max(blue, 0);
@@ -64,9 +65,9 @@ public class FilterLiteDither implements DitherHandler {
         for (int x = width - 1; x >= 0; --x) {
           final int index = yIndex + x;
           final int rgb = buffer.get(index);
-          int red = rgb >> 24 & 0xFF;
-          int green = rgb >> 16 & 0xFF;
-          int blue = rgb >> 8 & 0xFF;
+          int red = rgb >> 16 & 0xFF;
+          int green = rgb >> 8 & 0xFF;
+          int blue = rgb & 0xFF;
           blue = (blue += buf1[bufferIndex--]) > 255 ? 255 : Math.max(blue, 0);
           green = (green += buf1[bufferIndex--]) > 255 ? 255 : Math.max(green, 0);
           red = (red += buf1[bufferIndex--]) > 255 ? 255 : Math.max(red, 0);
