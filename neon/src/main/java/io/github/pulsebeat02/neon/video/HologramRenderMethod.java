@@ -4,7 +4,6 @@ import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.utils.TaskUtils;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
-import java.util.concurrent.ExecutionException;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
@@ -16,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public final class HologramRenderMethod extends EntityRenderMethod {
 
   private final int height;
+  private final int width;
   private @NotNull final Location location;
 
   public HologramRenderMethod(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
@@ -23,6 +23,7 @@ public final class HologramRenderMethod extends EntityRenderMethod {
     this.location = settings.getLocation();
     final ImmutableDimension dimension = settings.getResolution();
     this.height = dimension.getHeight();
+    this.width = dimension.getWidth();
   }
 
   @Override
@@ -32,15 +33,11 @@ public final class HologramRenderMethod extends EntityRenderMethod {
     final World world = spawn.getWorld();
     final Entity[] entities = this.getEntities();
     final Neon neon = this.getNeon();
-    for (int i = this.height - 1; i >= 0; i--) {
+    for (int i = this.width - 1; i >= 0; i--) {
       final Consumer<ArmorStand> handleEntity = this::handleEntity;
       final int index = i;
-      try {
-        TaskUtils.sync(neon, () -> this.spawnEntity(spawn, world, entities, handleEntity, index)).get();
-      } catch (final InterruptedException | ExecutionException e) {
-        throw new RuntimeException(e);
-      }
-      spawn.add(0.0, 0.225, 0.0);
+      TaskUtils.sync(neon, () -> this.spawnEntity(spawn, world, entities, handleEntity, index));
+      spawn.add(0.0, 0.1, 0.0);
     }
   }
 

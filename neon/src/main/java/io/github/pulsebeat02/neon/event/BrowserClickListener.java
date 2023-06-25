@@ -1,9 +1,13 @@
 package io.github.pulsebeat02.neon.event;
 
+import static java.awt.event.MouseEvent.BUTTON1;
+import static java.awt.event.MouseEvent.BUTTON2;
+
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import java.awt.event.MouseEvent;
 import java.util.Optional;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -13,6 +17,7 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -31,6 +36,7 @@ public final class BrowserClickListener implements Listener {
   public BrowserClickListener(@NotNull final Neon neon) {
     this.neon = neon;
     this.lastInteraction = System.currentTimeMillis();
+    neon.getServer().getPluginManager().registerEvents(this, neon);
   }
 
   public static @NotNull Optional<Location> calculateVector(
@@ -68,6 +74,14 @@ public final class BrowserClickListener implements Listener {
     if (this.checkValidMap(stack)) {
       event.setCancelled(true);
     }
+    if (!(event instanceof EntityDamageByEntityEvent damageEvent)) {
+      return;
+    }
+    final Entity damager = damageEvent.getDamager();
+    if (!(damager instanceof Player player)) {
+      return;
+    }
+    this.handleInteraction(player, frame, false);
   }
 
   @EventHandler
@@ -80,19 +94,29 @@ public final class BrowserClickListener implements Listener {
     if (this.checkValidMap(stack)) {
       event.setCancelled(true);
     }
+    final Player player = event.getPlayer();
+    this.handleInteraction(player, frame, true);
   }
 
-  public void handleInteraction(@NotNull final Player player, @NotNull final ItemFrame frame) {
+  public void handleInteraction(
+      @NotNull final Player player, @NotNull final ItemFrame frame, final boolean right) {
 
     final long now = System.currentTimeMillis();
-    if ((now + 100) > this.lastInteraction) {
+    if ((this.lastInteraction + 100) > now) {
       return;
     }
 
     final Location eye = player.getEyeLocation();
     final Vector direction = player.getLocation().getDirection();
     final int[] coords = this.getBoardCoords(frame, eye, direction);
-    if (coords.length == 0) {}
+    final int x = coords[0];
+    final int y = coords[1];
+
+    final MinecraftBrowser browser = this.neon.getBrowser();
+    final long time = System.currentTimeMillis();
+    final int type = right ? BUTTON2 : BUTTON1;
+    final MouseEvent event = new MouseEvent(null, 0, time, 0, x, y, 0, false, type);
+    browser.sendNativeMouseEvent(event);
   }
 
   private void activateWidget(final int[] coords) {}

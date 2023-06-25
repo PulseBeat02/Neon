@@ -6,6 +6,7 @@ import io.github.pulsebeat02.neon.apt.PackageManager;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
+import io.github.pulsebeat02.neon.event.BrowserClickListener;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
@@ -91,6 +92,7 @@ public final class Neon extends JavaPlugin {
 
   private void registerEvents() {
     new PlayerHookListener(this);
+    new BrowserClickListener(this);
   }
 
   private void registerStats() {

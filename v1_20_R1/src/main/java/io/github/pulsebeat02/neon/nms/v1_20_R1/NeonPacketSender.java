@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import net.md_5.bungee.api.ChatColor;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
@@ -147,25 +148,17 @@ public final class NeonPacketSender implements PacketSender {
       @NotNull final String character,
       final int width,
       final int height) {
-    final int maxHeight = Math.min(height, entities.length);
-    final PacketPlayOutEntityMetadata[] packets = new PacketPlayOutEntityMetadata[maxHeight];
     int index = 0;
-    for (int i = 0; i < maxHeight; i++) {
-      final IChatMutableComponent component = IChatMutableComponent.a(ComponentContents.a);
+    for (int i = 0; i < height; i++) {
+      final StringBuilder builder = new StringBuilder();
       for (int x = 0; x < width; x++) {
         final int rgb = data.get(index++);
-        final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);
-        p.b(ChatModifier.a.a(ChatHexColor.a(rgb & 0xFFFFFF)));
-        p.b(IChatBaseComponent.a(character));
-        component.a(p);
+        final ChatColor color = ChatColor.of(String.format("#%06X", rgb & 0xFFFFFF));
+        builder.append(color);
+        builder.append(character);
       }
-      final int id = ((CraftEntity) entities[i]).getHandle().af();
-      final Optional<IChatBaseComponent> optional = Optional.of(component);
-      final DataWatcherObject<Optional<IChatBaseComponent>> object =
-          new DataWatcherObject<>(2, DataWatcherRegistry.g);
-      packets[i] = new PacketPlayOutEntityMetadata(id, List.of(DataWatcher.b.a(object, optional)));
+      entities[i].setCustomName(builder.toString());
     }
-    this.sendEntityPackets(viewers, packets);
   }
 
   private void sendEntityPackets(

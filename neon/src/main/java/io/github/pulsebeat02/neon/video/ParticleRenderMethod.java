@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ParticleRenderMethod extends EntityRenderMethod {
 
   private final int height;
+  private final int width;
   private @NotNull final Location location;
 
   public ParticleRenderMethod(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
@@ -23,6 +24,7 @@ public final class ParticleRenderMethod extends EntityRenderMethod {
     this.location = settings.getLocation();
     final ImmutableDimension dimension = settings.getResolution();
     this.height = dimension.getHeight();
+    this.width = dimension.getWidth();
   }
 
   @Override
@@ -32,16 +34,11 @@ public final class ParticleRenderMethod extends EntityRenderMethod {
     final World world = spawn.getWorld();
     final Entity[] entities = this.getEntities();
     final Neon neon = this.getNeon();
-    for (int i = this.height - 1; i >= 0; i--) {
+    for (int i = this.width - 1; i >= 0; i--) {
       final Consumer<AreaEffectCloud> handleEntity = this::handleEntity;
       final int index = i;
-      try {
-        TaskUtils.sync(neon, () -> this.spawnEntity(spawn, world, entities, handleEntity, index))
-            .get();
-      } catch (final InterruptedException | ExecutionException e) {
-        throw new RuntimeException(e);
-      }
-      spawn.add(0.0, 0.225, 0.0);
+      TaskUtils.sync(neon, () -> this.spawnEntity(spawn, world, entities, handleEntity, index));
+      spawn.add(0.0, 0.1, 0.0);
     }
   }
 
