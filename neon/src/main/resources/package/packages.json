@@ -82,6 +82,16 @@
   "libudev1": "pool/main/s/systemd/",
   "libcolord2": "pool/main/c/colord/",
   "libsoup2.4-1": "pool/main/libs/libsoup2.4/",
-  "librest-0.7-0": "pool/main/libr/rest/",
-  "libwayland-egl1": "pool/main/w/wayland/"
+  "librest-0.7-0": "pool/main/libr/librest/",
+  "libwayland-egl1": "pool/main/w/wayland/",
+  "libindicator3-7": "pool/main/libi/libindicator/",
+  "libbrotli1": "pool/main/b/brotli/",
+  "libnghttp2-14": "pool/main/n/nghttp2/",
+  "libsqlite3-0": "pool/main/s/sqlite3/",
+  "libunistring2": "pool/main/libu/libunistring/",
+  "libidn2-0": "pool/main/libi/libidn2/",
+  "libpsl5": "pool/main/libp/libpsl/",
+  "libcom-err2": "pool/main/e/e2fsprogs/",
+  "libgssapi-krb5-2": "pool/main/k/krb5/",
+  "libsoup-gnome2.4-1": "pool/main/libs/libsoup2.4/"
 }

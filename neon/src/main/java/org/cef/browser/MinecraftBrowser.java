@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.CompletableFuture;
+import javax.swing.*;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
@@ -243,7 +244,15 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
     return true;
   }
 
-  public void sendNativeMouseEvent(@NotNull final MouseEvent event) {
+  public void sendNativeMouseEvent(final int x, final int y, final int type) {
+    final JPanel fake = new JPanel();
+    final Rectangle rectangle = this.browserRect;
+    final double width = rectangle.getWidth();
+    final double height = rectangle.getHeight();
+    final Dimension size = new Dimension((int) width, (int) height);
+    fake.setSize(size);
+    final MouseEvent event =
+        new MouseEvent(fake, 0, System.currentTimeMillis(), 0, x, y, 1, false, type);
     this.sendMouseEvent(event);
   }
 

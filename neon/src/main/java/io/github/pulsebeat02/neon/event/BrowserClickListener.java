@@ -7,7 +7,6 @@ import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
-import java.awt.event.MouseEvent;
 import java.util.Optional;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -100,23 +99,18 @@ public final class BrowserClickListener implements Listener {
 
   public void handleInteraction(
       @NotNull final Player player, @NotNull final ItemFrame frame, final boolean right) {
-
     final long now = System.currentTimeMillis();
     if ((this.lastInteraction + 100) > now) {
       return;
     }
-
     final Location eye = player.getEyeLocation();
     final Vector direction = player.getLocation().getDirection();
     final int[] coords = this.getBoardCoords(frame, eye, direction);
     final int x = coords[0];
     final int y = coords[1];
-
     final MinecraftBrowser browser = this.neon.getBrowser();
-    final long time = System.currentTimeMillis();
     final int type = right ? BUTTON2 : BUTTON1;
-    final MouseEvent event = new MouseEvent(null, 0, time, 0, x, y, 0, false, type);
-    browser.sendNativeMouseEvent(event);
+    browser.sendNativeMouseEvent(x, y, type);
   }
 
   private void activateWidget(final int[] coords) {}
