@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
@@ -155,13 +156,14 @@ public final class NeonPacketSender implements PacketSender {
         final int rgb = data.get(index++);
         final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);
         p.b(ChatModifier.a.a(ChatHexColor.a(rgb & 0xFFFFFF)));
-        p.a(IChatBaseComponent.a(character));
+        p.b(IChatBaseComponent.a(character));
         component.a(p);
       }
       final int id = ((CraftEntity) entities[i]).getHandle().af();
-      final DataWatcherObject<IChatBaseComponent> object =
-          new DataWatcherObject<>(2, DataWatcherRegistry.f);
-      packets[i] = new PacketPlayOutEntityMetadata(id, List.of(DataWatcher.b.a(object, component)));
+      final Optional<IChatBaseComponent> optional = Optional.of(component);
+      final DataWatcherObject<Optional<IChatBaseComponent>> object =
+          new DataWatcherObject<>(2, DataWatcherRegistry.g);
+      packets[i] = new PacketPlayOutEntityMetadata(id, List.of(DataWatcher.b.a(object, optional)));
     }
     this.sendEntityPackets(viewers, packets);
   }

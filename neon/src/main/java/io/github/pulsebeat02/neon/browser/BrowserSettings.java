@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class BrowserSettings {
 
@@ -16,13 +17,13 @@ public final class BrowserSettings {
   private @NotNull final ImmutableDimension resolution;
   private @NotNull final ImmutableDimension blockDimension;
   private @NotNull final DitherHandler handler;
-  private @NotNull final Location location;
+  private @Nullable final Location location;
 
   public BrowserSettings(
       @NotNull final ImmutableDimension resolution,
       @NotNull final ImmutableDimension blockDimension,
       @NotNull final String character,
-      @NotNull final Location location,
+      @Nullable final Location location,
       @NotNull final DitherHandler handler) {
     this.players = this.getAllPlayerUUIDs();
     this.resolution = resolution;
@@ -62,7 +63,7 @@ public final class BrowserSettings {
     return this.character;
   }
 
-  public @NotNull Location getLocation() {
+  public @Nullable Location getLocation() {
     return this.location;
   }
 

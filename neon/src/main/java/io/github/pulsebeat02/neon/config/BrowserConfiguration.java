@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 public final class BrowserConfiguration {
@@ -37,7 +38,7 @@ public final class BrowserConfiguration {
   private @NotNull ImmutableDimension resolution;
   private @NotNull ImmutableDimension blockDimension;
   private @NotNull String character;
-  private @NotNull Location location;
+  private @Nullable Location location;
   private @NotNull EntitySelection selection;
 
   public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
@@ -48,14 +49,8 @@ public final class BrowserConfiguration {
     this.blockDimension = new ImmutableDimension(5, 5);
     this.character = "█";
     this.selection = EntitySelection.HOLOGRAM;
-    this.location = this.createLocation();
     this.readFile();
     this.savePeriodically();
-  }
-
-  private @NotNull Location createLocation() {
-    final World world = Bukkit.getWorld("world");
-    return new Location(world, 0, 0, 0);
   }
 
   public void shutdownConfiguration() {
@@ -195,7 +190,7 @@ public final class BrowserConfiguration {
     this.selection = selection;
   }
 
-  public @NotNull Location getLocation() {
+  public @Nullable Location getLocation() {
     return this.location;
   }
 

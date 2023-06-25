@@ -12,6 +12,7 @@ public interface Locale extends LocaleParent {
   NullComponent<Sender> INVALID_SENDER = error("neon.command.invalid-sender");
   NullComponent<Sender> INVALID_HOMEPAGE_URL = error("neon.command.browser.invalid-homepage-url");
   NullComponent<Sender> INVALID_BROWSER_SETTING = error("neon.command.browser.invalid-setting");
+  NullComponent<Sender> INVALID_LOCATION = error("neon.command.browser.invalid-location");
   NullComponent<Sender> DESTROY_BROWSER = info("neon.command.browser.destroy");
   UniComponent<Sender, String> INVALID_DITHER_ALGORITHM =
       error("neon.command.browser.configure.invalid-dither", null);

@@ -14,6 +14,7 @@ import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.locale.Locale;
 import io.github.pulsebeat02.neon.utils.ArgumentUtils;
 import io.github.pulsebeat02.neon.utils.BrowserSuggestionUtils;
+import io.github.pulsebeat02.neon.video.EntityRenderMethod;
 import io.github.pulsebeat02.neon.video.HologramRenderMethod;
 import io.github.pulsebeat02.neon.video.MapRenderMethod;
 import io.github.pulsebeat02.neon.video.ParticleRenderMethod;
@@ -23,6 +24,7 @@ import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.cef.browser.MinecraftBrowser;
 import org.jetbrains.annotations.NotNull;
@@ -70,6 +72,14 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
     final Component homepageError = Locale.INVALID_HOMEPAGE_URL.build();
     if (ArgumentUtils.handleFalse(audience, homepageError, this.checkUrl(url))) {
       return SINGLE_SUCCESS;
+    }
+
+    if (method instanceof EntityRenderMethod) {
+      final Location location = settings.getLocation();
+      if (location == null) {
+        audience.sendMessage(Locale.INVALID_LOCATION.build());
+        return SINGLE_SUCCESS;
+      }
     }
 
     this.neon.shutdownBrowser();
