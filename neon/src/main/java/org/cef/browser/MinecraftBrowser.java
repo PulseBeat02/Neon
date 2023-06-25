@@ -184,17 +184,14 @@ public final class MinecraftBrowser extends CefBrowser_N implements CefRenderHan
     final int[] bufferArray = new int[length];
     for (int i = 0; i < length; i++) {
       final int bgra = buffer.getInt();
-      bufferArray[i] = this.toRGB(bgra);
+      final int blue = bgra >> 24 & 0xFF;
+      final int green = bgra >> 16 & 0xFF;
+      final int red = bgra >> 8 & 0xFF;
+      final int alpha = bgra & 0xFF;
+      bufferArray[i] =
+          (red * alpha / 255) << 16 | (green * alpha / 255) << 8 | (blue * alpha / 255);
     }
     this.method.render(IntBuffer.wrap(bufferArray));
-  }
-
-  public int toRGB(final int bgra) {
-    final int alpha = (bgra & 0xff000000) >> 24;
-    final int blue = (bgra & 0x00ff0000) >> 16;
-    final int green = (bgra & 0x0000ff00) >> 8;
-    final int red = (bgra & 0x000000ff);
-    return (red * alpha / 255) << 16 | (green * alpha / 255) << 8 | (blue * alpha / 255);
   }
 
   @Override

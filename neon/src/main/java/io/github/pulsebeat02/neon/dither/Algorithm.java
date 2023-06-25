@@ -7,12 +7,15 @@ import io.github.pulsebeat02.neon.dither.algorithm.error.FloydSteinbergDither;
 import io.github.pulsebeat02.neon.dither.algorithm.order.BayerDither;
 import io.github.pulsebeat02.neon.dither.algorithm.order.OrderedPixelMapper;
 import io.github.pulsebeat02.neon.dither.algorithm.random.RandomDither;
+import io.github.pulsebeat02.neon.dither.algorithm.simple.SimpleDither;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 public enum Algorithm {
+
+  SIMPLE(new SimpleDither()),
   FILTER_LITE(new FilterLiteDither()),
   FLOYD_STEINBERG(new FloydSteinbergDither()),
   RANDOM_LIGHT(new RandomDither(5)),

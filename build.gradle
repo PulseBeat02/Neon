@@ -31,5 +31,10 @@ subprojects {
             url "https://jogamp.org/deployment/maven"
         }
     }
-
+    compileJava.options.encoding = 'UTF-8'
+    tasks.withType(JavaCompile).tap {
+        configureEach {
+            options.encoding = 'UTF-8'
+        }
+    }
 }
