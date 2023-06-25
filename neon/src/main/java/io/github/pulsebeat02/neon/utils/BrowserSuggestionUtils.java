@@ -37,7 +37,13 @@ public final class BrowserSuggestionUtils {
     BLOCK_DIMENSION_SUGGESTIONS =
         List.of("1x1", "1x2", "3x3", "3x5", "5x5", "6x10", "8x14", "10x14", "8x8");
     CHARACTER_SUGGESTIONS =
-        Map.of("SMALL_SQUARE", "▪", "BIG_SQUARE", "☐", "SMILEY", "☺", "FROWNEY", "☹");
+        Map.of("SMALL_SQUARE", "▪",
+            "BIG_SQUARE", "■",
+            "CIRCLE", "●",
+            "HORIZONTAL_RECTANGLE", "▬",
+            "VERTICAL_RECTANGLE", "▮",
+            "SMILEY", "☺",
+            "FROWNEY", "☹");
     BROWSER_RENDER_TYPE_SUGGESTIONS = List.of("MAP", "ENTITY");
   }
 

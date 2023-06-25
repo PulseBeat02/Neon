@@ -1,10 +1,10 @@
 package io.github.pulsebeat02.neon.dither.algorithm.simple;
 
 import io.github.pulsebeat02.neon.dither.DitherHandler;
+import io.github.pulsebeat02.neon.utils.DitherUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.IntBuffer;
-import org.bukkit.map.MapPalette;
 import org.jetbrains.annotations.NotNull;
 
 public final class SimpleDither implements DitherHandler  {
@@ -22,7 +22,7 @@ public final class SimpleDither implements DitherHandler  {
         final int r = (color >> 16) & 0xFF;
         final int g = (color >> 8) & 0xFF;
         final int b = (color) & 0xFF;
-        data.writeByte(MapPalette.matchColor(r, g, b));
+        data.writeByte(DitherUtils.getBestColor(r, g, b));
       }
     }
     return data;

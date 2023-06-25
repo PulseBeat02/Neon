@@ -152,11 +152,9 @@ public final class NeonPacketSender implements PacketSender {
     for (int i = 0; i < maxHeight; i++) {
       final IChatMutableComponent component = IChatMutableComponent.a(ComponentContents.a);
       for (int x = 0; x < width; x++) {
-        final int bgra = data.get(index++);
-        final int rgba =
-            (bgra & 0x00ff0000) >> 16 | (bgra & 0xff00ff00) | (bgra & 0x000000ff) << 16;
+        final int rgb = data.get(index++);
         final IChatMutableComponent p = IChatMutableComponent.a(ComponentContents.a);
-        p.b(ChatModifier.a.a(ChatHexColor.a(rgba & 0xFFFFFF)));
+        p.b(ChatModifier.a.a(ChatHexColor.a(rgb & 0xFFFFFF)));
         p.a(IChatBaseComponent.a(character));
         component.a(p);
       }
