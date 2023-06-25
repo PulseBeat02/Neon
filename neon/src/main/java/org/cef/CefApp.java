@@ -4,11 +4,9 @@
 
 package org.cef;
 
-import io.github.pulsebeat02.neon.utils.ResourceUtils;
-import org.cef.callback.CefSchemeHandlerFactory;
-import org.cef.handler.CefAppHandler;
-import org.cef.handler.CefAppHandlerAdapter;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -22,11 +20,11 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import org.cef.callback.CefSchemeHandlerFactory;
+import org.cef.handler.CefAppHandler;
+import org.cef.handler.CefAppHandlerAdapter;
 
 /** Exposes static methods for managing the global CEF context. */
 public class CefApp extends CefAppHandlerAdapter {
@@ -437,18 +435,7 @@ public class CefApp extends CefAppHandlerAdapter {
                 }
               } else if (OS.isLinux()) {
                 if (settings.browser_subprocess_path == null) {
-                  final Path path = Paths.get(library_path, "helper");
-                  if (Files.notExists(path)) {
-                    try (final InputStream stream =
-                        ResourceUtils.getResourceAsStream("package/subprocess")) {
-                      Files.copy(stream, path, REPLACE_EXISTING);
-                      final Set<PosixFilePermission> permissions =
-                          PosixFilePermissions.fromString("rwxrwxrwx");
-                      Files.setPosixFilePermissions(path, permissions);
-                    } catch (final IOException e) {
-                      e.printStackTrace();
-                    }
-                  }
+                  final Path path = Paths.get(library_path, "jcef_helper");
                   settings.browser_subprocess_path = path.normalize().toAbsolutePath().toString();
                 }
                 if (settings.resources_dir_path == null) {
@@ -460,7 +447,6 @@ public class CefApp extends CefAppHandlerAdapter {
                   settings.locales_dir_path = path.normalize().toAbsolutePath().toString();
                 }
               }
-
               if (CefApp.this.N_Initialize(appHandler_, settings)) {
                 setState(CefAppState.INITIALIZED);
               }
