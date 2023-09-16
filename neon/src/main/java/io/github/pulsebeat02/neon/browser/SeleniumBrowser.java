@@ -97,13 +97,10 @@ public final class SeleniumBrowser {
   }
 
   private void setDimensions() {
-    final WebDriver.Options options = this.driver.manage();
-    final WebDriver.Window window = options.window();
     final ImmutableDimension immutable = this.settings.getResolution();
     final int width = immutable.getWidth();
     final int height = immutable.getHeight();
-    final Dimension dimension = new Dimension(width, height);
-    window.setSize(dimension);
+    this.driver.manage().window().setSize(new Dimension(width, height));
   }
 
   private @NotNull ChromeOptions createArguments() {

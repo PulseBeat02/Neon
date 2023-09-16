@@ -19,7 +19,7 @@ dependencies {
     compileOnly 'org.seleniumhq.selenium:selenium-java:4.12.1'
 
     testImplementation 'com.google.code.gson:gson:2.10.1'
-    testImplementation 'io.netty:netty-all:5.0.0.Alpha2'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
 
     implementation project(':neon-api')
     implementation project(':v1_20_R1')
