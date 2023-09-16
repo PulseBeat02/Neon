@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
+import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.command.CommandSegment;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.locale.Locale;
@@ -100,9 +101,12 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
       @NotNull final RenderMethod method,
       @NotNull final String url) {
     method.setup();
-    final MinecraftBrowser browser = new MinecraftBrowser(this.neon, settings, method, url);
-    browser.createImmediately();
+    //    final MinecraftBrowser browser = new MinecraftBrowser(this.neon, settings, method, url);
+    //    browser.createImmediately();
+    //    browser.loadURL(url);
+    final SeleniumBrowser browser = new SeleniumBrowser(this.neon, settings, method, url);
     browser.loadURL(url);
+    browser.start();
     this.neon.setBrowser(browser);
   }
 

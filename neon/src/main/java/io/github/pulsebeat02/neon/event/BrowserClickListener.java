@@ -5,6 +5,8 @@ import static java.awt.event.MouseEvent.BUTTON2;
 
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
+import io.github.pulsebeat02.neon.browser.MouseClick;
+import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import java.util.Optional;
@@ -66,18 +68,18 @@ public final class BrowserClickListener implements Listener {
   @EventHandler
   private void onEntityDamageFrameEvent(@NotNull final EntityDamageEvent event) {
     final Entity entity = event.getEntity();
-    if (!(entity instanceof ItemFrame frame)) {
+    if (!(entity instanceof final ItemFrame frame)) {
       return;
     }
     final ItemStack stack = frame.getItem();
     if (this.checkValidMap(stack)) {
       event.setCancelled(true);
     }
-    if (!(event instanceof EntityDamageByEntityEvent damageEvent)) {
+    if (!(event instanceof final EntityDamageByEntityEvent damageEvent)) {
       return;
     }
     final Entity damager = damageEvent.getDamager();
-    if (!(damager instanceof Player player)) {
+    if (!(damager instanceof final Player player)) {
       return;
     }
     this.handleInteraction(player, frame, false);
@@ -86,7 +88,7 @@ public final class BrowserClickListener implements Listener {
   @EventHandler
   private void onPlayerInteractEntityEvent(@NotNull final PlayerInteractEntityEvent event) {
     final Entity entity = event.getRightClicked();
-    if (!(entity instanceof ItemFrame frame)) {
+    if (!(entity instanceof final ItemFrame frame)) {
       return;
     }
     final ItemStack stack = frame.getItem();
@@ -108,9 +110,12 @@ public final class BrowserClickListener implements Listener {
     final int[] coords = this.getBoardCoords(frame, eye, direction);
     final int x = coords[0];
     final int y = coords[1];
-    final MinecraftBrowser browser = this.neon.getBrowser();
-    final int type = right ? BUTTON2 : BUTTON1;
-    browser.sendNativeMouseEvent(x, y, type);
+//    final MinecraftBrowser browser = this.neon.getBrowser();
+//    final int type = right ? BUTTON2 : BUTTON1;
+//    browser.sendNativeMouseEvent(x, y, type);
+    final SeleniumBrowser browser = this.neon.getBrowser();
+    final MouseClick type = right ? MouseClick.RIGHT : MouseClick.LEFT;
+    browser.sendMouseEvent(x, y, type);
   }
 
   private void activateWidget(final int[] coords) {}
@@ -168,7 +173,8 @@ public final class BrowserClickListener implements Listener {
     final MapMeta mapMeta = (MapMeta) meta;
     final int id = mapMeta.getMapId();
 
-    final MinecraftBrowser browser = this.neon.getBrowser();
+    // final MinecraftBrowser browser = this.neon.getBrowser();
+    final SeleniumBrowser browser = this.neon.getBrowser();
     final BrowserSettings settings = browser.getSettings();
     final ImmutableDimension blockDimension = settings.getBlockDimension();
     final int blockWidth = blockDimension.getWidth();

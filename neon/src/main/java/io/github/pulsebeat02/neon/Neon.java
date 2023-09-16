@@ -3,6 +3,7 @@ package io.github.pulsebeat02.neon;
 import static net.kyori.adventure.text.Component.text;
 
 import io.github.pulsebeat02.neon.apt.PackageManager;
+import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
@@ -31,7 +32,7 @@ public final class Neon extends JavaPlugin {
   private PacketSender sender;
   private BukkitAudiences audience;
   private Audience console;
-  private MinecraftBrowser browser;
+  private SeleniumBrowser browser;
 
   @Override
   public void onEnable() {
@@ -133,7 +134,8 @@ public final class Neon extends JavaPlugin {
   public void shutdownBrowser() {
     if (this.browser != null) {
       this.stopRenderer();
-      this.browser.close(true);
+      //      this.browser.close(true);
+      this.browser.shutdown();
       this.browser = null;
     }
   }
@@ -143,11 +145,11 @@ public final class Neon extends JavaPlugin {
     method.destroy();
   }
 
-  public @NotNull MinecraftBrowser getBrowser() {
+  public SeleniumBrowser getBrowser() {
     return this.browser;
   }
 
-  public void setBrowser(@NotNull final MinecraftBrowser browser) {
+  public void setBrowser(@NotNull final SeleniumBrowser browser) {
     this.shutdownBrowser();
     this.browser = browser;
   }

@@ -16,6 +16,7 @@ dependencies {
     compileOnly 'org.jogamp.gluegen:gluegen-rt-main:2.4.0'
     compileOnly 'org.jogamp.jogl:jogl-all-main:2.4.0'
     compileOnly 'org.jsoup:jsoup:1.16.1'
+    compileOnly 'org.seleniumhq.selenium:selenium-java:4.12.1'
 
     testImplementation 'com.google.code.gson:gson:2.10.1'
     testImplementation 'io.netty:netty-all:5.0.0.Alpha2'
