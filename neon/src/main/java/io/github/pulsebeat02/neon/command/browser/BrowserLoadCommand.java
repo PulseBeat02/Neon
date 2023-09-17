@@ -27,7 +27,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
-import org.cef.browser.MinecraftBrowser;
 import org.jetbrains.annotations.NotNull;
 
 public final class BrowserLoadCommand implements CommandSegment.Literal<CommandSender> {
@@ -101,9 +100,6 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
       @NotNull final RenderMethod method,
       @NotNull final String url) {
     method.setup();
-    //    final MinecraftBrowser browser = new MinecraftBrowser(this.neon, settings, method, url);
-    //    browser.createImmediately();
-    //    browser.loadURL(url);
     final SeleniumBrowser browser = new SeleniumBrowser(this.neon, settings, method, url);
     browser.loadURL(url);
     browser.start();

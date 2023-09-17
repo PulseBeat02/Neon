@@ -10,10 +10,8 @@
   "load": "STARTUP",
   "libraries": [
     "com.moandjiezana.toml:toml4j:0.7.2",
-    "com.github.stefvanschie.inventoryframework:IF:0.10.10",
+    "com.github.stefvanschie.inventoryframework:IF:0.10.11",
     "me.lucko:commodore:2.2",
-    "org.apache.commons:commons-compress:1.23.0",
-    "org.jsoup:jsoup:1.16.1",
     "org.seleniumhq.selenium:selenium-java:4.12.1"
   ]
 }

@@ -26,7 +26,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.util.Vector;
-import org.cef.browser.MinecraftBrowser;
 import org.jetbrains.annotations.NotNull;
 
 public final class BrowserClickListener implements Listener {
@@ -110,15 +109,10 @@ public final class BrowserClickListener implements Listener {
     final int[] coords = this.getBoardCoords(frame, eye, direction);
     final int x = coords[0];
     final int y = coords[1];
-//    final MinecraftBrowser browser = this.neon.getBrowser();
-//    final int type = right ? BUTTON2 : BUTTON1;
-//    browser.sendNativeMouseEvent(x, y, type);
     final SeleniumBrowser browser = this.neon.getBrowser();
     final MouseClick type = right ? MouseClick.RIGHT : MouseClick.LEFT;
     browser.sendMouseEvent(x, y, type);
   }
-
-  private void activateWidget(final int[] coords) {}
 
   /*
   Stolen from https://github.com/BananaPuncher714/RadioBoard/blob/master/src/io/github/bananapuncher714/radioboard/BoardListener.java
@@ -173,7 +167,6 @@ public final class BrowserClickListener implements Listener {
     final MapMeta mapMeta = (MapMeta) meta;
     final int id = mapMeta.getMapId();
 
-    // final MinecraftBrowser browser = this.neon.getBrowser();
     final SeleniumBrowser browser = this.neon.getBrowser();
     final BrowserSettings settings = browser.getSettings();
     final ImmutableDimension blockDimension = settings.getBlockDimension();

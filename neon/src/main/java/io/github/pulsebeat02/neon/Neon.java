@@ -2,7 +2,6 @@ package io.github.pulsebeat02.neon;
 
 import static net.kyori.adventure.text.Component.text;
 
-import io.github.pulsebeat02.neon.apt.PackageManager;
 import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
@@ -17,7 +16,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.cef.browser.MinecraftBrowser;
 import org.jetbrains.annotations.NotNull;
 
 public final class Neon extends JavaPlugin {
@@ -39,7 +37,6 @@ public final class Neon extends JavaPlugin {
     this.registerAdventure();
     this.registerServerImplementation();
     this.readConfigurationFile();
-    this.installPackages();
     this.registerStaticBlocks();
     this.registerCommands();
     this.registerStats();
@@ -47,7 +44,6 @@ public final class Neon extends JavaPlugin {
   }
 
   private void registerStaticBlocks() {
-    MinecraftBrowser.init();
     ExecutorProvider.init();
   }
 
@@ -70,14 +66,6 @@ public final class Neon extends JavaPlugin {
 
   private void shutdownExecutors() {
     ExecutorProvider.shutdown();
-  }
-
-  private void installPackages() {
-    try {
-      new PackageManager(this).installPackages();
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private void shutdownConfiguration() {
@@ -134,7 +122,6 @@ public final class Neon extends JavaPlugin {
   public void shutdownBrowser() {
     if (this.browser != null) {
       this.stopRenderer();
-      //      this.browser.close(true);
       this.browser.shutdown();
       this.browser = null;
     }

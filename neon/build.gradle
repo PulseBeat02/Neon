@@ -12,10 +12,6 @@ dependencies {
     compileOnly 'com.moandjiezana.toml:toml4j:0.7.2'
     compileOnly 'me.lucko:commodore:2.2'
     compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
-    compileOnly 'org.apache.commons:commons-compress:1.23.0'
-    compileOnly 'org.jogamp.gluegen:gluegen-rt-main:2.4.0'
-    compileOnly 'org.jogamp.jogl:jogl-all-main:2.4.0'
-    compileOnly 'org.jsoup:jsoup:1.16.1'
     compileOnly 'org.seleniumhq.selenium:selenium-java:4.12.1'
 
     testImplementation 'com.google.code.gson:gson:2.10.1'
