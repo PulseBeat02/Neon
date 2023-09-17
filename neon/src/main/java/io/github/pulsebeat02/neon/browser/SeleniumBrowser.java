@@ -77,18 +77,19 @@ public final class SeleniumBrowser {
   }
 
   private void paintLoop() {
-    final long previous = System.currentTimeMillis();
+    final double dt = 1000 / 60D;
+    double previous = System.currentTimeMillis();
     while (this.running.get()) {
-      try {
-        final long current = System.currentTimeMillis();
-        final long elapsed = current - previous;
-        if (elapsed < 42) {
-          continue;
-        }
-        this.paint();
-      } catch (final IOException e) {
-        this.neon.logConsole(e.getMessage());
+      final double current = System.currentTimeMillis();
+      double frameTime = current - previous;
+      previous = current;
+      int[] raster = new int[0];
+      while (frameTime > 0.0) {
+        final double deltaTime = Math.min(frameTime, dt);
+        raster = this.getRGB();
+        frameTime -= deltaTime;
       }
+      this.display(raster);
     }
   }
 
@@ -110,13 +111,37 @@ public final class SeleniumBrowser {
     return options;
   }
 
-  private void paint() throws IOException {
+  private int[] getRGB() {
     final TakesScreenshot screenshot = (TakesScreenshot) this.driver;
     final byte[] bytes = screenshot.getScreenshotAs(OutputType.BYTES);
-    final BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+    final BufferedImage image = this.toBufferedImage(bytes);
     final int width = image.getWidth();
     final int height = image.getHeight();
-    final int[] raster = image.getRGB(0, 0, width, height, null, 0, width);
+    int counter = 0;
+    final int[] buffer = new int[width * height];
+    for (int i = 0; i < width; i++) {
+      for (int j = 0; j < height; j++) {
+        final int argb = image.getRGB(j, i);
+        final int alpha = argb >> 24 & 0xFF;
+        final int red = argb >> 16 & 0xFF;
+        final int green = argb >> 8 & 0xFF;
+        final int blue = argb & 0xFF;
+        buffer[counter++] =
+            (red * alpha / 255) << 16 | (green * alpha / 255) << 8 | (blue * alpha / 255);
+      }
+    }
+    return buffer;
+  }
+
+  private @NotNull BufferedImage toBufferedImage(final byte[] bytes) {
+    try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
+      return ImageIO.read(stream);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void display(final int[] raster) {
     this.method.render(IntBuffer.wrap(raster));
   }
 
