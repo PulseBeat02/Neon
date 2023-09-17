@@ -4,3 +4,4 @@ resolution = [640, 640]
 block_dimension = [5, 5]
 character = "█"
 entity_selection = "HOLOGRAM"
+browser_arguments = ["--headless", "--disable-gpu", "--no-sandbox", "--disable-extensions"]

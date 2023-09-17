@@ -40,6 +40,7 @@ public final class BrowserConfiguration {
   private @NotNull String character;
   private @Nullable Location location;
   private @NotNull EntitySelection selection;
+  private @NotNull List<String> browserArguments;
 
   public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
     this.configurationPath = neon.getDataFolder().toPath().resolve("neon.toml");
@@ -49,6 +50,8 @@ public final class BrowserConfiguration {
     this.blockDimension = new ImmutableDimension(5, 5);
     this.character = "█";
     this.selection = EntitySelection.HOLOGRAM;
+    this.browserArguments =
+        List.of("--headless", "--disable-gpu", "--no-sandbox", "--disable-extensions");
     this.readFile();
     this.savePeriodically();
   }
@@ -86,6 +89,7 @@ public final class BrowserConfiguration {
     table.put("block_dimension", this.createDimension(this.blockDimension));
     table.put("character", this.character);
     table.put("selection", this.selection.name());
+    table.put("browser_arguments", this.browserArguments);
 
     final File file = this.configurationPath.toFile();
     final TomlWriter writer = TomlProvider.getTomlWriter();
@@ -107,6 +111,7 @@ public final class BrowserConfiguration {
     this.blockDimension = this.parseDimension(toml, "neon.block_dimension");
     this.character = toml.getString("neon.character");
     this.selection = this.parseEntitySelection(toml);
+    this.browserArguments = toml.getList("neon.browser_arguments");
   }
 
   private @NotNull EntitySelection parseEntitySelection(@NotNull final Toml toml) {

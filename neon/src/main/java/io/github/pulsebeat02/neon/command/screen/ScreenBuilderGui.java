@@ -11,7 +11,10 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.moandjiezana.toml.Toml;
+import io.github.pulsebeat02.neon.config.TomlProvider;
 import io.github.pulsebeat02.neon.utils.MapUtils;
+import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import io.github.pulsebeat02.neon.utils.gui.ItemBuilder;
 import io.github.pulsebeat02.neon.utils.gui.SkullCreator;
 import io.github.pulsebeat02.neon.utils.mutable.MutableInt;
@@ -24,16 +27,23 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public final class ScreenBuilderGui {
 
   private static @NotNull final String INCREASE_BASE64;
   private static @NotNull final String DECREASE_BASE64;
 
   static {
-    INCREASE_BASE64 =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWNkYjhmNDM2NTZjMDZjNGU4NjgzZTJlNjM0MWI0NDc5ZjE1N2Y0ODA4MmZlYTRhZmYwOWIzN2NhM2M2OTk1YiJ9fX0=";
-    DECREASE_BASE64 =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjFlMWU3MzBjNzcyNzljOGUyZTE1ZDhiMjcxYTExN2U1ZTJjYTkzZDI1YzhiZTNhMDBjYzkyYTAwY2MwYmI4NSJ9fX0=";
+    try (final InputStream stream = ResourceUtils.getResourceAsStream("config/neon.toml")) {
+      final Toml toml = TomlProvider.getToml();
+      toml.read(stream);
+      INCREASE_BASE64 = toml.getString("gui.increase_arrow");
+      DECREASE_BASE64 = toml.getString("gui.decrease_arrow");
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private @NotNull final ChestGui gui;
