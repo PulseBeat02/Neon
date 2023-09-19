@@ -3,8 +3,15 @@ package io.github.pulsebeat02.neon.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+
+import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import org.jetbrains.annotations.NotNull;
+
+import static java.util.Objects.requireNonNull;
 
 public final class ProcessUtils {
 
@@ -36,5 +43,14 @@ public final class ProcessUtils {
     }
   }
 
-  
+  public static void setEnvironmentalVariable(@NotNull final String key, @NotNull final String value) {
+    try {
+      final Map<String, String> unwritable = System.getenv();
+      final Map<String, String> writable =
+          (Map<String, String>) UnsafeUtils.getField(unwritable, "m");
+      writable.put(key, value);
+    } catch (final NoSuchFieldException e) {
+      throw new AssertionError(e);
+    }
+  }
 }

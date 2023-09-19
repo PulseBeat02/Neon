@@ -12,6 +12,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.moandjiezana.toml.Toml;
+import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.config.TomlProvider;
 import io.github.pulsebeat02.neon.utils.MapUtils;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;
@@ -53,8 +54,8 @@ public final class ScreenBuilderGui {
   private @NotNull final MutableInt height;
   private @NotNull Material material;
 
-  public ScreenBuilderGui(@NotNull final Player player) {
-    this.gui = new ChestGui(5, "Choose Screen Size");
+  public ScreenBuilderGui(@NotNull final Neon neon, @NotNull final Player player) {
+    this.gui = new ChestGui(5, "Choose Screen Size", neon);
     this.pane = new StaticPane(9, 5);
     this.material = Material.OAK_PLANKS;
     this.viewer = player;

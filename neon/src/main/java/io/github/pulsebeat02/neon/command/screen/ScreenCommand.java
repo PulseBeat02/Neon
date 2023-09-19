@@ -34,7 +34,7 @@ public final class ScreenCommand extends BaseCommand {
     if (requiresPlayer(plugin, sender)) {
       return SINGLE_SUCCESS;
     }
-    new ScreenBuilderGui((Player) sender);
+    new ScreenBuilderGui(plugin, (Player) sender);
     return SINGLE_SUCCESS;
   }
 

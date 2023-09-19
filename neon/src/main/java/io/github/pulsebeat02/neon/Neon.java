@@ -10,13 +10,17 @@ import io.github.pulsebeat02.neon.event.BrowserClickListener;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
+import io.github.pulsebeat02.neon.utils.ProcessUtils;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
+import java.nio.file.Path;
+
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.openqa.selenium.manager.SeleniumManager;
 
 public final class Neon extends JavaPlugin {
 
@@ -38,9 +42,17 @@ public final class Neon extends JavaPlugin {
     this.registerServerImplementation();
     this.readConfigurationFile();
     this.registerStaticBlocks();
+    this.setSeleniumFolder();
     this.registerCommands();
     this.registerStats();
     this.registerEvents();
+  }
+
+  private void setSeleniumFolder() {
+    final Path parent = this.getDataFolder().toPath();
+    final Path selenium = parent.resolve("selenium");
+    final String path = selenium.toAbsolutePath().toString();
+    ProcessUtils.setEnvironmentalVariable("SE_CACHE_PATH", path);
   }
 
   private void registerStaticBlocks() {
