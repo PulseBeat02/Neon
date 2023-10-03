@@ -6,66 +6,50 @@ import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
+import io.github.pulsebeat02.neon.dither.MapPalette;
 import io.github.pulsebeat02.neon.event.BrowserClickListener;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
+import io.github.pulsebeat02.neon.locale.AudienceHandler;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
 import io.github.pulsebeat02.neon.utils.ProcessUtils;
-import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.io.IOException;
 import java.nio.file.Path;
-
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.openqa.selenium.manager.SeleniumManager;
 
 public final class Neon extends JavaPlugin {
 
   private static final int BSTATS_PLUGIN_ID;
+  private static final String SELENIUM_CACHE;
 
   static {
     BSTATS_PLUGIN_ID = 18773;
+    SELENIUM_CACHE = "SE_CACHE_PATH";
   }
 
   private BrowserConfiguration configuration;
   private PacketSender sender;
-  private BukkitAudiences audience;
-  private Audience console;
+  private AudienceHandler audience;
   private SeleniumBrowser browser;
+
+  @Override
+  public void onLoad() {
+    this.registerStaticBlocks();
+    this.setSeleniumFolder();
+  }
 
   @Override
   public void onEnable() {
     this.registerAdventure();
     this.registerServerImplementation();
     this.readConfigurationFile();
-    this.registerStaticBlocks();
-    this.setSeleniumFolder();
     this.registerCommands();
     this.registerStats();
     this.registerEvents();
-  }
-
-  private void setSeleniumFolder() {
-    final Path parent = this.getDataFolder().toPath();
-    final Path selenium = parent.resolve("selenium");
-    final String path = selenium.toAbsolutePath().toString();
-    ProcessUtils.setEnvironmentalVariable("SE_CACHE_PATH", path);
-  }
-
-  private void registerStaticBlocks() {
-    ExecutorProvider.init();
-  }
-
-  private void registerAdventure() {
-    this.audience = BukkitAudiences.create(this);
-    this.console = this.audience.console();
-  }
-
-  private void registerServerImplementation() {
-    this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
   }
 
   @Override
@@ -76,19 +60,36 @@ public final class Neon extends JavaPlugin {
     this.shutdownExecutors();
   }
 
+  private void setSeleniumFolder() {
+    final Path parent = this.getDataFolder().toPath();
+    final Path selenium = parent.resolve("selenium");
+    final String path = selenium.toAbsolutePath().toString();
+    ProcessUtils.setEnvironmentalVariable(SELENIUM_CACHE, path);
+  }
+
+  private void registerStaticBlocks() {
+    ExecutorProvider.init();
+    MapPalette.init();
+  }
+
+  private void registerAdventure() {
+    this.audience = new AudienceHandler(this);
+  }
+
+  private void registerServerImplementation() {
+    this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
+  }
+
+  private void shutdownAdventure() {
+    this.audience.shutdown();
+  }
+
   private void shutdownExecutors() {
     ExecutorProvider.shutdown();
   }
 
   private void shutdownConfiguration() {
     this.configuration.shutdownConfiguration();
-  }
-
-  private void shutdownAdventure() {
-    if (this.audience != null) {
-      this.audience.close();
-      this.audience = null;
-    }
   }
 
   private void registerEvents() {
@@ -113,7 +114,8 @@ public final class Neon extends JavaPlugin {
   }
 
   public void logConsole(@NotNull final String text) {
-    this.console.sendMessage(text(text));
+    final Audience console = this.audience.console();
+    console.sendMessage(text(text));
   }
 
   public @NotNull BrowserConfiguration getConfiguration() {
@@ -121,10 +123,7 @@ public final class Neon extends JavaPlugin {
   }
 
   public @NotNull BukkitAudiences audience() {
-    if (this.audience == null) {
-      throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
-    }
-    return this.audience;
+    return this.audience.retrieve();
   }
 
   public @NotNull PacketSender getPacketSender() {
@@ -133,15 +132,9 @@ public final class Neon extends JavaPlugin {
 
   public void shutdownBrowser() {
     if (this.browser != null) {
-      this.stopRenderer();
       this.browser.shutdown();
       this.browser = null;
     }
-  }
-
-  private void stopRenderer() {
-    final RenderMethod method = this.browser.getRenderMethod();
-    method.destroy();
   }
 
   public SeleniumBrowser getBrowser() {

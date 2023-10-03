@@ -49,6 +49,8 @@ public final class SeleniumBrowser {
   }
 
   public void shutdown() {
+    final RenderMethod method = this.getRenderMethod();
+    method.destroy();
     this.running.set(false);
     this.driver.quit();
     this.executor.shutdownNow();

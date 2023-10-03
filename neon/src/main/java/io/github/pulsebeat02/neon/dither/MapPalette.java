@@ -28,6 +28,8 @@ public final class MapPalette {
     }
   }
 
+  public static void init() {}
+
   @NotNull
   public static Color getColor(final byte val) {
     return NMS_PALETTE[val];
