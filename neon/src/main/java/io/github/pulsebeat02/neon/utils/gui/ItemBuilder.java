@@ -13,8 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("deprecation")
-public class ItemBuilder {
+public final class ItemBuilder {
 
   private @NotNull final ItemStack is;
   private @Nullable Consumer<InventoryClickEvent> action;
@@ -33,11 +32,6 @@ public class ItemBuilder {
 
   public static @NotNull ItemBuilder from(@NotNull final ItemStack stack) {
     return new ItemBuilder(stack);
-  }
-
-  public @NotNull ItemBuilder durability(final short dur) {
-    this.is.setDurability(dur);
-    return this;
   }
 
   public @NotNull ItemBuilder name(@NotNull final Component name) {

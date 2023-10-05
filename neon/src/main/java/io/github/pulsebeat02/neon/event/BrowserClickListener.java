@@ -1,8 +1,5 @@
 package io.github.pulsebeat02.neon.event;
 
-import static java.awt.event.MouseEvent.BUTTON1;
-import static java.awt.event.MouseEvent.BUTTON2;
-
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.browser.BrowserSettings;
 import io.github.pulsebeat02.neon.browser.MouseClick;

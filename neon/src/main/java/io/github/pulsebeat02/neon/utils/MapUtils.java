@@ -23,13 +23,19 @@ public final class MapUtils {
 
   @NotNull
   public static ItemStack getMapFromID(final int id) {
+    final ItemStack map = createMapItemStack(id);
+    final ItemMeta itemMeta = map.getItemMeta();
+    itemMeta.setLore(List.of("Map ID [%s]".formatted(id)));
+    map.setItemMeta(itemMeta);
+    return map;
+  }
+
+  @SuppressWarnings("deprecation")
+  private static @NotNull ItemStack createMapItemStack(final int id) {
     final ItemStack map = new ItemStack(Material.FILLED_MAP);
     final MapMeta mapMeta = requireNonNull((MapMeta) map.getItemMeta());
     mapMeta.setMapId(id);
     map.setItemMeta(mapMeta);
-    final ItemMeta itemMeta = map.getItemMeta();
-    itemMeta.setLore(List.of("Map ID [%s]".formatted(id)));
-    map.setItemMeta(itemMeta);
     return map;
   }
 
@@ -48,14 +54,32 @@ public final class MapUtils {
     int map = startingMap;
     for (int h = height; h > 0; h--) {
       for (int w = 0; w < width; w++) {
-        final Block current = start.getRelative(BlockFace.UP, h).getRelative(BlockFace.EAST, w);
-        current.setType(mat);
-        final ItemFrame frame =
-            world.spawn(current.getRelative(opposite).getLocation(), ItemFrame.class);
-        frame.setFacingDirection(face);
-        frame.setItem(getMapFromID(map));
+        final Block current = getRelativeBlock(start, mat, w, h);
+        final ItemFrame frame = getRelativeItemFrame(world, current, opposite, face, map);
         map++;
       }
     }
+  }
+
+  private static @NotNull ItemFrame getRelativeItemFrame(
+      @NotNull final World world,
+      @NotNull final Block current,
+      @NotNull final BlockFace opposite,
+      @NotNull final BlockFace face,
+      final int map) {
+    final ItemFrame frame =
+        world.spawn(current.getRelative(opposite).getLocation(), ItemFrame.class);
+    frame.setFacingDirection(face);
+    frame.setItem(getMapFromID(map));
+    frame.setInvulnerable(true);
+    frame.setGravity(false);
+    return frame;
+  }
+
+  private static @NotNull Block getRelativeBlock(
+      @NotNull final Block start, @NotNull final Material mat, final int w, final int h) {
+    final Block block = start.getRelative(BlockFace.UP, h).getRelative(BlockFace.EAST, w);
+    block.setType(mat);
+    return block;
   }
 }

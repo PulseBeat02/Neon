@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-public class ReflectionHandler {
+public final class ReflectionHandler {
   private static @NotNull final String VERSION;
 
   static {
@@ -18,12 +18,7 @@ public class ReflectionHandler {
     this.neon = neon;
   }
 
-  private static @NotNull PacketSender getPacketHandler()
-      throws ClassNotFoundException,
-          NoSuchMethodException,
-          InvocationTargetException,
-          InstantiationException,
-          IllegalAccessException {
+  private static @NotNull PacketSender getPacketHandler() throws Exception {
     return (PacketSender) getPacketHandlerClass().getDeclaredConstructor().newInstance();
   }
 
@@ -38,11 +33,7 @@ public class ReflectionHandler {
   public @NotNull PacketSender getNewPacketHandlerInstance() {
     try {
       return getPacketHandler();
-    } catch (final ClassNotFoundException
-        | InstantiationException
-        | IllegalAccessException
-        | NoSuchMethodException
-        | InvocationTargetException e) {
+    } catch (final Exception e) {
       final String software = this.neon.getServer().getVersion();
       this.neon.logConsole("Unsupported Server Software %s!".formatted(software));
       throw new AssertionError(

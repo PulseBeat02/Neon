@@ -4,9 +4,10 @@ import io.github.pulsebeat02.neon.Neon;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class AudienceHandler {
-  private final BukkitAudiences audience;
+  private @Nullable final BukkitAudiences audience;
 
   public AudienceHandler(@NotNull final Neon neon) {
     this.audience = BukkitAudiences.create(neon);
@@ -19,16 +20,18 @@ public final class AudienceHandler {
   }
 
   public @NotNull BukkitAudiences retrieve() {
-    if (this.audience == null) {
-      throw new IllegalStateException("Tried to access BukkitAudiences when the plugin was disabled!");
-    }
+    this.checkStatus();
     return this.audience;
   }
 
   public @NotNull Audience console() {
+    this.checkStatus();
+    return this.audience.console();
+  }
+
+  private void checkStatus() {
     if (this.audience == null) {
-      throw new IllegalStateException("Tried to access Console when the plugin was disabled!");
+      throw new AssertionError("Tried to access Adventure when the plugin was disabled!");
     }
-    return audience.console();
   }
 }

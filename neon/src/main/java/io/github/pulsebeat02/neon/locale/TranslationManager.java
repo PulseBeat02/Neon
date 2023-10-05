@@ -14,15 +14,17 @@ import org.jetbrains.annotations.NotNull;
 public final class TranslationManager {
 
   private static @NotNull final java.util.Locale DEFAULT_LOCALE;
+  private static @NotNull final Key ADVENTURE_KEY;
 
   static {
     DEFAULT_LOCALE = java.util.Locale.ENGLISH;
+    ADVENTURE_KEY = Key.key("neon", "main");
   }
 
   private @NotNull final TranslationRegistry registry;
 
   public TranslationManager() {
-    this.registry = TranslationRegistry.create(Key.key("neon", "main"));
+    this.registry = TranslationRegistry.create(ADVENTURE_KEY);
     this.registry.defaultLocale(DEFAULT_LOCALE);
     this.registerTranslations();
   }

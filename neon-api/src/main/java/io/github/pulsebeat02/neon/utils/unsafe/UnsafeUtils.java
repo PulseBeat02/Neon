@@ -1,6 +1,8 @@
 package io.github.pulsebeat02.neon.utils.unsafe;
 
 import java.lang.reflect.Field;
+import java.util.Map;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
@@ -53,5 +55,16 @@ public final class UnsafeUtils {
       @NotNull final Class<?> clazz, @NotNull final Object object, @NotNull final String name)
       throws NoSuchFieldException {
     return UNSAFE.getObject(object, UNSAFE.objectFieldOffset(clazz.getDeclaredField(name)));
+  }
+
+  public static void setEnvironmentalVariable(@NotNull final String key, @NotNull final String value) {
+    try {
+      final Map<String, String> unwritable = System.getenv();
+      final Map<String, String> writable =
+              (Map<String, String>) UnsafeUtils.getField(unwritable, "m");
+      writable.put(key, value);
+    } catch (final NoSuchFieldException e) {
+      throw new AssertionError(e);
+    }
   }
 }

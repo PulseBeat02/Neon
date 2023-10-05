@@ -13,7 +13,7 @@ public final class TaskUtils {
     throw new UnsupportedOperationException("Utility class cannot be instantiated");
   }
 
-  public static <T> T sync(@NotNull final Neon neon, @NotNull final Callable<T> task) {
+  public static @NotNull <T> T sync(@NotNull final Neon neon, @NotNull final Callable<T> task) {
     try {
       return Bukkit.getServer().getScheduler().callSyncMethod(neon, task).get();
     } catch (final InterruptedException | ExecutionException e) {
