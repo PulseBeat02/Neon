@@ -109,7 +109,7 @@ public final class SeleniumBrowser {
   }
 
   private void paintLoop() {
-    final double dt = 1000 / 60D;
+    final double dt = 1000 / 24D;
     double previous = System.currentTimeMillis();
     while (this.running.get()) {
       final double current = System.currentTimeMillis();
@@ -180,8 +180,9 @@ public final class SeleniumBrowser {
   }
 
   private @NotNull Actions getActions() {
+    final By tag = By.tagName("body");
     final Actions actions = new Actions(this.driver);
-    final WebElement fake = this.driver.findElement(By.tagName("body"));
+    final WebElement fake = this.driver.findElement(tag);
     actions.moveToElement(fake, 0, 0);
     return actions;
   }
