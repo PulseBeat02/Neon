@@ -59,15 +59,18 @@ public final class SeleniumBrowser {
   public void sendMouseEvent(final int x, final int y, @NotNull final MouseClick type) {
     final Actions actions = this.getActions();
     final Actions move = actions.moveByOffset(x, y);
-    final Actions modified =
-        switch (type) {
-          case LEFT -> move.click();
-          case RIGHT -> move.contextClick();
-          case DOUBLE -> move.doubleClick();
-          case HOLD -> move.clickAndHold();
-          case RELEASE -> move.release();
-        };
+    final Actions modified = this.getAction(type, move);
     modified.build().perform();
+  }
+
+  private @NotNull Actions getAction(@NotNull final MouseClick type, @NotNull final Actions move) {
+    return switch (type) {
+      case LEFT -> move.click();
+      case RIGHT -> move.contextClick();
+      case DOUBLE -> move.doubleClick();
+      case HOLD -> move.clickAndHold();
+      case RELEASE -> move.release();
+    };
   }
 
   public void loadURL(@NotNull final String url) {
@@ -125,15 +128,18 @@ public final class SeleniumBrowser {
     for (int i = 0; i < width; i++) {
       for (int j = 0; j < height; j++) {
         final int argb = image.getRGB(j, i);
-        final int alpha = argb >> 24 & 0xFF;
-        final int red = argb >> 16 & 0xFF;
-        final int green = argb >> 8 & 0xFF;
-        final int blue = argb & 0xFF;
-        buffer[counter++] =
-            (red * alpha / 255) << 16 | (green * alpha / 255) << 8 | (blue * alpha / 255);
+        buffer[counter++] = this.convertColorBitmap(argb);
       }
     }
     return buffer;
+  }
+
+  private int convertColorBitmap(final int argb) {
+    final int alpha = argb >> 24 & 0xFF;
+    final int red = argb >> 16 & 0xFF;
+    final int green = argb >> 8 & 0xFF;
+    final int blue = argb & 0xFF;
+    return (red * alpha / 255) << 16 | (green * alpha / 255) << 8 | (blue * alpha / 255);
   }
 
   private @NotNull BufferedImage toBufferedImage(final byte[] bytes) {
@@ -155,31 +161,11 @@ public final class SeleniumBrowser {
     return actions;
   }
 
-  public @NotNull ExecutorService getExecutor() {
-    return this.executor;
-  }
-
-  public @NotNull WebDriver getDriver() {
-    return this.driver;
-  }
-
-  public @NotNull Neon getNeon() {
-    return this.neon;
-  }
-
   public @NotNull BrowserSettings getSettings() {
     return this.settings;
   }
 
   public @NotNull RenderMethod getRenderMethod() {
     return this.method;
-  }
-
-  public @NotNull String getUrl() {
-    return this.url;
-  }
-
-  public @NotNull AtomicBoolean getRunning() {
-    return this.running;
   }
 }

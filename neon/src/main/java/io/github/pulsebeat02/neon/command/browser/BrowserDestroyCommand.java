@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class BrowserDestroyCommand implements CommandSegment.Literal<CommandSender> {
 
-  private final @NotNull Neon neon;
+  private @NotNull final Neon neon;
   private @NotNull final LiteralCommandNode<CommandSender> node;
 
   public BrowserDestroyCommand(@NotNull final Neon neon) {

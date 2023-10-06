@@ -14,6 +14,7 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.moandjiezana.toml.Toml;
 import io.github.pulsebeat02.neon.Neon;
 import io.github.pulsebeat02.neon.config.TomlProvider;
+import io.github.pulsebeat02.neon.utils.JsonUtils;
 import io.github.pulsebeat02.neon.utils.MapUtils;
 import io.github.pulsebeat02.neon.utils.ResourceUtils;
 import io.github.pulsebeat02.neon.utils.gui.ItemBuilder;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 public final class ScreenBuilderGui {
 
@@ -37,11 +39,10 @@ public final class ScreenBuilderGui {
   private static @NotNull final String DECREASE_BASE64;
 
   static {
-    try (final InputStream stream = ResourceUtils.getResourceAsStream("config/neon.toml")) {
-      final Toml toml = TomlProvider.getToml();
-      toml.read(stream);
-      INCREASE_BASE64 = toml.getString("gui.increase_arrow");
-      DECREASE_BASE64 = toml.getString("gui.decrease_arrow");
+    try {
+      final Map<String, String> map = JsonUtils.toMapFromResource("ui/heads.json");
+      INCREASE_BASE64 = map.get("INCREASE_ARROW");
+      DECREASE_BASE64 = map.get("DECREASE_ARROW");
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }

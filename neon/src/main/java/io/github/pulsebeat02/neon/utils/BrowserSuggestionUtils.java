@@ -5,6 +5,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.pulsebeat02.neon.command.browser.configure.EntitySelection;
 import io.github.pulsebeat02.neon.dither.Algorithm;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,30 +23,17 @@ public final class BrowserSuggestionUtils {
   private static @NotNull final Map<String, String> CHARACTER_SUGGESTIONS;
 
   static {
-    RESOLUTION_SUGGESTIONS =
-        List.of(
-            "360x640",
-            "375x667",
-            "414x896",
-            "360x780",
-            "375x812",
-            "1366x768",
-            "1920x1080",
-            "1536x864",
-            "1440x900",
-            "1280x720",
-            "3840x2160");
-    BLOCK_DIMENSION_SUGGESTIONS =
-        List.of("1x1", "1x2", "3x3", "3x5", "5x5", "6x10", "8x14", "10x14", "8x8");
-    CHARACTER_SUGGESTIONS =
-        Map.of("SMALL_SQUARE", "▪",
-            "BIG_SQUARE", "■",
-            "CIRCLE", "●",
-            "HORIZONTAL_RECTANGLE", "▬",
-            "VERTICAL_RECTANGLE", "▮",
-            "SMILEY", "☺",
-            "FROWNEY", "☹");
-    BROWSER_RENDER_TYPE_SUGGESTIONS = List.of("MAP", "ENTITY");
+    final String parent = "command/suggestions";
+    try {
+      RESOLUTION_SUGGESTIONS = JsonUtils.toListFromResource("%s/resolution.json".formatted(parent));
+      BLOCK_DIMENSION_SUGGESTIONS =
+          JsonUtils.toListFromResource("%s/blockdim.json".formatted(parent));
+      BROWSER_RENDER_TYPE_SUGGESTIONS =
+          JsonUtils.toListFromResource("%s/rendertype.json".formatted(parent));
+      CHARACTER_SUGGESTIONS = JsonUtils.toMapFromResource("%s/character.json".formatted(parent));
+    } catch (final IOException e) {
+      throw new AssertionError(e);
+    }
   }
 
   private BrowserSuggestionUtils() {

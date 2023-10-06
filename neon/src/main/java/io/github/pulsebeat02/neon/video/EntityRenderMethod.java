@@ -18,7 +18,7 @@ public abstract class EntityRenderMethod extends RenderAdapter {
   private final int width;
   private final int height;
   private @NotNull final Location location;
-  private final @NotNull Entity[] entities;
+  private @NotNull final Entity[] entities;
 
   public EntityRenderMethod(@NotNull final Neon neon, @NotNull final BrowserSettings settings) {
     super(neon);

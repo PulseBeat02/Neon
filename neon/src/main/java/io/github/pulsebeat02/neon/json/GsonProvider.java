@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class GsonProvider {
 
-  public static @NotNull final Gson GSON;
+  private static @NotNull final Gson GSON;
 
   static {
     GSON = new Gson();
