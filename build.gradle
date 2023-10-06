@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id("com.github.hierynomus.license-base") version "0.16.1"
 }
 
 group = 'io.github.pulsebeat02'
@@ -12,29 +13,40 @@ java {
 }
 
 subprojects {
+
     apply plugin: 'java'
+    apply plugin: 'com.github.hierynomus.license-base'
+
     repositories {
         mavenCentral()
         mavenLocal()
-        maven {
-            name = "papermc-repo"
-            url = "https://repo.papermc.io/repository/maven-public/"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/groups/public/"
-        }
-        maven {
-            url "https://libraries.minecraft.net"
-        }
-        maven {
-            url "https://jogamp.org/deployment/maven"
-        }
+        maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+        maven { url = "https://oss.sonatype.org/content/groups/public/" }
+        maven { url "https://libraries.minecraft.net" }
+        maven { url "https://repository.minecodes.pl/releases" }
     }
-    compileJava.options.encoding = 'UTF-8'
-    tasks.withType(JavaCompile).tap {
-        configureEach {
-            options.encoding = 'UTF-8'
+
+    tasks.compileJava {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.register('wrapper', Wrapper) {
+        gradleVersion = "7.4.2"
+        distributionType = Wrapper.DistributionType.ALL
+    }
+
+    license {
+        header = rootProject.file("header.txt")
+        encoding = "UTF-8"
+        mapping("java", "SLASHSTAR_STYLE")
+        include("**/*.java")
+        include("**/*.kts")
+    }
+
+    sourceSets {
+        main {
+            java { srcDir("src/main/java") }
+            resources { srcDir("src/main/resources") }
         }
     }
 }

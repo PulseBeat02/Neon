@@ -1,3 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 Brandon Li
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package io.github.pulsebeat02.neon.command.screen;
 
 import static net.kyori.adventure.text.Component.join;
@@ -11,14 +34,11 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import com.moandjiezana.toml.Toml;
+import dev.dbassett.skullcreator.SkullCreator;
 import io.github.pulsebeat02.neon.Neon;
-import io.github.pulsebeat02.neon.config.TomlProvider;
 import io.github.pulsebeat02.neon.utils.JsonUtils;
 import io.github.pulsebeat02.neon.utils.MapUtils;
-import io.github.pulsebeat02.neon.utils.ResourceUtils;
-import io.github.pulsebeat02.neon.utils.gui.ItemBuilder;
-import io.github.pulsebeat02.neon.utils.gui.SkullCreator;
+import io.github.pulsebeat02.neon.utils.item.ItemBuilder;
 import io.github.pulsebeat02.neon.utils.mutable.MutableInt;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -30,7 +50,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 public final class ScreenBuilderGui {
@@ -167,13 +186,15 @@ public final class ScreenBuilderGui {
   }
 
   private @NotNull ItemStack getIncreaseArrow(@NotNull final String data) {
-    return ItemBuilder.from(SkullCreator.itemFromBase64(INCREASE_BASE64))
+    final ItemStack stack = SkullCreator.itemFromBase64(INCREASE_BASE64);
+    return ItemBuilder.from(stack)
         .name(text("Increase %s by One".formatted(data), GREEN))
         .buildWithoutAction();
   }
 
   private @NotNull ItemStack getDecreaseArrow(@NotNull final String data) {
-    return ItemBuilder.from(SkullCreator.itemFromBase64(DECREASE_BASE64))
+    final ItemStack stack = SkullCreator.itemFromBase64(DECREASE_BASE64);
+    return ItemBuilder.from(stack)
         .name(text("Decrease %s by One".formatted(data), RED))
         .buildWithoutAction();
   }

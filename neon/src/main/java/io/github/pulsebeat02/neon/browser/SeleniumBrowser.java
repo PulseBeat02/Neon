@@ -1,12 +1,36 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 Brandon Li
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package io.github.pulsebeat02.neon.browser;
 
-import io.github.pulsebeat02.neon.Neon;
+import io.github.pulsebeat02.neon.utils.JsonUtils;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.IntBuffer;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,25 +45,28 @@ import org.openqa.selenium.interactions.Actions;
 
 public final class SeleniumBrowser {
 
+  private static @NotNull final List<String> CHROME_ARGUMENTS;
+
+  static {
+    try {
+      CHROME_ARGUMENTS = JsonUtils.toListFromResource("browser/settings/config.json");
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private @NotNull final ExecutorService executor;
   private @NotNull final WebDriver driver;
-  private @NotNull final Neon neon;
   private @NotNull final BrowserSettings settings;
   private @NotNull final RenderMethod method;
-  private @NotNull final String url;
   private @NotNull final AtomicBoolean running;
 
   public SeleniumBrowser(
-      @NotNull final Neon neon,
-      @NotNull final BrowserSettings settings,
-      @NotNull final RenderMethod method,
-      @NotNull final String url) {
+      @NotNull final BrowserSettings settings, @NotNull final RenderMethod method) {
     this.driver = new ChromeDriver(this.createArguments());
     this.executor = Executors.newSingleThreadExecutor();
-    this.neon = neon;
     this.settings = settings;
     this.method = method;
-    this.url = url;
     this.running = new AtomicBoolean(true);
     this.setupDriver();
   }
@@ -111,9 +138,7 @@ public final class SeleniumBrowser {
 
   private @NotNull ChromeOptions createArguments() {
     final ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless");
-    options.addArguments("--disable-gpu");
-    options.addArguments("--disable-extensions");
+    options.addArguments(CHROME_ARGUMENTS);
     return options;
   }
 
