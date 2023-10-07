@@ -37,7 +37,7 @@ subprojects {
     }
 
     license {
-        header = rootProject.file("header.txt")
+        header = rootProject.file("LICENSE")
         encoding = "UTF-8"
         mapping("java", "SLASHSTAR_STYLE")
         include("**/*.java")
