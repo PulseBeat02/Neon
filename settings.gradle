@@ -1,5 +1,5 @@
 rootProject.name = 'Neon'
-include 'v1_20_R1'
+include 'v1_20_R2'
 include 'neon'
 include 'neon-api'
 

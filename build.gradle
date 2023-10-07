@@ -22,8 +22,9 @@ subprojects {
         mavenLocal()
         maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
         maven { url = "https://oss.sonatype.org/content/groups/public/" }
-        maven { url "https://libraries.minecraft.net" }
-        maven { url "https://repository.minecodes.pl/releases" }
+        maven { url "https://libraries.minecraft.net/" }
+        maven { url "https://repository.minecodes.pl/releases/" }
+        maven { url "https://repo.minebench.de/" }
     }
 
     tasks.compileJava {

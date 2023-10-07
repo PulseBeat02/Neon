@@ -92,7 +92,9 @@ public final class Neon extends JavaPlugin {
   }
 
   private void shutdownConfiguration() {
-    this.configuration.shutdownConfiguration();
+    if (this.configuration != null) {
+      this.configuration.shutdownConfiguration();
+    }
   }
 
   private void registerEvents() {

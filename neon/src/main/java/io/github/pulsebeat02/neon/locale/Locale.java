@@ -27,7 +27,6 @@ import static io.github.pulsebeat02.neon.locale.LocaleParent.*;
 import static io.github.pulsebeat02.neon.locale.LocaleParent.info;
 
 public interface Locale extends LocaleParent {
-
   NullComponent<Sender> INVALID_RESOLUTION =
       error("neon.command.browser.configure.invalid-resolution");
   NullComponent<Sender> INVALID_ENTITY_SELECTION =
@@ -37,6 +36,7 @@ public interface Locale extends LocaleParent {
   NullComponent<Sender> INVALID_BROWSER_SETTING = error("neon.command.browser.invalid-setting");
   NullComponent<Sender> INVALID_LOCATION = error("neon.command.browser.invalid-location");
   NullComponent<Sender> DESTROY_BROWSER = info("neon.command.browser.destroy");
+  UniComponent<Sender, String> PACKET_HANDLER = info("neon.packethandler", null);
   UniComponent<Sender, String> INVALID_DITHER_ALGORITHM =
       error("neon.command.browser.configure.invalid-dither", null);
   UniComponent<Sender, String> LOAD_BROWSER = info("neon.command.browser.load", null);

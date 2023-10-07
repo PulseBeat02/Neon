@@ -47,11 +47,6 @@ public final class AudienceHandler {
     return this.audience;
   }
 
-  public @NotNull Audience console() {
-    this.checkStatus();
-    return this.audience.console();
-  }
-
   private void checkStatus() {
     if (this.audience == null) {
       throw new AssertionError("Tried to access Adventure when the plugin was disabled!");
