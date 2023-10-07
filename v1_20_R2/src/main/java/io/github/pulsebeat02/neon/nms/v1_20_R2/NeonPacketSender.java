@@ -43,6 +43,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.game.PacketPlayOutMap;
 import net.minecraft.server.network.PlayerConnection;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
 import org.bukkit.Bukkit;
@@ -175,11 +176,14 @@ public final class NeonPacketSender implements PacketSender {
       entities[i].setCustomName(builder.toString());
     }
   }
+
   @Override
   public void injectPlayer(@NotNull final UUID player) {
     final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
     final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
-    final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "c");
+    final NetworkManager manager =
+        (NetworkManager)
+            UnsafeUtils.getFieldExceptionally(ServerCommonPacketListenerImpl.class, conn, "c");
     final Channel channel = manager.n;
     this.addChannelPipeline(channel);
     this.addConnection(bukkitPlayer, conn);
@@ -199,7 +203,9 @@ public final class NeonPacketSender implements PacketSender {
   public void uninjectPlayer(@NotNull final UUID player) {
     final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
     final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
-    final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "c");
+    final NetworkManager manager =
+        (NetworkManager)
+            UnsafeUtils.getFieldExceptionally(ServerCommonPacketListenerImpl.class, conn, "c");
     final Channel channel = manager.n;
     this.removeChannelPipeline(channel);
     this.removeConnection(bukkitPlayer);
