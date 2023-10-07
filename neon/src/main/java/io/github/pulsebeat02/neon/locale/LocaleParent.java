@@ -116,20 +116,6 @@ public interface LocaleParent {
     return MANAGER.render(join(separator(space()), PREFIX.build(), message));
   }
 
-  static @NotNull TextComponent getCommandUsageComponent(
-      @NotNull final Map<String, String> usages) {
-    final TextComponent.Builder builder = text();
-    usages.forEach((key, value) -> builder.append(createUsageComponent(key, value)));
-    return builder.build();
-  }
-
-  static @NotNull Component createUsageComponent(
-      @NotNull final String key, @NotNull final String value) {
-    final ComponentLike[] components = {
-      text(key, LIGHT_PURPLE), text("-", GOLD), text(value, AQUA), newline()
-    };
-    return join(separator(space()), components);
-  }
   @FunctionalInterface
   interface NullComponent<S extends Sender> {
 

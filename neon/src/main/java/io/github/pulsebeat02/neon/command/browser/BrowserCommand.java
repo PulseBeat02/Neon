@@ -50,20 +50,6 @@ public final class BrowserCommand extends BaseCommand {
   }
 
   @Override
-  public @NotNull Component usage() {
-    return LocaleParent.getCommandUsageComponent(
-        Map.of(
-            "/browser load [entity|map] [url]",
-            "Starts the browser",
-            "/browser configure map [width:height] [blockWidth:blockHeight] [algorithm]",
-            "Configures a browser using map callbacks",
-            "/browser configure entity [width:height] [display type] [character]",
-            "Configures a browser using entity callbacks",
-            "/browser destroy",
-            "Destroys the browser"));
-  }
-
-  @Override
   public @NotNull LiteralCommandNode<CommandSender> getNode() {
     return this.node;
   }

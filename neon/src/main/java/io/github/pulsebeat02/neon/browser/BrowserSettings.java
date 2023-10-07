@@ -34,21 +34,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class BrowserSettings {
-
-  private @NotNull final UUID[] players;
   private @NotNull final String character;
   private @NotNull final ImmutableDimension resolution;
   private @NotNull final ImmutableDimension blockDimension;
   private @NotNull final DitherHandler handler;
-  private @Nullable final Location location;
+  private @NotNull final Location location;
 
   public BrowserSettings(
       @NotNull final ImmutableDimension resolution,
       @NotNull final ImmutableDimension blockDimension,
       @NotNull final String character,
-      @Nullable final Location location,
+      @NotNull final Location location,
       @NotNull final DitherHandler handler) {
-    this.players = this.getAllPlayerUUIDs();
     this.resolution = resolution;
     this.blockDimension = blockDimension;
     this.character = character;
@@ -66,14 +63,6 @@ public final class BrowserSettings {
     return new BrowserSettings(dimension, blockDimension, character, location, handler);
   }
 
-  private @NotNull UUID[] getAllPlayerUUIDs() {
-    return Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).toArray(UUID[]::new);
-  }
-
-  public @NotNull UUID[] getPlayers() {
-    return this.players;
-  }
-
   public @NotNull ImmutableDimension getResolution() {
     return this.resolution;
   }
@@ -86,7 +75,7 @@ public final class BrowserSettings {
     return this.character;
   }
 
-  public @Nullable Location getLocation() {
+  public @NotNull Location getLocation() {
     return this.location;
   }
 

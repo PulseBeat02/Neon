@@ -27,6 +27,7 @@ import static io.github.pulsebeat02.neon.locale.LocaleParent.*;
 import static io.github.pulsebeat02.neon.locale.LocaleParent.info;
 
 public interface Locale extends LocaleParent {
+  NullComponent<Sender> CMD_USAGE = info("neon.command.usage");
   NullComponent<Sender> INIT_STATIC = info("neon.enable.static");
   NullComponent<Sender> INIT_CONFIG = info("neon.enable.config");
   NullComponent<Sender> INIT_CMDS = info("neon.enable.commands");

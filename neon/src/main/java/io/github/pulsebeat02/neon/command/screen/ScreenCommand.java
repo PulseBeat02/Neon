@@ -62,12 +62,6 @@ public final class ScreenCommand extends BaseCommand {
   }
 
   @Override
-  public @NotNull Component usage() {
-    return LocaleParent.getCommandUsageComponent(
-        Map.of("/screen", "Opens the screen building GUI"));
-  }
-
-  @Override
   public @NotNull LiteralCommandNode<CommandSender> getNode() {
     return this.node;
   }

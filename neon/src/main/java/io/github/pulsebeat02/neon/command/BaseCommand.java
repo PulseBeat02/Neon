@@ -28,6 +28,8 @@ import static java.util.Objects.requireNonNull;
 import io.github.pulsebeat02.neon.Neon;
 import java.util.Arrays;
 import java.util.List;
+
+import io.github.pulsebeat02.neon.locale.Locale;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
@@ -55,7 +57,9 @@ public abstract class BaseCommand extends Command implements LiteralCommandSegme
     this.audience = neon.audience();
   }
 
-  public @NotNull abstract Component usage();
+  public @NotNull Component usage() {
+    return Locale.CMD_USAGE.build();
+  }
 
   @Override
   public boolean execute(
