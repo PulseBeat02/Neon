@@ -1,5 +1,6 @@
 [
   "--headless",
   "--disable-gpu",
-  "--disable-extensions"
+  "--disable-extensions",
+  "--hide-scrollbars"
 ]
