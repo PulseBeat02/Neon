@@ -24,7 +24,6 @@
 package io.github.pulsebeat02.neon.nms;
 
 import io.github.pulsebeat02.neon.Neon;
-import java.lang.reflect.InvocationTargetException;
 
 import io.github.pulsebeat02.neon.locale.Locale;
 import net.kyori.adventure.audience.Audience;
@@ -59,10 +58,6 @@ public final class ReflectionHandler {
 
   public @NotNull PacketSender getNewPacketHandlerInstance() {
     try {
-      final String version = getVersion();
-      final BukkitAudiences audience = this.neon.audience();
-      final Audience console = audience.console();
-      console.sendMessage(Locale.PACKET_HANDLER.build(version));
       return getPacketHandler();
     } catch (final Exception e) {
       final String software = this.neon.getServer().getVersion();

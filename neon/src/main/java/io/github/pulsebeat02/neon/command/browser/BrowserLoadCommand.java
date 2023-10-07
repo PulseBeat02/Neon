@@ -63,7 +63,7 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
     this.config = neon.getConfiguration();
     this.node =
         this.literal("load")
-            .requires(has("neon.command.browser.load"))
+            .requires(has("neon.command.browser.info.load"))
             .then(
                 this.argument("type", word())
                     .suggests(BrowserSuggestionUtils::suggestRenderTypes)
@@ -87,12 +87,12 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
           default -> null;
         };
 
-    final Component browserError = Locale.INVALID_BROWSER_SETTING.build();
+    final Component browserError = Locale.ERR_BROWSER.build();
     if (ArgumentUtils.handleNull(audience, browserError, method)) {
       return SINGLE_SUCCESS;
     }
 
-    final Component homepageError = Locale.INVALID_HOMEPAGE_URL.build();
+    final Component homepageError = Locale.ERR_URL.build();
     if (ArgumentUtils.handleFalse(audience, homepageError, this.checkUrl(url))) {
       return SINGLE_SUCCESS;
     }
@@ -100,7 +100,7 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
     if (method instanceof EntityRenderMethod) {
       final Location location = settings.getLocation();
       if (location == null) {
-        audience.sendMessage(Locale.INVALID_LOCATION.build());
+        audience.sendMessage(Locale.ERR_LOC.build());
         return SINGLE_SUCCESS;
       }
     }
@@ -109,7 +109,7 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
 
     CompletableFuture.runAsync(
             () -> this.createBrowser(settings, method, url), ExecutorProvider.BROWSER_SERVICE)
-        .thenRun(() -> audience.sendMessage(Locale.LOAD_BROWSER.build(url)))
+        .thenRun(() -> audience.sendMessage(Locale.INFO_BROWSER_LOAD.build(url)))
         .exceptionally(
             e -> {
               throw new AssertionError(e);

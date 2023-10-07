@@ -80,7 +80,7 @@ public final class SeleniumBrowser {
   private static void getSeleniumBinary(@NotNull final Neon plugin) {
     final BukkitAudiences audience = plugin.audience();
     final Audience console = audience.console();
-    console.sendMessage(Locale.INSTALLING_SELENIUM.build());
+    console.sendMessage(Locale.INFO_SELENIUM.build());
     final boolean offline = false;
     final ChromeOptions options = new ChromeOptions();
     options.addArguments(CHROME_ARGUMENTS);
@@ -88,7 +88,6 @@ public final class SeleniumBrowser {
     final SeleniumManagerOutput.Result result = manager.getDriverPath(options, offline);
     final String path = result.getDriverPath();
     UnsafeUtils.setEnvironmentalVariable("webdriver.chrome.driver", path);
-    console.sendMessage(Locale.FINSIHED_INSTALLING_SELENIUM.build());
   }
 
   public static void init() {}

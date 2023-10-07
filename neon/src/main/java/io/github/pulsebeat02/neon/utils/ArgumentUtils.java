@@ -43,7 +43,7 @@ public final class ArgumentUtils {
   public static boolean requiresPlayer(
       @NotNull final Neon plugin, @NotNull final CommandSender sender) {
     return handleFalse(
-        plugin.audience().sender(sender), Locale.INVALID_SENDER.build(), sender instanceof Player);
+        plugin.audience().sender(sender), Locale.ERR_SENDER.build(), sender instanceof Player);
   }
 
   public static <T> boolean handleEmptyOptional(
@@ -98,7 +98,7 @@ public final class ArgumentUtils {
 
     final String[] dims = str.split("x");
     if (dims.length != 2) {
-      sender.sendMessage(Locale.INVALID_RESOLUTION.build());
+      sender.sendMessage(Locale.ERR_RES.build());
       return Optional.empty();
     }
 
@@ -108,7 +108,7 @@ public final class ArgumentUtils {
       return Optional.of(new int[] {width.get(), height.get()});
     }
 
-    sender.sendMessage(Locale.INVALID_RESOLUTION.build());
+    sender.sendMessage(Locale.ERR_RES.build());
 
     return Optional.empty();
   }

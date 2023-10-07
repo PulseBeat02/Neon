@@ -27,23 +27,28 @@ import static io.github.pulsebeat02.neon.locale.LocaleParent.*;
 import static io.github.pulsebeat02.neon.locale.LocaleParent.info;
 
 public interface Locale extends LocaleParent {
-  NullComponent<Sender> INVALID_RESOLUTION =
-      error("neon.command.browser.configure.invalid-resolution");
-  NullComponent<Sender> INVALID_ENTITY_SELECTION =
-      error("neon.command.browser.configure.invalid-entity-selection");
-  NullComponent<Sender> INVALID_SENDER = error("neon.command.invalid-sender");
-  NullComponent<Sender> INVALID_HOMEPAGE_URL = error("neon.command.browser.invalid-homepage-url");
-  NullComponent<Sender> INVALID_BROWSER_SETTING = error("neon.command.browser.invalid-setting");
-  NullComponent<Sender> INVALID_LOCATION = error("neon.command.browser.invalid-location");
-  NullComponent<Sender> DESTROY_BROWSER = info("neon.command.browser.destroy");
-  NullComponent<Sender> INSTALLING_SELENIUM = info("neon.command.browser.install");
-  NullComponent<Sender> FINSIHED_INSTALLING_SELENIUM = info("neon.command.browser.install-done");
-  UniComponent<Sender, String> PACKET_HANDLER = info("neon.packet-handler", null);
-  UniComponent<Sender, String> INVALID_DITHER_ALGORITHM =
-      error("neon.command.browser.configure.invalid-dither", null);
-  UniComponent<Sender, String> LOAD_BROWSER = info("neon.command.browser.load", null);
-  TriComponent<Sender, String, String, String> CONFIGURE_BROWSER_MAP =
-      info("neon.command.browser.configure.map", null, null, null);
-  TriComponent<Sender, String, String, String> CONFIGURE_BROWSER_ENTITY =
-      info("neon.command.browser.configure.entity", null, null, null);
+  NullComponent<Sender> INIT_STATIC = info("neon.enable.static");
+  NullComponent<Sender> INIT_CONFIG = info("neon.enable.config");
+  NullComponent<Sender> INIT_CMDS = info("neon.enable.commands");
+  NullComponent<Sender> INIT_BSTATS = info("neon.enable.stats");
+  NullComponent<Sender> INIT_EVENTS = info("neon.enable.events");
+  NullComponent<Sender> DISABLE_BROWSER = info("neon.disable.browser");
+  NullComponent<Sender> DISABLE_CONFIG = info("neon.disable.config");
+  NullComponent<Sender> DISABLE_STATIC = info("neon.disable.static");
+  NullComponent<Sender> ERR_RES = error("neon.command.browser.configure.error.resolution");
+  NullComponent<Sender> ERR_ENTITY = error("neon.command.browser.configure.error.entity");
+  NullComponent<Sender> ERR_SENDER = error("neon.command.error.sender");
+  NullComponent<Sender> ERR_URL = error("neon.command.browser.error.url");
+  NullComponent<Sender> ERR_BROWSER = error("neon.command.browser.error.browser");
+  NullComponent<Sender> ERR_LOC = error("neon.command.browser.error.location");
+  NullComponent<Sender> INFO_DESTROY_BROWSER = info("neon.command.browser.info.destroy");
+  NullComponent<Sender> INFO_SELENIUM = info("neon.command.browser.info.install");
+  UniComponent<Sender, String> INIT_HANDLER = info("neon.enable.packet-handler", null);
+  UniComponent<Sender, String> ERR_DITHER =
+      error("neon.command.browser.configure.error.dither", null);
+  UniComponent<Sender, String> INFO_BROWSER_LOAD = info("neon.command.browser.info.load", null);
+  TriComponent<Sender, String, String, String> INFO_BROWSER_MAP =
+      info("neon.command.browser.configure.info.map", null, null, null);
+  TriComponent<Sender, String, String, String> INFO_BROWSER_ENTITY =
+      info("neon.command.browser.configure.info.entity", null, null, null);
 }

@@ -26,6 +26,7 @@ package io.github.pulsebeat02.neon.locale;
 import io.github.pulsebeat02.neon.Neon;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +46,11 @@ public final class AudienceHandler {
   public @NotNull BukkitAudiences retrieve() {
     this.checkStatus();
     return this.audience;
+  }
+
+  public void console(@NotNull final Component component) {
+    this.checkStatus();
+    this.audience.console().sendMessage(component);
   }
 
   private void checkStatus() {

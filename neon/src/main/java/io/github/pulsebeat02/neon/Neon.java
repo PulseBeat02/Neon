@@ -23,7 +23,6 @@
  */
 package io.github.pulsebeat02.neon;
 
-
 import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
@@ -33,6 +32,7 @@ import io.github.pulsebeat02.neon.dither.MapPalette;
 import io.github.pulsebeat02.neon.event.BrowserClickListener;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.locale.AudienceHandler;
+import io.github.pulsebeat02.neon.locale.Locale;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
 import io.github.pulsebeat02.neon.utils.BrowserSuggestionUtils;
@@ -63,11 +63,12 @@ public final class Neon extends JavaPlugin {
   public void onDisable() {
     this.shutdownBrowser();
     this.shutdownConfiguration();
-    this.shutdownAdventure();
     this.shutdownExecutors();
+    this.shutdownAdventure();
   }
 
   private void registerStaticBlocks() {
+    this.audience.console(Locale.INIT_STATIC.build());
     ExecutorProvider.init();
     MapPalette.init();
     SeleniumBrowser.init();
@@ -80,7 +81,9 @@ public final class Neon extends JavaPlugin {
   }
 
   private void registerServerImplementation() {
+    final String version = ReflectionHandler.getVersion();
     this.sender = new ReflectionHandler(this).getNewPacketHandlerInstance();
+    this.audience.console(Locale.INIT_HANDLER.build(version));
   }
 
   private void shutdownAdventure() {
@@ -88,29 +91,35 @@ public final class Neon extends JavaPlugin {
   }
 
   private void shutdownExecutors() {
+    this.audience.console(Locale.DISABLE_STATIC.build());
     ExecutorProvider.shutdown();
   }
 
   private void shutdownConfiguration() {
+    this.audience.console(Locale.DISABLE_CONFIG.build());
     if (this.configuration != null) {
       this.configuration.shutdownConfiguration();
     }
   }
 
   private void registerEvents() {
+    this.audience.console(Locale.INIT_EVENTS.build());
     new PlayerHookListener(this);
     new BrowserClickListener(this);
   }
 
   private void registerStats() {
+    this.audience.console(Locale.INIT_BSTATS.build());
     new Metrics(this, 18773);
   }
 
   private void registerCommands() {
+    this.audience.console(Locale.INIT_CMDS.build());
     new CommandHandler(this);
   }
 
   private void readConfigurationFile() {
+    this.audience.console(Locale.INIT_CONFIG.build());
     this.configuration = new BrowserConfiguration(this);
   }
 
@@ -131,6 +140,7 @@ public final class Neon extends JavaPlugin {
   }
 
   public void shutdownBrowser() {
+    this.audience.console(Locale.DISABLE_BROWSER.build());
     if (this.browser != null) {
       this.browser.shutdown();
       this.browser = null;

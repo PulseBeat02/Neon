@@ -54,7 +54,7 @@ public final class BrowserConfigureEntityCommand implements CommandSegment.Liter
     this.config = neon.getConfiguration();
     this.node =
         this.literal("entity")
-            .requires(has("neon.command.browser.configure.entity"))
+            .requires(has("neon.command.browser.configure.info.entity"))
             .then(
                 this.argument("resolution", word())
                     .suggests(BrowserSuggestionUtils::suggestResolution)
@@ -87,7 +87,7 @@ public final class BrowserConfigureEntityCommand implements CommandSegment.Liter
     }
 
     final Optional<EntitySelection> optionalEntity = EntitySelection.ofKey(entityArg);
-    final Component error = Locale.INVALID_ENTITY_SELECTION.build();
+    final Component error = Locale.ERR_ENTITY.build();
     if (handleEmptyOptional(audience, error, optionalEntity)) {
       return SINGLE_SUCCESS;
     }
@@ -102,7 +102,7 @@ public final class BrowserConfigureEntityCommand implements CommandSegment.Liter
     this.config.setLocation(player.getLocation());
 
     audience.sendMessage(
-        Locale.CONFIGURE_BROWSER_ENTITY.build(resolutionArg, entityArg, character));
+        Locale.INFO_BROWSER_ENTITY.build(resolutionArg, entityArg, character));
 
     return SINGLE_SUCCESS;
   }

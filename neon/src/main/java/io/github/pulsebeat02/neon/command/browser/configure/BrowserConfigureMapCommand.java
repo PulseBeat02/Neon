@@ -55,7 +55,7 @@ public final class BrowserConfigureMapCommand implements CommandSegment.Literal<
     this.config = neon.getConfiguration();
     this.node =
         this.literal("map")
-            .requires(has("neon.command.browser.configure.map"))
+            .requires(has("neon.command.browser.configure.info.map"))
             .then(
                 this.argument("resolution", word())
                     .suggests(BrowserSuggestionUtils::suggestResolution)
@@ -88,7 +88,7 @@ public final class BrowserConfigureMapCommand implements CommandSegment.Literal<
     }
 
     final Optional<Algorithm> setting = Algorithm.ofKey(algorithmArg);
-    final Component error = Locale.INVALID_DITHER_ALGORITHM.build(algorithmArg);
+    final Component error = Locale.ERR_DITHER.build(algorithmArg);
     if (handleEmptyOptional(audience, error, setting)) {
       return SINGLE_SUCCESS;
     }
@@ -102,7 +102,7 @@ public final class BrowserConfigureMapCommand implements CommandSegment.Literal<
     this.config.setBlockDimension(new ImmutableDimension(blockDimension[0], blockDimension[1]));
 
     audience.sendMessage(
-        Locale.CONFIGURE_BROWSER_MAP.build(resolutionArg, blockDimensionArg, algorithmArg));
+        Locale.INFO_BROWSER_MAP.build(resolutionArg, blockDimensionArg, algorithmArg));
 
     return SINGLE_SUCCESS;
   }

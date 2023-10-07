@@ -44,7 +44,7 @@ public final class BrowserDestroyCommand implements CommandSegment.Literal<Comma
     this.neon = neon;
     this.node =
         this.literal("destroy")
-            .requires(has("neon.command.browser.destroy"))
+            .requires(has("neon.command.browser.info.destroy"))
             .executes(this::startBrowser)
             .build();
   }
@@ -54,7 +54,7 @@ public final class BrowserDestroyCommand implements CommandSegment.Literal<Comma
     this.neon.shutdownBrowser();
 
     final Audience audience = this.neon.audience().sender(context.getSource());
-    audience.sendMessage(Locale.DESTROY_BROWSER.build());
+    audience.sendMessage(Locale.INFO_DESTROY_BROWSER.build());
 
     return SINGLE_SUCCESS;
   }
