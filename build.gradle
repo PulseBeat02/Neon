@@ -4,7 +4,6 @@ plugins {
 }
 
 group = 'io.github.pulsebeat02'
-version = '1.0.0-SNAPSHOT'
 
 java {
     def javaVersion = JavaVersion.toVersion(17)
