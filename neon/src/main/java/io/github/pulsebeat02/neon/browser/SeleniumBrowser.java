@@ -23,6 +23,8 @@
  */
 package io.github.pulsebeat02.neon.browser;
 
+import io.github.pulsebeat02.neon.Neon;
+import io.github.pulsebeat02.neon.locale.Locale;
 import io.github.pulsebeat02.neon.utils.JsonUtils;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
 import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
@@ -39,6 +41,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.imageio.ImageIO;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +51,8 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.manager.SeleniumManager;
+import org.openqa.selenium.manager.SeleniumManagerOutput;
 
 public final class SeleniumBrowser {
 
@@ -60,15 +66,30 @@ public final class SeleniumBrowser {
       throw new RuntimeException(e);
     }
     SELENIUM_CACHE = "SE_CACHE_PATH";
-    setSeleniumCachePath();
+    final Neon plugin = (Neon) Bukkit.getPluginManager().getPlugin("Neon");
+    setSeleniumCachePath(plugin);
+    getSeleniumBinary(plugin);
   }
 
-  private static void setSeleniumCachePath() {
-    final Plugin plugin = Bukkit.getPluginManager().getPlugin("Neon");
+  private static void setSeleniumCachePath(@NotNull final Neon plugin) {
     final Path parent = plugin.getDataFolder().toPath();
     final Path selenium = parent.resolve("selenium");
     final String path = selenium.toAbsolutePath().toString();
     UnsafeUtils.setEnvironmentalVariable(SELENIUM_CACHE, path);
+  }
+
+  private static void getSeleniumBinary(@NotNull final Neon plugin) {
+    final BukkitAudiences audience = plugin.audience();
+    final Audience console = audience.console();
+    console.sendMessage(Locale.INSTALLING_SELENIUM.build());
+    final boolean offline = false;
+    final ChromeOptions options = new ChromeOptions();
+    options.addArguments(CHROME_ARGUMENTS);
+    final SeleniumManager manager = SeleniumManager.getInstance();
+    final SeleniumManagerOutput.Result result = manager.getDriverPath(options, offline);
+    final String path = result.getDriverPath();
+    UnsafeUtils.setEnvironmentalVariable("webdriver.chrome.driver", path);
+    console.sendMessage(Locale.FINSIHED_INSTALLING_SELENIUM.build());
   }
 
   public static void init() {}

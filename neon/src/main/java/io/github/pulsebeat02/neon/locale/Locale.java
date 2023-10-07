@@ -36,7 +36,9 @@ public interface Locale extends LocaleParent {
   NullComponent<Sender> INVALID_BROWSER_SETTING = error("neon.command.browser.invalid-setting");
   NullComponent<Sender> INVALID_LOCATION = error("neon.command.browser.invalid-location");
   NullComponent<Sender> DESTROY_BROWSER = info("neon.command.browser.destroy");
-  UniComponent<Sender, String> PACKET_HANDLER = info("neon.packethandler", null);
+  NullComponent<Sender> INSTALLING_SELENIUM = info("neon.command.browser.install");
+  NullComponent<Sender> FINSIHED_INSTALLING_SELENIUM = info("neon.command.browser.install-done");
+  UniComponent<Sender, String> PACKET_HANDLER = info("neon.packet-handler", null);
   UniComponent<Sender, String> INVALID_DITHER_ALGORITHM =
       error("neon.command.browser.configure.invalid-dither", null);
   UniComponent<Sender, String> LOAD_BROWSER = info("neon.command.browser.load", null);

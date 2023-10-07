@@ -35,20 +35,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.chat.*;
-import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutMap;
-import net.minecraft.network.syncher.DataWatcher;
-import net.minecraft.network.syncher.DataWatcher.b;
-import net.minecraft.network.syncher.DataWatcherObject;
-import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
@@ -182,37 +175,12 @@ public final class NeonPacketSender implements PacketSender {
       entities[i].setCustomName(builder.toString());
     }
   }
-
-  private void sendEntityPackets(
-      @NotNull final UUID[] viewers, @NotNull final PacketPlayOutEntityMetadata[] packets) {
-    if (viewers == null) {
-      for (final UUID uuid : this.connections.keySet()) {
-        this.sendEntityPacketToViewers(uuid, packets);
-      }
-    } else {
-      for (final UUID uuid : viewers) {
-        this.sendEntityPacketToViewers(uuid, packets);
-      }
-    }
-  }
-
-  private void sendEntityPacketToViewers(
-      @NotNull final UUID uuid, @NotNull final PacketPlayOutEntityMetadata @NotNull [] packets) {
-    final PlayerConnection connection = this.connections.get(uuid);
-    if (connection == null) {
-      return;
-    }
-    for (final PacketPlayOutEntityMetadata packet : packets) {
-      connection.a(packet);
-    }
-  }
-
   @Override
   public void injectPlayer(@NotNull final UUID player) {
     final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
     final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
-    final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "h");
-    final Channel channel = manager.m;
+    final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "c");
+    final Channel channel = manager.n;
     this.addChannelPipeline(channel);
     this.addConnection(bukkitPlayer, conn);
   }
@@ -231,8 +199,8 @@ public final class NeonPacketSender implements PacketSender {
   public void uninjectPlayer(@NotNull final UUID player) {
     final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
     final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
-    final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "h");
-    final Channel channel = manager.m;
+    final NetworkManager manager = (NetworkManager) UnsafeUtils.getFieldExceptionally(conn, "c");
+    final Channel channel = manager.n;
     this.removeChannelPipeline(channel);
     this.removeConnection(bukkitPlayer);
   }
