@@ -67,6 +67,7 @@ public final class ScreenBuilderGui {
     }
   }
 
+  public static void init() {}
   private @NotNull final ChestGui gui;
   private @NotNull final StaticPane pane;
   private @NotNull final Player viewer;

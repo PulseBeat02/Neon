@@ -23,11 +23,11 @@
  */
 package io.github.pulsebeat02.neon;
 
-import static net.kyori.adventure.text.Component.text;
 
 import io.github.pulsebeat02.neon.browser.SeleniumBrowser;
 import io.github.pulsebeat02.neon.command.CommandHandler;
 import io.github.pulsebeat02.neon.command.browser.ExecutorProvider;
+import io.github.pulsebeat02.neon.command.screen.ScreenBuilderGui;
 import io.github.pulsebeat02.neon.config.BrowserConfiguration;
 import io.github.pulsebeat02.neon.dither.MapPalette;
 import io.github.pulsebeat02.neon.event.BrowserClickListener;
@@ -35,12 +35,7 @@ import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.locale.AudienceHandler;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
-
-import java.io.IOException;
-import java.nio.file.Path;
-
-import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
-import net.kyori.adventure.audience.Audience;
+import io.github.pulsebeat02.neon.utils.BrowserSuggestionUtils;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,29 +43,16 @@ import org.jetbrains.annotations.NotNull;
 
 public final class Neon extends JavaPlugin {
 
-  private static final int BSTATS_PLUGIN_ID;
-  private static final String SELENIUM_CACHE;
-
-  static {
-    BSTATS_PLUGIN_ID = 18773;
-    SELENIUM_CACHE = "SE_CACHE_PATH";
-  }
-
   private BrowserConfiguration configuration;
   private PacketSender sender;
   private AudienceHandler audience;
   private SeleniumBrowser browser;
 
   @Override
-  public void onLoad() {
-    this.registerStaticBlocks();
-    this.setSeleniumFolder();
-  }
-
-  @Override
   public void onEnable() {
     this.registerAdventure();
     this.registerServerImplementation();
+    this.registerStaticBlocks();
     this.readConfigurationFile();
     this.registerCommands();
     this.registerStats();
@@ -85,16 +67,12 @@ public final class Neon extends JavaPlugin {
     this.shutdownExecutors();
   }
 
-  private void setSeleniumFolder() {
-    final Path parent = this.getDataFolder().toPath();
-    final Path selenium = parent.resolve("selenium");
-    final String path = selenium.toAbsolutePath().toString();
-    UnsafeUtils.setEnvironmentalVariable(SELENIUM_CACHE, path);
-  }
-
   private void registerStaticBlocks() {
     ExecutorProvider.init();
     MapPalette.init();
+    SeleniumBrowser.init();
+    BrowserSuggestionUtils.init();
+    ScreenBuilderGui.init();
   }
 
   private void registerAdventure() {
@@ -123,7 +101,7 @@ public final class Neon extends JavaPlugin {
   }
 
   private void registerStats() {
-    new Metrics(this, BSTATS_PLUGIN_ID);
+    new Metrics(this, 18773);
   }
 
   private void registerCommands() {
@@ -131,16 +109,7 @@ public final class Neon extends JavaPlugin {
   }
 
   private void readConfigurationFile() {
-    try {
-      this.configuration = new BrowserConfiguration(this);
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void logConsole(@NotNull final String text) {
-    final Audience console = this.audience.console();
-    console.sendMessage(text(text));
+    this.configuration = new BrowserConfiguration(this);
   }
 
   public @NotNull BrowserConfiguration getConfiguration() {
@@ -155,15 +124,15 @@ public final class Neon extends JavaPlugin {
     return this.sender;
   }
 
+  public @NotNull SeleniumBrowser getBrowser() {
+    return this.browser;
+  }
+
   public void shutdownBrowser() {
     if (this.browser != null) {
       this.browser.shutdown();
       this.browser = null;
     }
-  }
-
-  public SeleniumBrowser getBrowser() {
-    return this.browser;
   }
 
   public void setBrowser(@NotNull final SeleniumBrowser browser) {

@@ -59,6 +59,8 @@ public final class BrowserSuggestionUtils {
     }
   }
 
+  public static void init() {}
+
   private BrowserSuggestionUtils() {
     throw new UnsupportedOperationException("Utility class cannot be instantiated");
   }

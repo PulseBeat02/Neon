@@ -64,7 +64,7 @@ public final class BrowserConfiguration {
   private @NotNull EntitySelection selection;
   private @NotNull List<String> browserArguments;
 
-  public BrowserConfiguration(@NotNull final Neon neon) throws IOException {
+  public BrowserConfiguration(@NotNull final Neon neon) {
     this.configurationPath = neon.getDataFolder().toPath().resolve("neon.toml");
     this.checkFile();
     this.algorithm = Algorithm.FILTER_LITE;
@@ -153,9 +153,13 @@ public final class BrowserConfiguration {
     return new ImmutableDimension(width, height);
   }
 
-  private void checkFile() throws IOException {
+  private void checkFile() {
     if (Files.notExists(this.configurationPath)) {
-      this.copyFile();
+      try {
+        this.copyFile();
+      } catch (final IOException e) {
+        throw new AssertionError(e);
+      }
     }
   }
 

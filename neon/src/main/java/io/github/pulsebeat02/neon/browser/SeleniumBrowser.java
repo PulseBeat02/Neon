@@ -25,17 +25,22 @@ package io.github.pulsebeat02.neon.browser;
 
 import io.github.pulsebeat02.neon.utils.JsonUtils;
 import io.github.pulsebeat02.neon.utils.immutable.ImmutableDimension;
+import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.github.pulsebeat02.neon.video.RenderMethod;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.imageio.ImageIO;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.*;
 import org.openqa.selenium.Dimension;
@@ -46,6 +51,7 @@ import org.openqa.selenium.interactions.Actions;
 public final class SeleniumBrowser {
 
   private static @NotNull final List<String> CHROME_ARGUMENTS;
+  private static @NotNull final String SELENIUM_CACHE;
 
   static {
     try {
@@ -53,7 +59,19 @@ public final class SeleniumBrowser {
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
+    SELENIUM_CACHE = "SE_CACHE_PATH";
+    setSeleniumCachePath();
   }
+
+  private static void setSeleniumCachePath() {
+    final Plugin plugin = Bukkit.getPluginManager().getPlugin("Neon");
+    final Path parent = plugin.getDataFolder().toPath();
+    final Path selenium = parent.resolve("selenium");
+    final String path = selenium.toAbsolutePath().toString();
+    UnsafeUtils.setEnvironmentalVariable(SELENIUM_CACHE, path);
+  }
+
+  public static void init() {}
 
   private @NotNull final ExecutorService executor;
   private @NotNull final WebDriver driver;

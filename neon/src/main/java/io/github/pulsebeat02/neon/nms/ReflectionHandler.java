@@ -58,7 +58,6 @@ public final class ReflectionHandler {
       return getPacketHandler();
     } catch (final Exception e) {
       final String software = this.neon.getServer().getVersion();
-      this.neon.logConsole("Unsupported Server Software %s!".formatted(software));
       throw new AssertionError(
           "Current server implementation (%s) is not supported!".formatted(software));
     }
