@@ -179,7 +179,7 @@ public final class SeleniumBrowser {
     return options;
   }
 
-  private int[] getRGB() {
+  private int @NotNull [] getRGB() {
     final TakesScreenshot screenshot = (TakesScreenshot) this.driver;
     final byte[] bytes = screenshot.getScreenshotAs(OutputType.BYTES);
     final BufferedImage image = this.toBufferedImage(bytes);

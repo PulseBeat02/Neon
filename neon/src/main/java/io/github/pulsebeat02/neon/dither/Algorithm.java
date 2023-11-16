@@ -43,7 +43,6 @@ public enum Algorithm {
   FLOYD_STEINBERG(new FloydSteinbergDither()),
   RANDOM_LIGHT(new RandomDither(5)),
   RANDOM_HEAVY(new RandomDither(10)),
-
   BAYER_2X2(ordered(NORMAL_2X2, NORMAL_2X2_MAX)),
   BAYER_4X4(ordered(NORMAL_4X4, NORMAL_4X4_MAX)),
   BAYER_8X8(ordered(NORMAL_8X8, NORMAL_8X8_MAX)),
