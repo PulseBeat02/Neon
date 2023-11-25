@@ -49,30 +49,40 @@ import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.NotNull;
 
 public final class NeonPacketSender implements PacketSender {
   private static final int PACKET_THRESHOLD_MS;
   private static final Set<Object> PACKET_DIFFERENTIATION;
+  private static final String HANDLER_NAME;
+  private static final String MESSENGER_ID;
 
   static {
     PACKET_THRESHOLD_MS = 0;
     PACKET_DIFFERENTIATION = Collections.newSetFromMap(new WeakHashMap<>());
+    HANDLER_NAME = "neon_handler_1171";
+    MESSENGER_ID = "neon:map_data";
   }
 
   private final Map<UUID, PlayerConnection> connections;
   private final Map<UUID, Long> lastUpdated;
   private final Set<UUID> modUsage;
-  private final String handlerName;
+  private  final Plugin plugin;
 
   {
     this.connections = new ConcurrentHashMap<>();
     this.lastUpdated = new ConcurrentHashMap<>();
     this.modUsage = new HashSet<>();
-    this.handlerName = "neon_handler_1171";
+    this.plugin = Bukkit.getPluginManager().getPlugin("Neon");
+    final Server server = this.plugin.getServer();
+    final Messenger messenger = server.getMessenger();
+    messenger.registerOutgoingPluginChannel(this.plugin, MESSENGER_ID);
   }
 
   @Override
@@ -132,7 +142,8 @@ public final class NeonPacketSender implements PacketSender {
     if (viewers == null) {
       for (final UUID uuid : this.connections.keySet()) {
         if (this.modUsage.contains(uuid)) {
-          // send mod packet
+          final Player player = Bukkit.getPlayer(uuid);
+          //player.sendPluginMessage(plugin, MESSENGER_ID, packetArray);
         }
         this.sendMapPacketsToViewers(uuid, packetArray);
       }
@@ -235,8 +246,8 @@ public final class NeonPacketSender implements PacketSender {
 
   private void removeChannelPipelineHandler(@NotNull final Channel channel) {
     final ChannelPipeline pipeline = channel.pipeline();
-    if (pipeline.get(this.handlerName) != null) {
-      pipeline.remove(this.handlerName);
+    if (pipeline.get(HANDLER_NAME) != null) {
+      pipeline.remove(HANDLER_NAME);
     }
   }
 

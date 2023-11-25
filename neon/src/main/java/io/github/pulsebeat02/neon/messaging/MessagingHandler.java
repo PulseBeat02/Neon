@@ -10,7 +10,7 @@ public final class MessagingHandler {
   private static final String CHANNEL_ID;
 
   static {
-    CHANNEL_ID = "neon:map_data";
+    CHANNEL_ID = "neon:info";
   }
 
   private @NotNull final Neon neon;
