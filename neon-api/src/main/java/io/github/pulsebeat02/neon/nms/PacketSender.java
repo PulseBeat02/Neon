@@ -55,4 +55,6 @@ public interface PacketSender {
   void injectPlayer(@NotNull final UUID player);
 
   void uninjectPlayer(@NotNull final UUID player);
+
+  void sendModPacket(@NotNull final UUID player);
 }

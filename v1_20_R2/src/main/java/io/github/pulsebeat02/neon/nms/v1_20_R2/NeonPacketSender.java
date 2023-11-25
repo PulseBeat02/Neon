@@ -33,6 +33,7 @@ import io.netty.channel.ChannelPipeline;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,11 +65,13 @@ public final class NeonPacketSender implements PacketSender {
 
   private final Map<UUID, PlayerConnection> connections;
   private final Map<UUID, Long> lastUpdated;
+  private final Set<UUID> modUsage;
   private final String handlerName;
 
   {
     this.connections = new ConcurrentHashMap<>();
     this.lastUpdated = new ConcurrentHashMap<>();
+    this.modUsage = new HashSet<>();
     this.handlerName = "neon_handler_1171";
   }
 
@@ -128,6 +131,9 @@ public final class NeonPacketSender implements PacketSender {
   private void sendMapPackets(final UUID[] viewers, final PacketPlayOutMap[] packetArray) {
     if (viewers == null) {
       for (final UUID uuid : this.connections.keySet()) {
+        if (this.modUsage.contains(uuid)) {
+          // send mod packet
+        }
         this.sendMapPacketsToViewers(uuid, packetArray);
       }
     } else {
@@ -209,6 +215,16 @@ public final class NeonPacketSender implements PacketSender {
     final Channel channel = manager.n;
     this.removeChannelPipeline(channel);
     this.removeConnection(bukkitPlayer);
+    this.removeModInfo(player);
+  }
+
+  private void removeModInfo(@NotNull final UUID uuid) {
+    this.modUsage.remove(uuid);
+  }
+
+  @Override
+  public void sendModPacket(@NotNull final UUID uuid) {
+    this.modUsage.add(uuid);
   }
 
   private void removeChannelPipeline(@NotNull final Channel channel) {

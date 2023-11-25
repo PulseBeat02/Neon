@@ -33,6 +33,7 @@ import io.github.pulsebeat02.neon.event.BrowserClickListener;
 import io.github.pulsebeat02.neon.event.PlayerHookListener;
 import io.github.pulsebeat02.neon.locale.AudienceHandler;
 import io.github.pulsebeat02.neon.locale.Locale;
+import io.github.pulsebeat02.neon.messaging.MessagingHandler;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.nms.ReflectionHandler;
 import io.github.pulsebeat02.neon.utils.BrowserSuggestionUtils;
@@ -44,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 public final class Neon extends JavaPlugin {
 
   private BrowserConfiguration configuration;
+  private MessagingHandler handler;
   private PacketSender sender;
   private AudienceHandler audience;
   private SeleniumBrowser browser;
@@ -53,6 +55,7 @@ public final class Neon extends JavaPlugin {
     this.registerAdventure();
     this.registerServerImplementation();
     this.registerStaticBlocks();
+    this.registerMessagingHandler();
     this.readConfigurationFile();
     this.registerCommands();
     this.registerStats();
@@ -65,6 +68,16 @@ public final class Neon extends JavaPlugin {
     this.shutdownConfiguration();
     this.shutdownExecutors();
     this.shutdownAdventure();
+    this.unregisterMessagingHandler();
+  }
+
+  private void unregisterMessagingHandler() {
+    this.handler.unregisterMessagingHandler();
+  }
+
+  private void registerMessagingHandler() {
+    this.handler = new MessagingHandler(this);
+    this.handler.registerMessagingHandler();
   }
 
   private void registerStaticBlocks() {
