@@ -1,5 +1,7 @@
 package io.github.pulsebeat02.neon.listener;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
@@ -12,6 +14,8 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
+
 public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayChannelHandler {
 
   /*
@@ -19,7 +23,7 @@ public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayC
   INT id
   DOUBLE centerX
   DOUBLE centerZ
-  BYTE scale
+  BYTE[] mapData
 
    */
   @Override
@@ -31,9 +35,24 @@ public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayC
     final int id = buf.readInt();
     final double centerX = buf.readDouble();
     final double centerZ = buf.readDouble();
-    final byte scale = buf.readByte();
-    final byte[] mapData = buf.readByteArray();
-    client.execute(() -> this.handleMapData(client, id, centerX, centerZ, scale, mapData));
+    final byte[] squishedMapData = buf.readByteArray();
+    final byte[] mapData = this.expand(squishedMapData);
+    client.execute(() -> this.handleMapData(client, id, centerX, centerZ, mapData));
+  }
+
+  private byte @NotNull [] expand(final byte @NotNull [] squishedMapData) {
+    try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      for (int i = 0; i < squishedMapData.length; i += 2) {
+        final int count = squishedMapData[i];
+        final byte value = squishedMapData[i + 1];
+        for (int j = 0; j < count; j++) {
+          out.write(value);
+        }
+      }
+      return out.toByteArray();
+    } catch (final Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void handleMapData(
@@ -41,7 +60,6 @@ public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayC
       final int id,
       final double centerX,
       final double centerZ,
-      final byte scale,
       final byte[] mapData) {
     final ClientPlayerEntity player = client.player;
     if (player == null) {
@@ -49,7 +67,7 @@ public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayC
     }
     final ClientWorld world = player.clientWorld;
     final RegistryKey<World> key = world.getRegistryKey();
-    final MapState state = MapState.of(centerX, centerZ, scale, false, false, key);
+    final MapState state = MapState.of(centerX, centerZ, (byte) 0, false, false, key);
     state.colors = mapData;
     world.putClientsideMapState(String.valueOf(id), state);
   }

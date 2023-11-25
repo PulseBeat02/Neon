@@ -28,8 +28,14 @@ import static java.util.Objects.requireNonNull;
 import io.github.pulsebeat02.neon.nms.PacketSender;
 import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +62,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class NeonPacketSender implements PacketSender {
   private static final int PACKET_THRESHOLD_MS;
@@ -73,13 +80,17 @@ public final class NeonPacketSender implements PacketSender {
   private final Map<UUID, PlayerConnection> connections;
   private final Map<UUID, Long> lastUpdated;
   private final Set<UUID> modUsage;
-  private  final Plugin plugin;
+  private final Plugin plugin;
 
-  {
+  public NeonPacketSender() {
     this.connections = new ConcurrentHashMap<>();
     this.lastUpdated = new ConcurrentHashMap<>();
     this.modUsage = new HashSet<>();
     this.plugin = Bukkit.getPluginManager().getPlugin("Neon");
+    this.registerMessenger();
+  }
+
+  private void registerMessenger() {
     final Server server = this.plugin.getServer();
     final Messenger messenger = server.getMessenger();
     messenger.registerOutgoingPluginChannel(this.plugin, MESSENGER_ID);
@@ -104,8 +115,9 @@ public final class NeonPacketSender implements PacketSender {
     final int yLoopMin = Math.max(0, yOff >> 7);
     final int xLoopMax = Math.min(mapWidth, (int) Math.ceil(negXOff / 128.0));
     final int yLoopMax = Math.min(mapHeight, (int) Math.ceil(negYOff / 128.0));
-    final PacketPlayOutMap[] packetArray =
-        new PacketPlayOutMap[(xLoopMax - xLoopMin) * (yLoopMax - yLoopMin)];
+    final int size = (xLoopMax - xLoopMin) * (yLoopMax - yLoopMin);
+    final PacketPlayOutMap[] packetArray = new PacketPlayOutMap[size];
+    final NeonMapPacket[] neonPackets = new NeonMapPacket[size];
     int arrIndex = 0;
     for (int y = yLoopMin; y < yLoopMax; y++) {
       final int relY = y << 7;
@@ -126,35 +138,36 @@ public final class NeonPacketSender implements PacketSender {
           }
         }
         final int mapId = map + mapWidth * y + x;
-        final byte b = (byte) 0;
-        final boolean display = false;
         final List<MapIcon> icons = new ArrayList<>();
         final WorldMap.b worldmap = new WorldMap.b(topX, topY, xDiff, yDiff, mapData);
-        final PacketPlayOutMap packet = new PacketPlayOutMap(mapId, b, display, icons, worldmap);
-        packetArray[arrIndex++] = packet;
+        final PacketPlayOutMap packet =
+            new PacketPlayOutMap(mapId, (byte) 0, false, icons, worldmap);
+        packetArray[arrIndex] = packet;
+        neonPackets[arrIndex] = new NeonMapPacket(mapId, x, y, mapData);
+        arrIndex++;
         PACKET_DIFFERENTIATION.add(packet);
       }
     }
-    this.sendMapPackets(viewers, packetArray);
+    this.sendMapPackets(viewers, packetArray, neonPackets);
   }
 
-  private void sendMapPackets(final UUID[] viewers, final PacketPlayOutMap[] packetArray) {
+  private void sendMapPackets(
+      final UUID[] viewers,
+      final PacketPlayOutMap[] packetArray,
+      final NeonMapPacket[] neonPackets) {
     if (viewers == null) {
       for (final UUID uuid : this.connections.keySet()) {
-        if (this.modUsage.contains(uuid)) {
-          final Player player = Bukkit.getPlayer(uuid);
-          //player.sendPluginMessage(plugin, MESSENGER_ID, packetArray);
-        }
-        this.sendMapPacketsToViewers(uuid, packetArray);
+        this.sendMapPacketsToViewers(uuid, packetArray, neonPackets);
       }
     } else {
       for (final UUID uuid : viewers) {
-        this.sendMapPacketsToViewers(uuid, packetArray);
+        this.sendMapPacketsToViewers(uuid, packetArray, neonPackets);
       }
     }
   }
 
-  private void sendMapPacketsToViewers(final UUID uuid, final PacketPlayOutMap[] packetArray) {
+  private void sendMapPacketsToViewers(
+      final UUID uuid, final PacketPlayOutMap[] packetArray, final NeonMapPacket[] neonPackets) {
     final long val = this.lastUpdated.getOrDefault(uuid, 0L);
     if (System.currentTimeMillis() - val > PACKET_THRESHOLD_MS) {
       final PlayerConnection connection = this.connections.get(uuid);
@@ -162,8 +175,15 @@ public final class NeonPacketSender implements PacketSender {
         return;
       }
       this.updateTime(uuid);
-      for (final PacketPlayOutMap packet : packetArray) {
-        connection.a(packet);
+      if (this.modUsage.contains(uuid)) {
+        final Player player = Bukkit.getPlayer(uuid);
+        for (final NeonMapPacket packet : neonPackets) {
+          player.sendPluginMessage(this.plugin, MESSENGER_ID, packet.serialize());
+        }
+      } else {
+        for (final PacketPlayOutMap packet : packetArray) {
+          connection.a(packet);
+        }
       }
     }
   }
@@ -238,7 +258,7 @@ public final class NeonPacketSender implements PacketSender {
     this.modUsage.add(uuid);
   }
 
-  private void removeChannelPipeline(@NotNull final Channel channel) {
+  private void removeChannelPipeline(@Nullable final Channel channel) {
     if (channel != null) {
       this.removeChannelPipelineHandler(channel);
     }
@@ -253,5 +273,54 @@ public final class NeonPacketSender implements PacketSender {
 
   private void removeConnection(@NotNull final Player player) {
     this.connections.remove(player.getUniqueId());
+  }
+
+  public static final class NeonMapPacket implements Serializable {
+
+    @Serial private static final long serialVersionUID = 872899747238599830L;
+    private final int id;
+    private final double centerX;
+    private final double centerZ;
+    private final byte[] mapData;
+
+    public NeonMapPacket(
+        final int id, final double centerX, final double centerZ, final byte[] mapData) {
+      this.id = id;
+      this.centerX = centerX;
+      this.centerZ = centerZ;
+      this.mapData = mapData;
+    }
+
+    public byte @NotNull [] serialize() {
+      final ByteBuf buf = Unpooled.buffer();
+      buf.writeInt(this.id);
+      buf.writeDouble(this.centerX);
+      buf.writeDouble(this.centerZ);
+      buf.writeBytes(this.squish(this.mapData));
+      return buf.array();
+    }
+
+    private byte @NotNull [] squish(final byte @NotNull [] bloated) {
+      try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        byte lastByte = bloated[0];
+        int matchCount = 1;
+        for (int i = 1; i < bloated.length; i++) {
+          final byte thisByte = bloated[i];
+          if (lastByte == thisByte) {
+            matchCount++;
+          } else {
+            out.write((byte) matchCount);
+            out.write(lastByte);
+            matchCount = 1;
+            lastByte = thisByte;
+          }
+        }
+        out.write((byte) matchCount);
+        out.write(lastByte);
+        return out.toByteArray();
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }
