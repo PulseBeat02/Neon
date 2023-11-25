@@ -36,6 +36,10 @@ java {
     withSourcesJar()
 }
 
+sourcesJar {
+    duplicatesStrategy(DuplicatesStrategy.INCLUDE)
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {

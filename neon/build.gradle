@@ -38,3 +38,5 @@ tasks {
         rename('plugin.json', 'plugin.yml')
     }
 }
+
+tasks.build.dependsOn tasks.shadowJar

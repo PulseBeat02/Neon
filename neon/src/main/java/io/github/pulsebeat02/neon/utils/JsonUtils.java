@@ -24,7 +24,7 @@
 package io.github.pulsebeat02.neon.utils;
 
 import com.google.gson.Gson;
-import io.github.pulsebeat02.neon.video.json.GsonProvider;
+import io.github.pulsebeat02.neon.json.GsonProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
