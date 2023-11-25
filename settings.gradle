@@ -1,5 +1,16 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'Neon'
 include 'v1_20_R2'
 include 'neon'
 include 'neon-api'
-
+include 'neon-mod'

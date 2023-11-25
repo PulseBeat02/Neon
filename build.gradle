@@ -3,13 +3,8 @@ plugins {
     id("com.github.hierynomus.license-base") version "0.16.1"
 }
 
-group = 'io.github.pulsebeat02'
-
-java {
-    def javaVersion = JavaVersion.toVersion(17)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-}
+version = project.mod_version
+group = project.maven_group
 
 subprojects {
 
@@ -26,13 +21,10 @@ subprojects {
         maven { url "https://repo.minebench.de/" }
     }
 
-    tasks.compileJava {
-        options.encoding = 'UTF-8'
-    }
-
-    tasks.register('wrapper', Wrapper) {
-        gradleVersion = "7.4.2"
-        distributionType = Wrapper.DistributionType.ALL
+    java {
+        def javaVersion = JavaVersion.toVersion(17)
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     license {
@@ -48,5 +40,15 @@ subprojects {
             java { srcDir("src/main/java") }
             resources { srcDir("src/main/resources") }
         }
+    }
+
+    tasks.compileJava {
+        options.encoding = 'UTF-8'
+        options.release = 17
+    }
+
+    tasks.register('wrapper', Wrapper) {
+        gradleVersion = "8.3"
+        distributionType = Wrapper.DistributionType.ALL
     }
 }
