@@ -1,5 +1,7 @@
 package io.github.pulsebeat02.neon.listener;
 
+import io.github.pulsebeat02.neon.packet.NeonFrameUpdateS2CPacket;
+import io.github.pulsebeat02.neon.packet.NeonMapPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -63,77 +65,5 @@ public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayC
     final MapState state = MapState.of(centerX, centerZ, (byte) 0, false, false, key);
     state.colors = mapData;
     world.putClientsideMapState(FilledMapItem.getMapName(id), state);
-  }
-
-  public static final class NeonFrameUpdateS2CPacket implements Serializable {
-
-    @Serial private static final long serialVersionUID = 2863313598102499399L;
-    final NeonMapPacket[] frames;
-
-    public NeonFrameUpdateS2CPacket(final NeonMapPacket[] frames) {
-      this.frames = frames;
-    }
-
-    public byte @NotNull [] serialize() {
-      return squish(SerializationUtils.serialize(this));
-    }
-
-    public static @NotNull NeonFrameUpdateS2CPacket deserialize(final byte @NotNull [] data) {
-      return SerializationUtils.deserialize(expand(data));
-    }
-
-    private static byte @NotNull [] expand(final byte @NotNull [] squishedMapData) {
-      try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-        for (int i = 0; i < squishedMapData.length; i += 2) {
-          final int count = squishedMapData[i];
-          final byte value = squishedMapData[i + 1];
-          for (int j = 0; j < count; j++) {
-            out.write(value);
-          }
-        }
-        return out.toByteArray();
-      } catch (final Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    private static byte @NotNull [] squish(final byte @NotNull [] bloated) {
-      try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-        byte lastByte = bloated[0];
-        int matchCount = 1;
-        for (int i = 1; i < bloated.length; i++) {
-          final byte thisByte = bloated[i];
-          if (lastByte == thisByte) {
-            matchCount++;
-          } else {
-            out.write((byte) matchCount);
-            out.write(lastByte);
-            matchCount = 1;
-            lastByte = thisByte;
-          }
-        }
-        out.write((byte) matchCount);
-        out.write(lastByte);
-        return out.toByteArray();
-      } catch (final Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  public static final class NeonMapPacket implements Serializable {
-
-    @Serial private static final long serialVersionUID = 4147643121501630471L;
-    final int id;
-    final int centerX;
-    final int centerZ;
-    final byte[] mapData;
-
-    public NeonMapPacket(final int id, final int centerX, final int centerZ, final byte[] mapData) {
-      this.id = id;
-      this.centerX = centerX;
-      this.centerZ = centerZ;
-      this.mapData = mapData;
-    }
   }
 }

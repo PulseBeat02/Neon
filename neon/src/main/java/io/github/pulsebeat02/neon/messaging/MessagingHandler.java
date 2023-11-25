@@ -1,10 +1,13 @@
 package io.github.pulsebeat02.neon.messaging;
 
 import io.github.pulsebeat02.neon.Neon;
+import io.github.pulsebeat02.neon.nms.PacketSender;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public final class MessagingHandler {
 
@@ -28,9 +31,9 @@ public final class MessagingHandler {
 
   public void register(
       @NotNull final String id, @NotNull final Player player, final byte @NotNull [] bytes) {
-    final Server server = this.neon.getServer();
-    final Messenger messenger = server.getMessenger();
-    messenger.unregisterIncomingPluginChannel(this.neon, CHANNEL_ID);
+    final PacketSender sender = this.neon.getPacketSender();
+    final String uuid = new String(bytes);
+    sender.sendModPacket(UUID.fromString(uuid));
   }
 
   public void unregisterMessagingHandler() {

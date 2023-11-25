@@ -26,17 +26,12 @@ package io.github.pulsebeat02.neon.nms.v1_20_R2;
 import static java.util.Objects.requireNonNull;
 
 import io.github.pulsebeat02.neon.nms.PacketSender;
+import io.github.pulsebeat02.neon.packet.NeonFrameUpdateS2CPacket;
+import io.github.pulsebeat02.neon.packet.NeonMapPacket;
 import io.github.pulsebeat02.neon.utils.unsafe.UnsafeUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,22 +41,20 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import net.md_5.bungee.api.ChatColor;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.game.PacketPlayOutMap;
+import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
-import org.apache.commons.lang3.SerializationUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.StandardMessenger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -193,28 +186,6 @@ public final class NeonPacketSender implements PacketSender {
   }
 
   @Override
-  public void displayEntities(
-      @NotNull final UUID[] viewers,
-      @NotNull final Location location,
-      @NotNull final Entity[] entities,
-      @NotNull final IntBuffer data,
-      @NotNull final String character,
-      final int width,
-      final int height) {
-    int index = 0;
-    for (int i = 0; i < height; i++) {
-      final StringBuilder builder = new StringBuilder();
-      for (int x = 0; x < width; x++) {
-        final int rgb = data.get(index++);
-        final ChatColor color = ChatColor.of(String.format("#%06X", rgb & 0xFFFFFF));
-        builder.append(color);
-        builder.append(character);
-      }
-      entities[i].setCustomName(builder.toString());
-    }
-  }
-
-  @Override
   public void injectPlayer(@NotNull final UUID player) {
     final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
     final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
@@ -273,77 +244,5 @@ public final class NeonPacketSender implements PacketSender {
 
   private void removeConnection(@NotNull final Player player) {
     this.connections.remove(player.getUniqueId());
-  }
-
-  public static final class NeonFrameUpdateS2CPacket implements Serializable {
-
-    @Serial private static final long serialVersionUID = 2863313598102499399L;
-    final NeonMapPacket[] frames;
-
-    public NeonFrameUpdateS2CPacket(final NeonMapPacket[] frames) {
-      this.frames = frames;
-    }
-
-    public byte @NotNull [] serialize() {
-      return squish(SerializationUtils.serialize(this));
-    }
-
-    public static @NotNull NeonFrameUpdateS2CPacket deserialize(final byte @NotNull [] data) {
-      return SerializationUtils.deserialize(expand(data));
-    }
-
-    private static byte @NotNull [] expand(final byte @NotNull [] squishedMapData) {
-      try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-        for (int i = 0; i < squishedMapData.length; i += 2) {
-          final int count = squishedMapData[i];
-          final byte value = squishedMapData[i + 1];
-          for (int j = 0; j < count; j++) {
-            out.write(value);
-          }
-        }
-        return out.toByteArray();
-      } catch (final Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    private static byte @NotNull [] squish(final byte @NotNull [] bloated) {
-      try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-        byte lastByte = bloated[0];
-        int matchCount = 1;
-        for (int i = 1; i < bloated.length; i++) {
-          final byte thisByte = bloated[i];
-          if (lastByte == thisByte) {
-            matchCount++;
-          } else {
-            out.write((byte) matchCount);
-            out.write(lastByte);
-            matchCount = 1;
-            lastByte = thisByte;
-          }
-        }
-        out.write((byte) matchCount);
-        out.write(lastByte);
-        return out.toByteArray();
-      } catch (final Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  public static final class NeonMapPacket implements Serializable {
-
-    @Serial private static final long serialVersionUID = 4147643121501630471L;
-    final int id;
-    final int centerX;
-    final int centerZ;
-    final byte[] mapData;
-
-    public NeonMapPacket(final int id, final int centerX, final int centerZ, final byte[] mapData) {
-      this.id = id;
-      this.centerX = centerX;
-      this.centerZ = centerZ;
-      this.mapData = mapData;
-    }
   }
 }

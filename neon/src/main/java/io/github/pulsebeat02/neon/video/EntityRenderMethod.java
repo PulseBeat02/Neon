@@ -66,9 +66,9 @@ public abstract class EntityRenderMethod extends RenderAdapter {
   }
 
   @Override
-  public void render(@NotNull final IntBuffer buf) {
-    this.sender.displayEntities(
-        null, this.location, this.entities, buf, this.character, this.width, this.height);
+  public void render(@NotNull final IntBuffer buf) { // TODO
+//    this.sender.displayEntities(
+//        null, this.location, this.entities, buf, this.character, this.width, this.height);
   }
 
   public @NotNull Entity[] getEntities() {
