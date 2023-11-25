@@ -18,7 +18,7 @@ public class CompressionTest {
     final String SALTCHARS = "0123456789";
     final StringBuilder salt = new StringBuilder();
     final Random rnd = new Random();
-    while (salt.length() < 100000) {
+    while (salt.length() < 128 * 128 * 24) {
       final int index = (int) (rnd.nextFloat() * SALTCHARS.length());
       salt.append(SALTCHARS.charAt(index));
     }

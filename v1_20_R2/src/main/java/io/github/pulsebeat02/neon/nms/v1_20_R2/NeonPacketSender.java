@@ -53,6 +53,7 @@ import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.world.level.saveddata.maps.MapIcon;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
+import org.apache.commons.lang3.SerializationUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -143,7 +144,7 @@ public final class NeonPacketSender implements PacketSender {
         final PacketPlayOutMap packet =
             new PacketPlayOutMap(mapId, (byte) 0, false, icons, worldmap);
         packetArray[arrIndex] = packet;
-        neonPackets[arrIndex] = new NeonMapPacket(mapId, x, y, mapData);
+        neonPackets[arrIndex] = new NeonMapPacket(mapId, topX, topY, mapData); // TODO this
         arrIndex++;
         PACKET_DIFFERENTIATION.add(packet);
       }
@@ -177,9 +178,8 @@ public final class NeonPacketSender implements PacketSender {
       this.updateTime(uuid);
       if (this.modUsage.contains(uuid)) {
         final Player player = Bukkit.getPlayer(uuid);
-        for (final NeonMapPacket packet : neonPackets) {
-          player.sendPluginMessage(this.plugin, MESSENGER_ID, packet.serialize());
-        }
+        final NeonFrameUpdateS2CPacket packet = new NeonFrameUpdateS2CPacket(neonPackets);
+        player.sendPluginMessage(this.plugin, MESSENGER_ID, packet.serialize());
       } else {
         for (final PacketPlayOutMap packet : packetArray) {
           connection.a(packet);
@@ -275,32 +275,39 @@ public final class NeonPacketSender implements PacketSender {
     this.connections.remove(player.getUniqueId());
   }
 
-  public static final class NeonMapPacket implements Serializable {
+  public static final class NeonFrameUpdateS2CPacket implements Serializable {
 
-    @Serial private static final long serialVersionUID = 872899747238599830L;
-    private final int id;
-    private final double centerX;
-    private final double centerZ;
-    private final byte[] mapData;
+    @Serial private static final long serialVersionUID = 2863313598102499399L;
+    final NeonMapPacket[] frames;
 
-    public NeonMapPacket(
-        final int id, final double centerX, final double centerZ, final byte[] mapData) {
-      this.id = id;
-      this.centerX = centerX;
-      this.centerZ = centerZ;
-      this.mapData = mapData;
+    public NeonFrameUpdateS2CPacket(final NeonMapPacket[] frames) {
+      this.frames = frames;
     }
 
     public byte @NotNull [] serialize() {
-      final ByteBuf buf = Unpooled.buffer();
-      buf.writeInt(this.id);
-      buf.writeDouble(this.centerX);
-      buf.writeDouble(this.centerZ);
-      buf.writeBytes(this.squish(this.mapData));
-      return buf.array();
+      return squish(SerializationUtils.serialize(this));
     }
 
-    private byte @NotNull [] squish(final byte @NotNull [] bloated) {
+    public static @NotNull NeonFrameUpdateS2CPacket deserialize(final byte @NotNull [] data) {
+      return SerializationUtils.deserialize(expand(data));
+    }
+
+    private static byte @NotNull [] expand(final byte @NotNull [] squishedMapData) {
+      try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        for (int i = 0; i < squishedMapData.length; i += 2) {
+          final int count = squishedMapData[i];
+          final byte value = squishedMapData[i + 1];
+          for (int j = 0; j < count; j++) {
+            out.write(value);
+          }
+        }
+        return out.toByteArray();
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    private static byte @NotNull [] squish(final byte @NotNull [] bloated) {
       try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
         byte lastByte = bloated[0];
         int matchCount = 1;
@@ -321,6 +328,22 @@ public final class NeonPacketSender implements PacketSender {
       } catch (final Exception e) {
         throw new RuntimeException(e);
       }
+    }
+  }
+
+  public static final class NeonMapPacket implements Serializable {
+
+    @Serial private static final long serialVersionUID = 4147643121501630471L;
+    final int id;
+    final int centerX;
+    final int centerZ;
+    final byte[] mapData;
+
+    public NeonMapPacket(final int id, final int centerX, final int centerZ, final byte[] mapData) {
+      this.id = id;
+      this.centerX = centerX;
+      this.centerZ = centerZ;
+      this.mapData = mapData;
     }
   }
 }
