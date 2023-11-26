@@ -2,8 +2,6 @@ package io.github.pulsebeat02.neon.listener;
 
 import io.github.pulsebeat02.neon.packet.NeonFrameUpdateS2CPacket;
 import io.github.pulsebeat02.neon.packet.NeonMapPacket;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
@@ -15,13 +13,7 @@ import net.minecraft.item.map.MapState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.SerializationUtils;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Serial;
-import java.io.Serializable;
 
 public final class MapDataMessagingHandler implements ClientPlayNetworking.PlayChannelHandler {
 
