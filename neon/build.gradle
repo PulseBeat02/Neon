@@ -26,7 +26,7 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName.set("${project.name}-${project.version}-BUKKIT.jar")
+    archiveFileName = "${project.parent.name}-${project.version}-BUKKIT.jar"
     relocate('net.kyori', 'io.github.pulsebeat02.neon.lib.kyori')
     relocate('org.bstats', 'io.github.pulsebeat02.neon.lib.bstats')
     relocate('dev.dbassett', 'io.github.pulsebeat02.neon.lib.dbassett')

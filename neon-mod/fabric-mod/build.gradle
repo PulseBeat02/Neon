@@ -19,7 +19,7 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation project(':neon-api')
+    shadow project(':neon-api')
 }
 
 processResources {
@@ -46,8 +46,17 @@ publishing {
     }
 }
 
-shadowJar {
-    archiveFileName.set("${project.name}-${project.version}-FABRIC.jar")
+jar {
+    archiveClassifier = ''
 }
 
-tasks.build.dependsOn tasks.shadowJar
+shadowJar {
+    archiveFileName = "${project.parent.name}-${project.version}-FABRIC.jar"
+    archiveClassifier = ''
+    configurations = [project.configurations.shadow]
+}
+
+remapJar {
+    dependsOn(shadowJar)
+    inputFile = tasks.shadowJar.archiveFile
+}
