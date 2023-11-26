@@ -18,7 +18,7 @@ dependencies {
     testImplementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
 
     implementation project(':neon-api')
-    implementation project(':v1_20_R2')
+    implementation project(':neon:v1_20_R2')
     implementation 'org.bstats:bstats-bukkit:3.0.2'
     implementation 'net.kyori:adventure-api:4.14.0'
     implementation 'net.kyori:adventure-platform-bukkit:4.3.0'

@@ -27,5 +27,5 @@ Steps for Building Locally
 1) Run [BuildTools](https://www.spigotmc.org/wiki/buildtools/) to generate the
    1.20.2 server jar.
 2) Clone the repository by using this Git link: https://github.com/MinecraftMediaLibrary/EzMediaCore.git.
-3) Run `gradle neon:shadowJar` to compile the plugin JAR.
-4) Find the JAR in the neon/build/libs folder.
+3) Run `gradle build` to compile the plugin JAR.
+4) Find the mods and plugins in the build folder.

@@ -4,13 +4,24 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+        }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
+}
+
 rootProject.name = 'Neon'
-include 'v1_20_R2'
-include 'neon'
+
 include 'neon-api'
+include 'neon:v1_20_R2'
+include 'neon'
+include 'neon-mod:fabric-mod'
+include 'neon-mod:forge-mod'
 include 'neon-mod'
