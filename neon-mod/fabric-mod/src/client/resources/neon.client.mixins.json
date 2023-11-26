@@ -2,9 +2,7 @@
   "required": true,
   "package": "io.github.pulsebeat02.neon.mixin",
   "compatibilityLevel": "JAVA_17",
-  "client": [
-    "ExtendedMapPaletteMixin"
-  ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }

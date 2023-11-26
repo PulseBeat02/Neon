@@ -1,8 +1,6 @@
 package io.github.pulsebeat02.neon.listener;
 
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 public final class PluginMessagingResponse {

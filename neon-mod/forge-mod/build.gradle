@@ -1,4 +1,5 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
@@ -43,9 +44,11 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation project(':neon-api')
 }
 
 tasks.named('processResources', ProcessResources).configure {
+    duplicatesStrategy(DuplicatesStrategy.INCLUDE)
     var replaceProperties = [
             minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
             forge_version       : forge_version, forge_version_range: forge_version_range,
@@ -92,3 +95,9 @@ publishing {
         }
     }
 }
+
+shadowJar {
+    archiveFileName.set("${project.name}-${project.version}-FORGE.jar")
+}
+
+tasks.build.dependsOn tasks.shadowJar

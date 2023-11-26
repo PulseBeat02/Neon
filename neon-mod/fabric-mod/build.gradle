@@ -1,4 +1,5 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'fabric-loom' version '1.4-SNAPSHOT'
     id 'maven-publish'
 }
@@ -22,6 +23,7 @@ dependencies {
 }
 
 processResources {
+    duplicatesStrategy(DuplicatesStrategy.INCLUDE)
     inputs.property "version", project.version
     filesMatching("fabric.mod.json") {
         expand "version": project.version
@@ -43,3 +45,9 @@ publishing {
         }
     }
 }
+
+shadowJar {
+    archiveFileName.set("${project.name}-${project.version}-FABRIC.jar")
+}
+
+tasks.build.dependsOn tasks.shadowJar

@@ -15,7 +15,7 @@ public final class ServerJoinHandler {
   private static final Identifier SEND_MOD_MESSAGE_ID;
 
   static {
-    SEND_MOD_MESSAGE_ID = new Identifier("neon", "info");
+    SEND_MOD_MESSAGE_ID = new Identifier("neon", "HANDSHAKE");
   }
 
   public ServerJoinHandler() {

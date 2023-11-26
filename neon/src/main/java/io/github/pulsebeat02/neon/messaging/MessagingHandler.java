@@ -14,7 +14,7 @@ public final class MessagingHandler {
   private static final String CHANNEL_ID;
 
   static {
-    CHANNEL_ID = "neon:info";
+    CHANNEL_ID = "neon:HANDSHAKE";
   }
 
   private @NotNull final Neon neon;
