@@ -153,15 +153,14 @@ public final class Neon extends JavaPlugin {
   }
 
   public void shutdownBrowser() {
-    this.audience.console(Locale.DISABLE_BROWSER.build());
     if (this.browser != null) {
+      this.audience.console(Locale.DISABLE_BROWSER.build());
       this.browser.shutdown();
       this.browser = null;
     }
   }
 
   public void setBrowser(@NotNull final SeleniumBrowser browser) {
-    this.shutdownBrowser();
     this.browser = browser;
   }
 }

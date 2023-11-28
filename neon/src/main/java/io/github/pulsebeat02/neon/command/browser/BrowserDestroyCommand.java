@@ -45,11 +45,11 @@ public final class BrowserDestroyCommand implements CommandSegment.Literal<Comma
     this.node =
         this.literal("destroy")
             .requires(has("neon.command.browser.info.destroy"))
-            .executes(this::startBrowser)
+            .executes(this::destroyBrowser)
             .build();
   }
 
-  private int startBrowser(@NotNull final CommandContext<CommandSender> context) {
+  private int destroyBrowser(@NotNull final CommandContext<CommandSender> context) {
 
     this.neon.shutdownBrowser();
 

@@ -14,7 +14,7 @@ public final class MessagingHandler {
   private static final String CHANNEL_ID;
 
   static {
-    CHANNEL_ID = "neon:HANDSHAKE";
+    CHANNEL_ID = "neon:handshake";
   }
 
   private @NotNull final Neon neon;
@@ -26,10 +26,10 @@ public final class MessagingHandler {
   public void registerMessagingHandler() {
     final Server server = this.neon.getServer();
     final Messenger messenger = server.getMessenger();
-    messenger.registerIncomingPluginChannel(this.neon, CHANNEL_ID, this::register);
+    messenger.registerIncomingPluginChannel(this.neon, CHANNEL_ID, this::handlePacket);
   }
 
-  public void register(
+  public void handlePacket(
       @NotNull final String id, @NotNull final Player player, final byte @NotNull [] bytes) {
     final PacketSender sender = this.neon.getPacketSender();
     final String uuid = new String(bytes);

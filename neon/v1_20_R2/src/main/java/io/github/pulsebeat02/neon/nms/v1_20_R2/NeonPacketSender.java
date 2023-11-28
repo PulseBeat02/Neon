@@ -60,14 +60,10 @@ import org.jetbrains.annotations.Nullable;
 
 public final class NeonPacketSender implements PacketSender {
   private static final int PACKET_THRESHOLD_MS;
-  private static final Set<Object> PACKET_DIFFERENTIATION;
-  private static final String HANDLER_NAME;
   private static final String MESSENGER_ID;
 
   static {
-    PACKET_THRESHOLD_MS = 0;
-    PACKET_DIFFERENTIATION = Collections.newSetFromMap(new WeakHashMap<>());
-    HANDLER_NAME = "neon_handler_1171";
+    PACKET_THRESHOLD_MS = 5;
     MESSENGER_ID = "neon:map_data";
   }
 
@@ -76,11 +72,11 @@ public final class NeonPacketSender implements PacketSender {
   private final Set<UUID> modUsage;
   private final Plugin plugin;
 
-  public NeonPacketSender() {
+  {
     this.connections = new ConcurrentHashMap<>();
     this.lastUpdated = new ConcurrentHashMap<>();
     this.modUsage = new HashSet<>();
-    this.plugin = Bukkit.getPluginManager().getPlugin("Neon");
+    this.plugin = requireNonNull(Bukkit.getPluginManager().getPlugin("Neon"));
     this.registerMessenger();
   }
 
@@ -137,18 +133,17 @@ public final class NeonPacketSender implements PacketSender {
         final PacketPlayOutMap packet =
             new PacketPlayOutMap(mapId, (byte) 0, false, icons, worldmap);
         packetArray[arrIndex] = packet;
-        neonPackets[arrIndex] = new NeonMapPacket(mapId, topX, topY, mapData); // TODO this
+        neonPackets[arrIndex] = new NeonMapPacket(mapId, topX, topY, mapData);
         arrIndex++;
-        PACKET_DIFFERENTIATION.add(packet);
       }
     }
     this.sendMapPackets(viewers, packetArray, neonPackets);
   }
 
   private void sendMapPackets(
-      final UUID[] viewers,
-      final PacketPlayOutMap[] packetArray,
-      final NeonMapPacket[] neonPackets) {
+      @NotNull final UUID[] viewers,
+      @NotNull final PacketPlayOutMap[] packetArray,
+      @NotNull final NeonMapPacket[] neonPackets) {
     if (viewers == null) {
       for (final UUID uuid : this.connections.keySet()) {
         this.sendMapPacketsToViewers(uuid, packetArray, neonPackets);
@@ -161,62 +156,44 @@ public final class NeonPacketSender implements PacketSender {
   }
 
   private void sendMapPacketsToViewers(
-      final UUID uuid, final PacketPlayOutMap[] packetArray, final NeonMapPacket[] neonPackets) {
-    final long val = this.lastUpdated.getOrDefault(uuid, 0L);
-    if (System.currentTimeMillis() - val > PACKET_THRESHOLD_MS) {
-      final PlayerConnection connection = this.connections.get(uuid);
-      if (connection == null) {
-        return;
-      }
-      this.updateTime(uuid);
-      if (this.modUsage.contains(uuid)) {
-        final Player player = Bukkit.getPlayer(uuid);
-        final NeonFrameUpdateS2CPacket packet = new NeonFrameUpdateS2CPacket(neonPackets);
-        player.sendPluginMessage(this.plugin, MESSENGER_ID, packet.serialize());
-      } else {
-        for (final PacketPlayOutMap packet : packetArray) {
-          connection.a(packet);
-        }
-      }
+      @NotNull final UUID uuid,
+      @NotNull final PacketPlayOutMap[] packetArray,
+      @NotNull final NeonMapPacket[] neonPackets) {
+    if (!this.checkValidSend(uuid)) {
+      return;
+    }
+    final PlayerConnection connection = this.connections.get(uuid);
+    if (this.modUsage.contains(uuid)) {
+      final Player player = requireNonNull(Bukkit.getPlayer(uuid));
+      final NeonFrameUpdateS2CPacket packet = new NeonFrameUpdateS2CPacket(neonPackets);
+      player.sendPluginMessage(this.plugin, MESSENGER_ID, packet.serialize());
+      return;
+    }
+    for (final PacketPlayOutMap packet : packetArray) {
+      connection.a(packet);
     }
   }
 
-  private void updateTime(final UUID uuid) {
-    this.lastUpdated.put(uuid, System.currentTimeMillis());
+  private boolean checkValidSend(@NotNull final UUID uuid) {
+    final long val = this.lastUpdated.getOrDefault(uuid, 0L);
+    final long current = System.currentTimeMillis();
+    if (current - val > PACKET_THRESHOLD_MS) {
+      this.lastUpdated.put(uuid, current);
+      return true;
+    }
+    return false;
   }
 
   @Override
   public void injectPlayer(@NotNull final UUID player) {
     final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
     final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
-    final NetworkManager manager =
-        (NetworkManager)
-            UnsafeUtils.getFieldExceptionally(ServerCommonPacketListenerImpl.class, conn, "c");
-    final Channel channel = manager.n;
-    this.addChannelPipeline(channel);
-    this.addConnection(bukkitPlayer, conn);
-  }
-
-  private void addChannelPipeline(@NotNull final Channel channel) {
-    if (channel != null) {
-      this.removeChannelPipelineHandler(channel);
-    }
-  }
-
-  private void addConnection(@NotNull final Player player, @NotNull final PlayerConnection conn) {
-    this.connections.put(player.getUniqueId(), conn);
+    this.connections.put(player, conn);
   }
 
   @Override
   public void uninjectPlayer(@NotNull final UUID player) {
-    final Player bukkitPlayer = requireNonNull(Bukkit.getPlayer(player));
-    final PlayerConnection conn = ((CraftPlayer) bukkitPlayer).getHandle().c;
-    final NetworkManager manager =
-        (NetworkManager)
-            UnsafeUtils.getFieldExceptionally(ServerCommonPacketListenerImpl.class, conn, "c");
-    final Channel channel = manager.n;
-    this.removeChannelPipeline(channel);
-    this.removeConnection(bukkitPlayer);
+    this.removeConnection(player);
     this.removeModInfo(player);
   }
 
@@ -229,20 +206,7 @@ public final class NeonPacketSender implements PacketSender {
     this.modUsage.add(uuid);
   }
 
-  private void removeChannelPipeline(@Nullable final Channel channel) {
-    if (channel != null) {
-      this.removeChannelPipelineHandler(channel);
-    }
-  }
-
-  private void removeChannelPipelineHandler(@NotNull final Channel channel) {
-    final ChannelPipeline pipeline = channel.pipeline();
-    if (pipeline.get(HANDLER_NAME) != null) {
-      pipeline.remove(HANDLER_NAME);
-    }
-  }
-
-  private void removeConnection(@NotNull final Player player) {
-    this.connections.remove(player.getUniqueId());
+  private void removeConnection(@NotNull final UUID uuid) {
+    this.connections.remove(uuid);
   }
 }

@@ -11,17 +11,17 @@ dependencies {
     compileOnly 'com.mojang:authlib:1.5.26'
     compileOnly 'com.moandjiezana.toml:toml4j:0.7.2'
     compileOnly 'me.lucko:commodore:2.2'
-    compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.10'
-    compileOnly 'org.seleniumhq.selenium:selenium-java:4.12.1'
+    compileOnly 'com.github.stefvanschie.inventoryframework:IF:0.10.12'
+    compileOnly 'org.seleniumhq.selenium:selenium-java:4.15.0'
 
     testImplementation 'com.google.code.gson:gson:2.10.1'
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
 
     implementation project(':neon-api')
     implementation project(':neon:v1_20_R2')
     implementation 'org.bstats:bstats-bukkit:3.0.2'
     implementation 'net.kyori:adventure-api:4.14.0'
-    implementation 'net.kyori:adventure-platform-bukkit:4.3.0'
+    implementation 'net.kyori:adventure-platform-bukkit:4.3.1'
     implementation 'dev.dbassett:skullcreator:3.0.1'
 }
 

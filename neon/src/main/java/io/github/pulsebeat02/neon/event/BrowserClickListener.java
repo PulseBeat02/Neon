@@ -79,9 +79,10 @@ public final class BrowserClickListener implements Listener {
       return;
     }
     final ItemStack stack = frame.getItem();
-    if (this.checkValidMap(stack)) {
-      event.setCancelled(true);
+    if (!this.checkValidMap(stack)) {
+      return;
     }
+    event.setCancelled(true);
   }
 
   @EventHandler
@@ -93,9 +94,10 @@ public final class BrowserClickListener implements Listener {
     }
 
     final ItemStack stack = frame.getItem();
-    if (this.checkValidMap(stack)) {
-      event.setCancelled(true);
+    if (!this.checkValidMap(stack)) {
+      return;
     }
+    event.setCancelled(true);
 
     if (!(event instanceof final EntityDamageByEntityEvent damageEvent)) {
       return;
@@ -118,10 +120,11 @@ public final class BrowserClickListener implements Listener {
     }
 
     final ItemStack stack = frame.getItem();
-    if (this.checkValidMap(stack)) {
-      event.setCancelled(true);
+    if (!this.checkValidMap(stack)) {
+      return;
     }
-    
+    event.setCancelled(true);
+
     final Player player = event.getPlayer();
     this.handleInteraction(player, frame, true);
   }

@@ -96,15 +96,16 @@ public final class SeleniumBrowser {
   private @NotNull final WebDriver driver;
   private @NotNull final BrowserSettings settings;
   private @NotNull final RenderMethod method;
-  private @NotNull final AtomicBoolean running;
+  private volatile boolean running;
+  private String currentUrl;
 
   public SeleniumBrowser(
       @NotNull final BrowserSettings settings, @NotNull final RenderMethod method) {
     this.driver = new ChromeDriver(this.createArguments());
-    this.executor = Executors.newSingleThreadExecutor();
+    this.executor = Executors.newCachedThreadPool();
     this.settings = settings;
     this.method = method;
-    this.running = new AtomicBoolean(true);
+    this.running = true;
     this.setupDriver();
   }
 
@@ -115,7 +116,7 @@ public final class SeleniumBrowser {
   public void shutdown() {
     final RenderMethod method = this.getRenderMethod();
     method.destroy();
-    this.running.set(false);
+    this.running = false;
     this.driver.quit();
     this.executor.shutdownNow();
   }
@@ -137,8 +138,8 @@ public final class SeleniumBrowser {
     };
   }
 
-  public void loadURL(@NotNull final String url) {
-    this.driver.get(url);
+  public void setURL(@NotNull final String url) {
+    this.currentUrl = url;
   }
 
   private void startPaintLoop() {
@@ -146,9 +147,10 @@ public final class SeleniumBrowser {
   }
 
   private void paintLoop() {
+    this.driver.get(this.currentUrl);
     final double dt = 1000 / 24D;
     double previous = System.currentTimeMillis();
-    while (this.running.get()) {
+    while (this.running) {
       final double current = System.currentTimeMillis();
       double frameTime = current - previous;
       previous = current;
@@ -158,6 +160,7 @@ public final class SeleniumBrowser {
         raster = this.getRGB();
         frameTime -= deltaTime;
       }
+      System.out.println("Displaying Frame");
       this.display(raster);
     }
   }

@@ -104,16 +104,11 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
         return SINGLE_SUCCESS;
       }
     }
+    method.setup();
 
-    this.neon.shutdownBrowser();
+    this.createBrowser(settings, method, url);
 
-    CompletableFuture.runAsync(
-            () -> this.createBrowser(settings, method, url), ExecutorProvider.BROWSER_SERVICE)
-        .thenRun(() -> audience.sendMessage(Locale.INFO_BROWSER_LOAD.build(url)))
-        .exceptionally(
-            e -> {
-              throw new AssertionError(e);
-            });
+    audience.sendMessage(Locale.INFO_BROWSER_LOAD.build(url));
 
     return SINGLE_SUCCESS;
   }
@@ -122,11 +117,11 @@ public final class BrowserLoadCommand implements CommandSegment.Literal<CommandS
       @NotNull final BrowserSettings settings,
       @NotNull final RenderMethod method,
       @NotNull final String url) {
-    method.setup();
+    this.neon.shutdownBrowser();
     final SeleniumBrowser browser = new SeleniumBrowser(settings, method);
-    browser.loadURL(url);
-    browser.start();
     this.neon.setBrowser(browser);
+    browser.setURL(url);
+    browser.start();
   }
 
   private boolean checkUrl(@NotNull final String url) {

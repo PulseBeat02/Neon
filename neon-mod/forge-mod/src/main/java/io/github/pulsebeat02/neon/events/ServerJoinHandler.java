@@ -18,7 +18,7 @@ public final class ServerJoinHandler {
 
   public ServerJoinHandler() {
     this.handshake =
-        ChannelBuilder.named("neon:HANDHSHAKE")
+        ChannelBuilder.named("neon:handshake")
             .optional()
             .networkProtocolVersion(1)
             .simpleChannel();
